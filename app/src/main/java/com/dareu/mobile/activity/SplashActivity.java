@@ -37,7 +37,9 @@ public class SplashActivity extends AppCompatActivity implements ActivityListene
         Intent intent = null;
         if(!SharedUtils.getStringPreference(this, SharedUtils.PrefName.SIGNIN_TOKEN).isEmpty()){
             //go to main activity here
-            //intent = new Intent(this, );
+            intent = new Intent(this, SignupActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }else {
             //go to signin activity
             //new Intent(this,);

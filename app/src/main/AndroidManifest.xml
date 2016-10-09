@@ -16,8 +16,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.WelcomeActivity" />
-        <activity android:name=".activity.SignupActivity" />
-        <activity android:name=".activity.SigninActivity"></activity>
+        <activity android:name=".activity.SignupActivity"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".activity.SigninActivity"
+            android:windowSoftInputMode="adjustResize"></activity>
     </application>
 
 </manifest>
