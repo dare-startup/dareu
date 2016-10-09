@@ -7,14 +7,17 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".SplashActivity">
+        android:theme="@style/NoActionBarAppTheme">
+        <activity android:name=".activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.WelcomeActivity" />
+        <activity android:name=".activity.SignupActivity" />
+        <activity android:name=".activity.SigninActivity"></activity>
     </application>
 
 </manifest>

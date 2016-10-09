@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+-->
+    <!-- first attempt -->
+    <!--
+    <color name="colorPrimary">#EDBE00</color>
+    <color name="colorPrimaryDark">#C2C2C2</color>
+    <color name="colorAccent">#E1E1E1</color>
+    -->
+    <!-- second attempt -->
+    <color name="colorPrimary">#FC002F</color>
+    <color name="colorPrimaryDark">#C2C2C2</color>
+    <color name="colorAccent">#E1E1E1</color>
+
+    <color name="fontColor1">#242424</color>
+
+    <!-- third attempt -->
+
 </resources>
