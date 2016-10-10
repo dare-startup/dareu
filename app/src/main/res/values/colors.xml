@@ -11,13 +11,17 @@
     <color name="colorPrimaryDark">#C2C2C2</color>
     <color name="colorAccent">#E1E1E1</color>
     -->
+
     <!-- second attempt -->
-    <color name="colorPrimary">#FC002F</color>
-    <color name="colorPrimaryDark">#C2C2C2</color>
-    <color name="colorAccent">#E1E1E1</color>
+    <color name="colorPrimary1">#FC002F</color>
+    <color name="colorPrimaryDark1">#C2C2C2</color>
+    <color name="colorAccent1">#E1E1E1</color>
 
     <color name="fontColor1">#242424</color>
 
     <!-- third attempt -->
-
+    <!-- second attempt -->
+    <color name="colorPrimary">#424242</color>
+    <color name="colorPrimaryDark">#212121</color>
+    <color name="colorAccent">#EEEEEE</color>
 </resources>

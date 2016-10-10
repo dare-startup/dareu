@@ -27,7 +27,8 @@ public class WelcomeActivity extends AppCompatActivity implements ActivityListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
-
+        getComponents();
+        initialize();
     }
 
     @Override

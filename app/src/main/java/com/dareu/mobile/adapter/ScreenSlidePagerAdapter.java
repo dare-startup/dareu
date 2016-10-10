@@ -18,10 +18,10 @@ public class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
 
     private static List<Fragment> FRAGMENTS = new ArrayList<>();
     static{
-        FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
-        FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
-        FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
-        FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
+        //FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
+        //FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
+        //FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
+        //FRAGMENTS.add(ViewPagerFragment.getInstance(R.drawable.welcome_1));
     }
 
     public ScreenSlidePagerAdapter(FragmentManager fm){

@@ -7,6 +7,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.dareu.mobile.R;
+import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 
 public class SplashActivity extends AppCompatActivity implements ActivityListener{
@@ -35,14 +36,14 @@ public class SplashActivity extends AppCompatActivity implements ActivityListene
 
         //check if user is already logged in
         Intent intent = null;
-        if(!SharedUtils.getStringPreference(this, SharedUtils.PrefName.SIGNIN_TOKEN).isEmpty()){
+        if(!SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN).isEmpty()){
             //go to main activity here
-            intent = new Intent(this, SignupActivity.class);
+            intent = new Intent(this, SigninActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }else {
             //go to signin activity
-            //new Intent(this,);
+            startActivity(new Intent(this, WelcomeActivity.class));
         }
     }
 }
