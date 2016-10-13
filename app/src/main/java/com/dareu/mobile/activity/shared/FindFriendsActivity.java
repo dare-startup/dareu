@@ -14,6 +14,9 @@ import com.dareu.mobile.R;
 
 public class FindFriendsActivity extends AppCompatActivity {
 
+    public static final int REQUEST_CODE = 4326;
+    public static final String FRIENDS_IDS__NAME = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,4 +50,6 @@ public class FindFriendsActivity extends AppCompatActivity {
             //use the query to search your data somehow
         }
     }
+
+
 }

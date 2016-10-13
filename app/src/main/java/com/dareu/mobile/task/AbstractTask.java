@@ -53,7 +53,9 @@ public abstract class AbstractTask extends AsyncTask<Void, Void, Map<String, Str
     }
 
     public AbstractTask(PropertyName propertyName, String requestType, Context cxt, boolean authenticated, Object entity){
-        this.url = SharedUtils.getProperty(propertyName, cxt);
+        //append url to host
+        this.url = SharedUtils.getProperty(PropertyName.DEBUG_SERVER, cxt) +
+                SharedUtils.getProperty(propertyName, cxt);
         this.cxt = cxt;
         this.requestType = requestType;
         this.authenticated = authenticated;

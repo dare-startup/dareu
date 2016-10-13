@@ -8,7 +8,8 @@ public enum PropertyName {
     DEBUG_SERVER("server"),
     SIGNIN("signin"),
     SIGNUP("signup"),
-    UPDATE_GCM_RE_ID("update.gcm");
+    UPDATE_GCM_RE_ID("update.gcm"),
+    CATEGORIES("categories");
 
     String value;
     PropertyName(String name){

@@ -4,14 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -25,6 +30,8 @@ public class SharedUtils {
     private static final String PREFERENCES_NAME = "com.dareu.mobile.utils.SaredUtils.dareuPreferencesName";
 
     public static final String PROPERTIES_FILE_NAME = "dareu_props.properties";
+
+
 
     /**
      * Get a String from shared preferences
@@ -94,6 +101,16 @@ public class SharedUtils {
         }catch(IOException ex){
             return false;
         }
+    }
+
+    public static <T> T deserialize(Class<T> type, String json){
+        Gson gson = new Gson();
+        Type typeToken = new TypeToken<T>(){}.getType();
+        return gson.fromJson(json, typeToken);
+    }
+
+    public static String serializeObject(Object object){
+        return new Gson().toJson(object);
     }
 
 }
