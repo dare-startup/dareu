@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_marginRight="8dp"
+        android:id="@+id/searchFriendsSuggestionImageView"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@android:color/black"/>
+
+    <LinearLayout
+        android:padding="4dp"
+        android:id="@+id/searchFriendsLayout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="70dp">
+        <TextView
+            style="@style/TitleTextViewTheme"
+            android:text="Alberto Rubalcaba"
+            android:id="@+id/searchFriendsSuggestionNameView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:text="Created dares 5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="Responses 7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>

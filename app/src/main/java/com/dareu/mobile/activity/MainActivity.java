@@ -1,8 +1,10 @@
 package com.dareu.mobile.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,9 +16,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.dareu.mobile.R;
+import com.dareu.mobile.activity.shared.NewDareActivity;
+import com.dareu.mobile.adapter.MainContentPagerAdapter;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener{
+
+    private static final int NEW_DARE_REQUEST_CODE = 432;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,24 +30,76 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        //setup drawer
+        setupDrawer(toolbar);
+        //setup view pager
+        setupViewPager();
+        FloatingActionButton newDareButton = (FloatingActionButton)findViewById(R.id.newDareButton);
+        newDareButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
+                //start a new dare activity
+                Intent intent = new Intent(MainActivity.this, NewDareActivity.class);
+                startActivityForResult(intent, NEW_DARE_REQUEST_CODE);
             }
         });
+    }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+    private void setupViewPager() {
+        ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
+        viewPager.setAdapter(new MainContentPagerAdapter(getSupportFragmentManager()));
+        TabLayout layout = (TabLayout)findViewById(R.id.tabLayout);
+        layout.setupWithViewPager(viewPager);
+        layout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                String subtitle = "";
+                //change title
+                switch(tab.getPosition()){
+                    case 0:
+                        subtitle = "Discover";
+                        break;
+                    case 1:
+                        subtitle = "Channel";
+                        break;
+                    case 2:
+                        subtitle = "Hottest";
+                        break;
+                    case 3:
+                        subtitle = "Anchored";
+                        break;
+                }
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+                Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+                toolbar.setSubtitle(subtitle);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+        for(int i = 0; i < layout.getTabCount(); i ++){
+            switch(i){
+                case 0:
+                    layout.getTabAt(i).setIcon(R.drawable.ic_action_discover);
+                    break;
+                case 1:
+                    layout.getTabAt(i).setIcon(R.drawable.ic_action_channel);
+                    break;
+                case 2:
+                    layout.getTabAt(i).setIcon(R.drawable.ic_action_fire);
+                    break;
+                case 3:
+                    layout.getTabAt(i).setIcon(R.drawable.ic_action_anchor);
+                    break;
+            }
+        }
     }
 
     @Override
@@ -57,7 +115,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        //getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -100,4 +158,16 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void setupDrawer(Toolbar toolbar){
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
 }

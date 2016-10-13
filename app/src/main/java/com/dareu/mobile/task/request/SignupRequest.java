@@ -1,6 +1,6 @@
 package com.dareu.mobile.task.request;
 
-import java.net.URI;
+import android.net.Uri;
 
 /**
  * Created by jose.rubalcaba on 10/09/2016.
@@ -18,7 +18,7 @@ public class SignupRequest extends MultipartRequest{
         super(null);
     }
 
-    public SignupRequest(String name, String email, String username, String password, String regId, URI image, String birthday) {
+    public SignupRequest(String name, String email, String username, String password, String regId, Uri image, String birthday) {
         super(image);
         this.name = name;
         this.email = email;

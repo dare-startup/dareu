@@ -6,9 +6,6 @@ package com.dareu.mobile.task;
 
 public interface AsyncTaskListener {
 
-    static final String JSON_RESPONSE = "jsonResponse";
-    static final String STATUS_CODE = "statusCode";
-
     public void onSuccess(String jsonText);
     public void onStatusCode(String jsonText, int statusCode);
 }

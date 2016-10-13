@@ -11,6 +11,7 @@
     tools:context="com.dareu.mobile.activity.SigninActivity">
 
     <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -22,7 +23,8 @@
                 android:id="@+id/signinImage"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@android:color/white">
 
             </LinearLayout>
 
@@ -33,23 +35,31 @@
                 android:orientation="vertical">
 
                 <EditText
+                    android:id="@+id/signinUsernameText"
                     android:layout_margin="8dp"
                     android:hint="Username"
+                    android:inputType="text"
+                    android:imeOptions="actionNext"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
                 <EditText
+                    android:id="@+id/signinPasswordText"
                     android:layout_margin="8dp"
+                    android:inputType="textPassword"
                     android:hint="Password"
+                    android:imeOptions="actionDone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <Button
-                    android:text="Signin"
-                    style="@style/PrimaryButtonTheme"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
             </LinearLayout>
+            <Button
+                android:id="@+id/signinButton"
+                android:text="Signin"
+                android:layout_alignParentBottom="true"
+                style="@style/PrimaryButtonTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </RelativeLayout>
     </android.support.design.widget.CoordinatorLayout>
 

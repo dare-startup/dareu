@@ -28,6 +28,9 @@ public abstract class AbstractTask extends AsyncTask<Void, Void, Map<String, Str
 
     private static final String TAG = "AbstractAsyncTask";
 
+    protected static final String JSON_RESPONSE = "jsonResponse";
+    protected static final String STATUS_CODE = "statusCode";
+
     protected Context cxt;
     private HttpURLConnection conn;
     private String url;
@@ -97,8 +100,8 @@ public abstract class AbstractTask extends AsyncTask<Void, Void, Map<String, Str
             String responseBody = builder.toString();
 
             Map<String, String> responseMap = new HashMap<String, String>();
-            responseMap.put(AsyncTaskListener.JSON_RESPONSE, responseBody);
-            responseMap.put(AsyncTaskListener.STATUS_CODE, String.valueOf(statusCode));
+            responseMap.put(JSON_RESPONSE, responseBody);
+            responseMap.put(STATUS_CODE, String.valueOf(statusCode));
 
             return responseMap;
         }catch (MalformedURLException ex){
@@ -109,12 +112,6 @@ public abstract class AbstractTask extends AsyncTask<Void, Void, Map<String, Str
             return null;
         }
     }
-
-    /**
-     * Initializes values like UI management, etc
-     */
-    @Override
-    public abstract void onPreExecute();
 
     /**
      * Post execution

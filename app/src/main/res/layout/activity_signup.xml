@@ -32,6 +32,7 @@
 
 
                 <ImageView
+                    android:scaleType="fitXY"
                     android:id="@+id/signupProfilePicture"
                     android:background="@android:color/white"
                     android:layout_width="match_parent"
@@ -73,6 +74,7 @@
                     android:inputType="textPassword"/>
 
                 <TextView
+                    android:id="@+id/signupDateView"
                     android:paddingLeft="4dp"
                     android:text="Touch to selectyour birthday"
                     android:layout_margin="8dp"

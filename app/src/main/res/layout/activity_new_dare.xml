@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_new_dare"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.dareu.mobile.activity.shared.NewDareActivity">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <include layout="@layout/toolbar" android:id="@+id/toolbar"/>
+
+            <LinearLayout
+                android:layout_below="@id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <EditText
+                    android:id="@+id/newDareNameView"
+                    android:textColorHint="@color/colorPrimary"
+                    android:paddingLeft="8dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:hint="Name your dare"
+                    android:layout_width="match_parent" />
+
+                <EditText
+                    android:id="@+id/newDareDescriptionView"
+                    android:textColorHint="@color/colorPrimary"
+                    android:paddingLeft="8dp"
+                    android:layout_margin="8dp"
+                    android:hint="Describe your dare here"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lines="5"/>
+
+                <LinearLayout
+                    android:layout_margin="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_weight=".4"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="8dp"
+                        android:text="Dare Category"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" />
+
+                    <Spinner
+                        android:layout_weight=".6"
+                        android:id="@+id/newDareCategorySpinner"
+                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_margin="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_weight=".4"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="8dp"
+                        android:text="Timer"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" />
+
+                    <Spinner
+                        android:layout_weight=".6"
+                        android:id="@+id/newDareTimerSpinner"
+                        android:layout_margin="8dp"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:padding="8dp"
+                    android:text="Search for friends you want to dare (Up to 6 friends)"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <Button
+                    android:id="@+id/newDareFindFriendsButton"
+                    style="@style/PrimaryDarkButtonTheme"
+                    android:text="Find friends"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

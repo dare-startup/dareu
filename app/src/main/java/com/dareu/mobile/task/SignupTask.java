@@ -55,10 +55,9 @@ public class SignupTask extends AsyncTask<Void, Void, Void>{
         parts[1] = new StringPart("email", request.getEmail());
         parts[2] = new StringPart("username", request.getUsername());
         parts[3] = new StringPart("password", request.getPassword());
-        parts[4] = new StringPart("regId", request.getRegId());
         parts[5] = new StringPart("birthday", request.getBirthday());
         try{
-            parts[6] = new FilePart("file", new File(request.getFile()), "", ""); //TODO: finish this
+            parts[6] = new FilePart("file", new File(request.getFile().getPath()), "application/octet-stream", ""); //TODO: finish this
         }catch(FileNotFoundException ex){
             Log.e(TAG, "Could not found image: " + ex.getMessage());
             return null;

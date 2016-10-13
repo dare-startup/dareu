@@ -1,23 +1,23 @@
 package com.dareu.mobile.task.request;
 
-import java.net.URI;
+import android.net.Uri;
 
 /**
  * Created by jose.rubalcaba on 10/09/2016.
  */
 
 public abstract class MultipartRequest {
-    private URI file;
+    private Uri file;
 
-    public MultipartRequest(URI file) {
+    public MultipartRequest(Uri file) {
         this.file = file;
     }
 
-    public URI getFile() {
+    public Uri getFile() {
         return file;
     }
 
-    public void setFile(URI file) {
+    public void setFile(Uri file) {
         this.file = file;
     }
 }

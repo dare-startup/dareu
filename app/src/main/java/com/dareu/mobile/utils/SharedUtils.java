@@ -20,7 +20,7 @@ import java.util.Properties;
 
 public class SharedUtils {
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy");
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy");
 
     private static final String PREFERENCES_NAME = "com.dareu.mobile.utils.SaredUtils.dareuPreferencesName";
 

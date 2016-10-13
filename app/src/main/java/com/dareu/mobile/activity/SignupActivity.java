@@ -1,8 +1,11 @@
 package com.dareu.mobile.activity;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
@@ -12,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,18 +24,24 @@ import com.dareu.mobile.R;
 import com.dareu.mobile.task.AsyncTaskListener;
 import com.dareu.mobile.task.SignupTask;
 import com.dareu.mobile.task.request.SignupRequest;
+import com.dareu.mobile.task.response.AuthenticationResponse;
+import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.google.firebase.FirebaseOptions;
+import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class SignupActivity extends AppCompatActivity implements ActivityListener{
 
     private static final String TAG = "SignupActivity";
-    private static final int GALLERY_REQUEST_CODE = 123342;
+    private static final int GALLERY_REQUEST_CODE = 122;
 
     private ImageView imageView;
     private EditText nameText, emailText, usernameText, passwordText;
@@ -64,6 +74,7 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
         passwordText = (EditText)findViewById(R.id.signupPasswordText);
         signupButton = (Button)findViewById(R.id.signupButton);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+        birthdayView = (TextView)findViewById(R.id.signupDateView);
     }
 
     @Override
@@ -85,7 +96,7 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                 String email = emailText.getText().toString();
                 String username = usernameText.getText().toString();
                 String password = passwordText.getText().toString();
-                String birthday = birthdayView.getText().toString();
+                String birthday = currentRequest.getBirthday();
 
                 if(! SharedUtils.validateDate(birthday)){
                     Snackbar.make(coordinatorLayout, "You must provide your birthday", Snackbar.LENGTH_LONG)
@@ -113,7 +124,7 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                             .show();
                     return;
                 }
-                progressDialog = new ProgressDialog(getApplicationContext());
+                progressDialog = new ProgressDialog(SignupActivity.this);
                 progressDialog.setIndeterminate(true);
                 progressDialog.setMessage("Signing up to DareÜ");
                 progressDialog.show();
@@ -128,36 +139,64 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                 SignupTask task = new SignupTask(getApplicationContext(), new AsyncTaskListener() {
                     @Override
                     public void onSuccess(String jsonText) {
+                        AuthenticationResponse response = new Gson().fromJson(jsonText, AuthenticationResponse.class);
+                        if(response != null){
+                            //save authentication token
+                            String token = response.getToken();
+                            SharedUtils.setStringPreference(SignupActivity.this, PrefName.SIGNIN_TOKEN, token);
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                        }
                         progressDialog.dismiss();
                     }
 
                     @Override
                     public void onStatusCode(String jsonText, int statusCode) {
+                        if(statusCode == 500){
+                            //internal server error
+                            Snackbar.make(coordinatorLayout, "Something went wrong, try again", Snackbar.LENGTH_LONG)
+                                    .show();
+                        }
                         progressDialog.dismiss();
                     }
                 }, currentRequest);
                 task.execute();
             }
         });
+        birthdayView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar c = Calendar.getInstance();
+                int mYear = c.get(Calendar.YEAR);
+                int mMonth = c.get(Calendar.MONTH);
+                int mDay = c.get(Calendar.DAY_OF_MONTH);
+                System.out.println("the selected " + mDay);
+                DatePickerDialog dialog = new DatePickerDialog(SignupActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                                String date = String.valueOf(monthOfYear + 1) + "/" + dayOfMonth + "/" + year;
+                                currentRequest.setBirthday(date);
+                                birthdayView.setText("Date of birth: " + date);
+                            }
+                        }, mYear, mMonth, mDay);
+                dialog.show();
+            }
+        });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK){
+        if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK) {
             Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String filePath = cursor.getString(columnIndex);
-            cursor.close();
-
-            try{
-                currentRequest.setFile(new URI(filePath));
-            }catch(URISyntaxException ex){
-                Log.i(TAG, "Could not get file path: " + ex.getMessage());
+            try {
+                currentRequest.setFile(selectedImageUri);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                imageView.setImageBitmap(bitmap);
+            } catch (IOException ex) {
+                Log.e(TAG, "Could not load bitmap: " + ex.getMessage());
             }
         }
     }

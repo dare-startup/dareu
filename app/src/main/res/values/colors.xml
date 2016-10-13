@@ -1,27 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
--->
-    <!-- first attempt -->
-    <!--
-    <color name="colorPrimary">#EDBE00</color>
-    <color name="colorPrimaryDark">#C2C2C2</color>
-    <color name="colorAccent">#E1E1E1</color>
-    -->
 
-    <!-- second attempt -->
-    <color name="colorPrimary1">#FC002F</color>
-    <color name="colorPrimaryDark1">#C2C2C2</color>
-    <color name="colorAccent1">#E1E1E1</color>
-
-    <color name="fontColor1">#242424</color>
+    <color name="colorPrimary">#455A64</color>
+    <color name="colorPrimaryDark">#263238</color>
+    <color name="colorAccent">#ECEFF1</color>
 
     <!-- third attempt -->
     <!-- second attempt -->
-    <color name="colorPrimary">#424242</color>
-    <color name="colorPrimaryDark">#212121</color>
-    <color name="colorAccent">#EEEEEE</color>
+    <color name="colorPrimary1">#424242</color>
+    <color name="colorPrimaryDark1">#212121</color>
+    <color name="colorAccent1">#EEEEEE</color>
 </resources>
