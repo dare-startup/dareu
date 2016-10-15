@@ -94,11 +94,16 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                     //set to spinner
                     Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
                     categoriesSpinner.setAdapter(adapter);
-                    categoriesSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             if(position >= 0)
                                 dareRequest.setCategoryId(categories.get(position).getId());
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            dareRequest.setCategoryId(null);
                         }
                     });
                 }else{
@@ -130,10 +135,15 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         Spinner timerSpinner = (Spinner)findViewById(R.id.newDareTimerSpinner);
         timerSpinner.setAdapter(new ArrayAdapter<String>(NewDareActivity.this,
                 R.layout.support_simple_spinner_dropdown_item, SharedUtils.TIMERS));
-        timerSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        timerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 dareRequest.setTimer(Integer.parseInt(SharedUtils.TIMERS[position]));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                dareRequest.setTimer(0);
             }
         });
     }
