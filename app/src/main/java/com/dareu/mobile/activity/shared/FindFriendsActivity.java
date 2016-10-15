@@ -15,7 +15,7 @@ import com.dareu.mobile.R;
 public class FindFriendsActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE = 4326;
-    public static final String FRIENDS_IDS__NAME = "";
+    public static final String FRIENDS_IDS__NAME = "friendsIdsArray";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +27,7 @@ public class FindFriendsActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.find_friends, menu);
-        // Associate searchable configuration with the SearchView
+        // Associate find_friends_searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView =

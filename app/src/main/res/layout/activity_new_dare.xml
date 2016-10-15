@@ -90,6 +90,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:gravity="center"
                     android:padding="8dp"
                     android:text="Search for friends you want to dare (Up to 6 friends)"
                     android:layout_width="match_parent"

@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">DareÜ</string>
     <string name="title_activity_main">DareÜ</string>
-    <string name="search_hint">Search up to 6 friends</string>
+    <string name="search_friends_searchable_hint">Search up to 6 friends</string>
+    <string name="search_dareu">Search on DareÜ</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 

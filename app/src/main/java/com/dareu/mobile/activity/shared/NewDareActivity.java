@@ -1,5 +1,6 @@
 package com.dareu.mobile.activity.shared;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -10,8 +11,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
@@ -21,6 +25,7 @@ import com.dareu.mobile.adapter.CategoriesAdapter;
 import com.dareu.mobile.data.Category;
 import com.dareu.mobile.task.AsyncTaskListener;
 import com.dareu.mobile.task.CategoriesTask;
+import com.dareu.mobile.task.CreateDareTask;
 import com.dareu.mobile.task.request.NewDareRequest;
 import com.dareu.mobile.task.response.ListResponse;
 import com.dareu.mobile.utils.SharedUtils;
@@ -33,6 +38,7 @@ import java.util.List;
 public class NewDareActivity extends AppCompatActivity implements ActivityListener{
 
     private NewDareRequest dareRequest;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,12 +88,19 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                 ListResponse<Category> response = new Gson().fromJson(jsonText, type);
                 if(response != null){
                     //get list of categories
-                    List<Category> categories = response.getList();
+                    final List<Category> categories = response.getList();
                     //create spinner adapter
                     CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, categories);
                     //set to spinner
                     Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
                     categoriesSpinner.setAdapter(adapter);
+                    categoriesSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            if(position >= 0)
+                                dareRequest.setCategoryId(categories.get(position).getId());
+                        }
+                    });
                 }else{
                     //TODO: set error message or try again
                 }
@@ -112,10 +125,22 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
             }
         });
         task.execute();
+
+        //set timer spinner
+        Spinner timerSpinner = (Spinner)findViewById(R.id.newDareTimerSpinner);
+        timerSpinner.setAdapter(new ArrayAdapter<String>(NewDareActivity.this,
+                R.layout.support_simple_spinner_dropdown_item, SharedUtils.TIMERS));
+        timerSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                dareRequest.setTimer(Integer.parseInt(SharedUtils.TIMERS[position]));
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.new_dare, menu);
         return true;
     }
 
@@ -132,6 +157,42 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
 
     private void saveDare() {
 
+        //get name
+        EditText nameView = (EditText)findViewById(R.id.newDareNameView);
+        EditText descView = (EditText)findViewById(R.id.newDareDescriptionView);
+
+        dareRequest.setName(nameView.getText().toString());
+        dareRequest.setDescription(descView.getText().toString());
+
+        //validate request
+        if(dareRequest.getFriendsIds().length == 0){
+
+        }else if(dareRequest.getCategoryId() == null || dareRequest.getCategoryId().isEmpty()){
+
+        }else if(dareRequest.getDescription() == null || dareRequest.getDescription().isEmpty()){
+
+        }else if(dareRequest.getName() == null || dareRequest.getName().isEmpty()){
+
+        }else if(dareRequest.getTimer() == 0){
+
+        }
+
+        progressDialog = new ProgressDialog(NewDareActivity.this);
+        progressDialog.setMessage("Creating your new dare...");
+        progressDialog.setIndeterminate(true);
+        progressDialog.show();
+        CreateDareTask task = new CreateDareTask(NewDareActivity.this, dareRequest, new AsyncTaskListener() {
+            @Override
+            public void onSuccess(String jsonText) {
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onStatusCode(String jsonText, int statusCode) {
+                progressDialog.dismiss();
+            }
+        });
+        task.execute();
     }
 
     @Override
@@ -141,6 +202,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
             String[] ids = data.getStringArrayExtra(FindFriendsActivity.FRIENDS_IDS__NAME);
             //TODO: save here the array on the newDareRequest object
             ids = new String[]{}; //TODO: work here
+            //TODO: CHANGE TEXTVIEW ABOVE BUTTON WITH SELECTED FRIENDS NAME
         }
     }
 }

@@ -31,6 +31,8 @@ public class SharedUtils {
 
     public static final String PROPERTIES_FILE_NAME = "dareu_props.properties";
 
+    public static final String[] TIMERS = new String[]{ "1", "3", "6", "12" };
+
 
 
     /**
