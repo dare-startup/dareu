@@ -6,7 +6,8 @@ package com.dareu.mobile.utils;
 
 public enum PrefName {
     SIGNIN_TOKEN("com.dareu.mobile.utils.SharedUtils.signinToken"),
-    GCM_TOKEN("com.dareu.mobile.utils.SharedUtils.gcmToken");
+    GCM_TOKEN("com.dareu.mobile.utils.SharedUtils.gcmToken"),
+    FIRST_TIME("com.dareu.mobile.utils.SharedUtils.isFirstTimeHere");
 
     String value;
 

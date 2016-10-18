@@ -9,6 +9,13 @@ public class Category extends DareuEntity{
     private String description;
 
     public Category() {
+        super();
+    }
+
+    public Category(String id, String name, String desc){
+        super(id);
+        this.name = name;
+        this.description = desc;
     }
 
     public String getName() {

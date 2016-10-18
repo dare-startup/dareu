@@ -1,5 +1,6 @@
 package com.dareu.mobile.activity;
 
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +8,9 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SearchView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,10 +20,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.shared.NewDareActivity;
 import com.dareu.mobile.adapter.MainContentPagerAdapter;
+import com.dareu.mobile.adapter.WelcomeDialogAdapter;
+import com.dareu.mobile.utils.PrefName;
+import com.dareu.mobile.utils.SharedUtils;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
@@ -37,6 +46,8 @@ public class MainActivity extends AppCompatActivity
         setupDrawer(toolbar);
         //setup view pager
         setupViewPager();
+        //setup first visit dialog
+        //setupFirstVisitDialog();
         FloatingActionButton newDareButton = (FloatingActionButton)findViewById(R.id.newDareButton);
         newDareButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,6 +58,42 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+    }
+
+    private void setupFirstVisitDialog() {
+        //check if user is for the first time here
+        if(SharedUtils.getBooleanPreference(MainActivity.this, PrefName.FIRST_TIME)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setCancelable(false);
+            //create view
+            View welcomeDialogView = LayoutInflater.from(MainActivity.this).inflate(R.layout.welcome_dialog, null);
+
+            //get view pager
+            ViewPager pager = (ViewPager)welcomeDialogView.findViewById(R.id.welcomeDialogViewPager);
+
+            //create adapter
+            pager.setAdapter(new WelcomeDialogAdapter(getSupportFragmentManager()));
+
+            //set listener for close label
+            TextView closeView = (TextView)welcomeDialogView.findViewById(R.id.welcomeDialogCloseView);
+
+            //set view
+            builder.setView(welcomeDialogView);
+            //create dialog
+            final AlertDialog dialog = builder.create();
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.dimAmount = 0.0f;
+            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            closeView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SharedUtils.setBooleanPreference(MainActivity.this, PrefName.FIRST_TIME, Boolean.FALSE);
+                    //close dialog
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+        }
     }
 
     private void setupViewPager() {

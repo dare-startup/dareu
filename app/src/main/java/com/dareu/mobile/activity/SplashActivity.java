@@ -32,13 +32,13 @@ public class SplashActivity extends AppCompatActivity implements ActivityListene
     @Override
     public void initialize() {
         //set message view and load data from here...
-        this.messageView.setText("Loading something important from here...");
+        this.messageView.setText("Loading some important stuff here...");
 
         //check if user is already logged in
         Intent intent = null;
         if(!SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN).isEmpty()){
             //go to main activity here
-            intent = new Intent(this, SigninActivity.class);
+            intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         }else {

@@ -5,11 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 
 import com.dareu.mobile.R;
+import com.dareu.mobile.adapter.FriendSearchAdapter;
+import com.dareu.mobile.utils.DummyFactory;
 
 
 public class FindFriendsActivity extends AppCompatActivity {
@@ -17,10 +21,22 @@ public class FindFriendsActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 4326;
     public static final String FRIENDS_IDS__NAME = "friendsIdsArray";
 
+    private RecyclerView recyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_friends);
+
+        //load all friends
+        //TODO: THIS IS DUMMY LAYOUT, NEED TO EXECUTE TASK FROM HERE TO GET AL FRIENDS AND THEN FILTER THEM
+        this.recyclerView = (RecyclerView)findViewById(R.id.findFriendsList);
+        LinearLayoutManager manager = new LinearLayoutManager(FindFriendsActivity.this);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setHasFixedSize(false);
+
+        //TODO: change this by a real task please
+        recyclerView.setAdapter(new FriendSearchAdapter(FindFriendsActivity.this, DummyFactory.getFriendSearch()));
     }
 
     @Override
@@ -34,8 +50,9 @@ public class FindFriendsActivity extends AppCompatActivity {
                 (SearchView) menu.findItem(R.id.searchFriendsMenuItem).getActionView();
 
         //searchview suggestions adapter
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        //searchView.setSearchableInfo(
+        //        searchManager.getSearchableInfo(getComponentName()));
+
         return true;
     }
 

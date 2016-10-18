@@ -28,6 +28,7 @@ import com.dareu.mobile.task.CategoriesTask;
 import com.dareu.mobile.task.CreateDareTask;
 import com.dareu.mobile.task.request.NewDareRequest;
 import com.dareu.mobile.task.response.ListResponse;
+import com.dareu.mobile.utils.DummyFactory;
 import com.dareu.mobile.utils.SharedUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -80,7 +81,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         });
 
         //execute categories task
-        CategoriesTask task = new CategoriesTask(NewDareActivity.this, new AsyncTaskListener() {
+        /**CategoriesTask task = new CategoriesTask(NewDareActivity.this, new AsyncTaskListener() {
             @Override
             public void onSuccess(String jsonText) {
                 Type type = new TypeToken<ListResponse<Category>>(){}.getType();
@@ -129,8 +130,23 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                         .show();
             }
         });
-        task.execute();
+        task.execute();**/ //UNCOMMENT THIS TO TEST WITH SERVER
+        CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, DummyFactory.getCategories());
+        //set to spinner
+        Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
+        categoriesSpinner.setAdapter(adapter);
+        categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position >= 0)
+                    dareRequest.setCategoryId(DummyFactory.getCategories().get(position).getId());
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                dareRequest.setCategoryId(null);
+            }
+        });
         //set timer spinner
         Spinner timerSpinner = (Spinner)findViewById(R.id.newDareTimerSpinner);
         timerSpinner.setAdapter(new ArrayAdapter<String>(NewDareActivity.this,
@@ -138,7 +154,8 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         timerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                dareRequest.setTimer(Integer.parseInt(SharedUtils.TIMERS[position]));
+                String[] array = SharedUtils.TIMERS[position].split(" ");
+                dareRequest.setTimer(Integer.parseInt(array[0]));
             }
 
             @Override
@@ -174,17 +191,28 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         dareRequest.setName(nameView.getText().toString());
         dareRequest.setDescription(descView.getText().toString());
 
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         //validate request
         if(dareRequest.getFriendsIds().length == 0){
-
+            Snackbar.make(coordinatorLayout, "You must select at least one friend", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
         }else if(dareRequest.getCategoryId() == null || dareRequest.getCategoryId().isEmpty()){
-
+            Snackbar.make(coordinatorLayout, "You must set a category", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
         }else if(dareRequest.getDescription() == null || dareRequest.getDescription().isEmpty()){
-
+            Snackbar.make(coordinatorLayout, "You must provide a description", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
         }else if(dareRequest.getName() == null || dareRequest.getName().isEmpty()){
-
+            Snackbar.make(coordinatorLayout, "Please, name your new dare", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
         }else if(dareRequest.getTimer() == 0){
-
+            Snackbar.make(coordinatorLayout, "Select a timer", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
         }
 
         progressDialog = new ProgressDialog(NewDareActivity.this);
@@ -195,6 +223,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
             @Override
             public void onSuccess(String jsonText) {
                 progressDialog.dismiss();
+
             }
 
             @Override

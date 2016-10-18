@@ -3,6 +3,9 @@ package com.dareu.mobile.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -31,9 +34,23 @@ public class SharedUtils {
 
     public static final String PROPERTIES_FILE_NAME = "dareu_props.properties";
 
-    public static final String[] TIMERS = new String[]{ "1", "3", "6", "12" };
+    public static final String[] TIMERS = new String[]{ "1 Hrs", "3 Hrs", "6 Hrs", "12 Hrs" };
 
 
+    public static String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
     /**
      * Get a String from shared preferences
@@ -51,6 +68,18 @@ public class SharedUtils {
         prefs.edit()
                 .putString(prefName.toString(), value)
                 .commit();
+    }
+
+    public static void setBooleanPreference(Context cxt, PrefName name, Boolean value){
+        SharedPreferences prefs = cxt.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putBoolean(name.toString(), value)
+                .commit();
+    }
+
+    public static Boolean getBooleanPreference(Context cxt, PrefName prefName){
+        SharedPreferences prefs = cxt.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(prefName.toString(), Boolean.TRUE);
     }
 
 
