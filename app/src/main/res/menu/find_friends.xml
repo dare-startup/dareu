@@ -6,4 +6,8 @@
         android:icon="@android:drawable/ic_menu_search"
         app:showAsAction="always"
         android:actionViewClass="android.widget.SearchView" />
+    <item android:id="@+id/searchFriendsReadyItem"
+        android:title="Ready"
+        android:icon="@drawable/ic_done"
+        app:showAsAction="always"/>
 </menu>

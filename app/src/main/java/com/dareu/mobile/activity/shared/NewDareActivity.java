@@ -239,7 +239,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if(requestCode == FindFriendsActivity.REQUEST_CODE && resultCode == RESULT_OK){
             //get array of strings
-            String[] ids = data.getStringArrayExtra(FindFriendsActivity.FRIENDS_IDS__NAME);
+            String[] ids = data.getStringArrayExtra(FindFriendsActivity.FRIENDS_IDS_NAME);
             //TODO: save here the array on the newDareRequest object
             ids = new String[]{}; //TODO: work here
             //TODO: CHANGE TEXTVIEW ABOVE BUTTON WITH SELECTED FRIENDS NAME

@@ -45,12 +45,24 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
     }
 
     @Override
-    public void onBindViewHolder(final FriendSearchViewModel holder, int position) {
+    public void onBindViewHolder(final FriendSearchViewModel holder, final int position) {
         FriendSearch search = friends.get(position);
         holder.name.setText(search.getName());
         holder.dares.setText("Created dares\t" + search.getDareCount());
         holder.responses.setText("Uploaded responses\t" + search.getVideoResponsesCount());
-        
+        holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    //add to list
+                    selectedUsers.add(friends.get(position).getId());
+                }else{
+                    if(selectedUsers.contains(friends.get(position).getId()))
+                        //remove it
+                        selectedUsers.remove(friends.get(position).getId());
+                }
+            }
+        });
         //TODO: load image from here in an async task
     }
 
@@ -68,7 +80,6 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
         public FriendSearchViewModel(View itemView) {
             super(itemView);
-            itemView.setClickable(true);
             imageView = (ImageView)itemView.findViewById(R.id.friendItemImage);
             progressBar = (ProgressBar)itemView.findViewById(R.id.friendItemProgressBar);
             name = (TextView)itemView.findViewById(R.id.friendItemName);
@@ -76,5 +87,9 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
             responses = (TextView)itemView.findViewById(R.id.friendItemResponses);
             checkbox = (CheckBox)itemView.findViewById(R.id.friendItemCheckbox);
         }
+    }
+
+    public List<String> getSelectedUsers(){
+        return this.selectedUsers;
     }
 }
