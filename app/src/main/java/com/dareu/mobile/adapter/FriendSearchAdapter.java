@@ -5,13 +5,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bignerdranch.android.multiselector.MultiSelector;
+import com.bignerdranch.android.multiselector.SwappingHolder;
 import com.dareu.mobile.R;
 import com.dareu.mobile.data.FriendSearch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,11 +27,12 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
     private List<FriendSearch> friends;
     private Context cxt;
+    private List<String> selectedUsers;
 
     public FriendSearchAdapter(Context cxt, List<FriendSearch> list){
         this.cxt = cxt;
         this.friends = list;
-
+        this.selectedUsers = new ArrayList<>();
     }
 
 
@@ -39,11 +45,12 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
     }
 
     @Override
-    public void onBindViewHolder(FriendSearchViewModel holder, int position) {
+    public void onBindViewHolder(final FriendSearchViewModel holder, int position) {
         FriendSearch search = friends.get(position);
         holder.name.setText(search.getName());
         holder.dares.setText("Created dares\t" + search.getDareCount());
         holder.responses.setText("Uploaded responses\t" + search.getVideoResponsesCount());
+        
         //TODO: load image from here in an async task
     }
 
@@ -52,19 +59,22 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
         return friends.size();
     }
 
-    static class FriendSearchViewModel extends RecyclerView.ViewHolder{
+    class FriendSearchViewModel extends RecyclerView.ViewHolder {
 
         ImageView imageView;
         ProgressBar progressBar;
         TextView name, dares, responses;
+        CheckBox checkbox;
 
         public FriendSearchViewModel(View itemView) {
             super(itemView);
+            itemView.setClickable(true);
             imageView = (ImageView)itemView.findViewById(R.id.friendItemImage);
             progressBar = (ProgressBar)itemView.findViewById(R.id.friendItemProgressBar);
             name = (TextView)itemView.findViewById(R.id.friendItemName);
             dares = (TextView)itemView.findViewById(R.id.friendItemDares);
             responses = (TextView)itemView.findViewById(R.id.friendItemResponses);
+            checkbox = (CheckBox)itemView.findViewById(R.id.friendItemCheckbox);
         }
     }
 }

@@ -7,14 +7,19 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:colorBackground">@color/colorAccent</item>
-
         <item name="android:textViewStyle">@style/PrimaryTextViewTheme</item>
-        <item name="colorControlNormal">#c5c5c5</item>
+        <!--<item name="colorControlNormal">#c5c5c5</item>-->
         <item name="colorControlActivated">@color/colorPrimary</item>
         <item name="colorControlHighlight">@color/colorPrimary</item>
         <item name="android:editTextStyle">@style/PrimaryEditTextTheme</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="android:checkboxStyle">@style/CheckBoxTheme</item>
     </style>
 
+    <!-- Checbox -->
+    <style name="CheckBoxTheme" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/checkbox_selector</item>
+    </style>
 
     <!-- Buttons -->
     <style name="PrimaryButtonTheme" parent="android:Widget.Holo.Light.Button">

@@ -67,7 +67,8 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
     @Override
     public void initialize() {
         dareRequest = new NewDareRequest();
-
+        //initialize friend ids
+        dareRequest.setFriendsIds(new String[]{});
         //set find friends listener
         Button findFriendsButton = (Button)findViewById(R.id.newDareFindFriendsButton);
         findFriendsButton.setOnClickListener(new View.OnClickListener() {
