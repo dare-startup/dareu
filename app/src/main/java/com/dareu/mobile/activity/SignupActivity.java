@@ -3,9 +3,7 @@ package com.dareu.mobile.activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
@@ -21,22 +19,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.task.AsyncTaskListener;
-import com.dareu.mobile.task.SignupTask;
-import com.dareu.mobile.task.request.SignupRequest;
-import com.dareu.mobile.task.response.AuthenticationResponse;
+import com.dareu.mobile.net.MultiparListener;
+import com.dareu.mobile.net.SignupTask;
+import com.dareu.mobile.net.request.SignupRequest;
+import com.dareu.mobile.net.response.AuthenticationResponse;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
-import com.google.firebase.FirebaseOptions;
 import com.google.gson.Gson;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class SignupActivity extends AppCompatActivity implements ActivityListener{
 
@@ -119,12 +111,13 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                     Snackbar.make(coordinatorLayout, "You must provide a password", Snackbar.LENGTH_LONG)
                             .show();
                     return;
-                }else if(currentRequest.getFile() == null){
+                }else if(currentRequest.getBitmap() == null){
                     Snackbar.make(coordinatorLayout, "You must provide a profile image", Snackbar.LENGTH_LONG)
                             .show();
                     return;
                 }
                 progressDialog = new ProgressDialog(SignupActivity.this);
+                progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(true);
                 progressDialog.setMessage("Signing up to DareÜ");
                 progressDialog.show();
@@ -136,29 +129,33 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                 currentRequest.setPassword(password);
                 currentRequest.setUsername(username);
 
-                SignupTask task = new SignupTask(getApplicationContext(), new AsyncTaskListener() {
+                SignupTask task = new SignupTask(SignupActivity.this, new MultiparListener() {
                     @Override
-                    public void onSuccess(String jsonText) {
-                        AuthenticationResponse response = new Gson().fromJson(jsonText, AuthenticationResponse.class);
-                        if(response != null){
-                            //save authentication token
-                            String token = response.getToken();
-                            SharedUtils.setStringPreference(SignupActivity.this, PrefName.SIGNIN_TOKEN, token);
-                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
+                    public void onResponse(int statusCode, String jsonResponse) {
+                        if(statusCode == 500){
+                            //show message
+                            Snackbar.make(coordinatorLayout, "Something went wrong, try again", Snackbar.LENGTH_LONG)
+                                    .show();
+                        }else if(statusCode == 400){
+                            //bad request
+                            Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_LONG)
+                                    .show();
+                        }else if(statusCode == 200){
+                            //ok
+                            AuthenticationResponse response = new Gson().fromJson(jsonResponse, AuthenticationResponse.class);
+                            if(response != null){
+                                //save token
+                                SharedUtils.setStringPreference(SignupActivity.this, PrefName.SIGNIN_TOKEN, response.getToken());
+                                Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
                         }
-                        progressDialog.dismiss();
                     }
 
                     @Override
-                    public void onStatusCode(String jsonText, int statusCode) {
-                        if(statusCode == 500){
-                            //internal server error
-                            Snackbar.make(coordinatorLayout, "Something went wrong, try again", Snackbar.LENGTH_LONG)
-                                    .show();
-                        }
-                        progressDialog.dismiss();
+                    public void onError(String message) {
+
                     }
                 }, currentRequest);
                 task.execute();
@@ -168,7 +165,7 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
             @Override
             public void onClick(View v) {
                 Calendar c = Calendar.getInstance();
-                int mYear = c.get(Calendar.YEAR);
+                int mYear = c.get(Calendar.YEAR) - 18;
                 int mMonth = c.get(Calendar.MONTH);
                 int mDay = c.get(Calendar.DAY_OF_MONTH);
                 System.out.println("the selected " + mDay);
@@ -192,9 +189,9 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
             Uri selectedImageUri = data.getData();
 
             try {
-                currentRequest.setFile(selectedImageUri);
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
                 imageView.setImageBitmap(bitmap);
+                currentRequest.setBitmap(bitmap);
             } catch (IOException ex) {
                 Log.e(TAG, "Could not load bitmap: " + ex.getMessage());
             }

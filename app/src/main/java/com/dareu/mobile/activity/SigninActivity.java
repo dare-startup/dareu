@@ -13,10 +13,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.task.AsyncTaskListener;
-import com.dareu.mobile.task.SigninTask;
-import com.dareu.mobile.task.request.SigninRequest;
-import com.dareu.mobile.task.response.AuthenticationResponse;
+import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.SigninTask;
+import com.dareu.mobile.net.request.SigninRequest;
+import com.dareu.mobile.net.response.AuthenticationResponse;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.google.gson.Gson;
@@ -74,42 +74,30 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
                 }
                 progressDialog.setMessage("Signing in to " + getString(R.string.app_name));
                 progressDialog.setIndeterminate(true);
+                progressDialog.setCancelable(false);
                 progressDialog.show();
 
-                SigninTask task = new SigninTask(SigninActivity.this, new SigninRequest(username, password));
-                task.setListener(new AsyncTaskListener() {
-                    @Override
-                    public void onSuccess(String jsonText) {
-                        AuthenticationResponse response = new Gson().fromJson(jsonText, AuthenticationResponse.class);
-                        if(response != null){
-                            //save token
-                            String token = response.getToken();
-                            SharedUtils.setStringPreference(SigninActivity.this, PrefName.SIGNIN_TOKEN, token);
-
-                            Intent intent = new Intent(SigninActivity.this, MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            progressDialog.dismiss();
-
-                            startActivity(intent);
-                        }
-                    }
-
+                //TODO: create request here
+                SigninTask task = new SigninTask(SigninActivity.this, new SigninRequest(username, password), new AsyncTaskListener() {
                     @Override
                     public void onStatusCode(String jsonText, int statusCode) {
-                        Log.e(TAG, "Got json " + jsonText + " with statusCode " + statusCode);
                         if(statusCode == 401){
-                            //unauthorized
-                            Snackbar.make(coordinatorLayout, "Username and/or password are incorrect", Snackbar.LENGTH_LONG)
+                            //bad credentials
+                            Snackbar.make(coordinatorLayout, "Bad credentials", Snackbar.LENGTH_LONG)
                                     .show();
-                        }else if(statusCode == 500){
-                            //internal server error
-                            Snackbar.make(coordinatorLayout, "Something went wrong, try again", Snackbar.LENGTH_LONG)
-                                    .show();
+                        }else if(statusCode == 200){
+                            //ok
+                            AuthenticationResponse response = new Gson().fromJson(jsonText, AuthenticationResponse.class);
+                            if(response != null){
+                                //save token
+                                SharedUtils.setStringPreference(SigninActivity.this, PrefName.SIGNIN_TOKEN, response.getToken());
+                                Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
                         }
-                        progressDialog.dismiss();
                     }
                 });
-                task.execute();
             }
         });
     }

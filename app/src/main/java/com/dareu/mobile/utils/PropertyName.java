@@ -10,7 +10,10 @@ public enum PropertyName {
     SIGNUP("signup"),
     UPDATE_GCM_RE_ID("update.gcm"),
     CATEGORIES("categories"),
-    CREATE_DARE("create.dare");
+    CREATE_DARE("create.dare"),
+    FIND_FRIENDS_BY_QUERY("find.friends"),
+    GET_ACCOUNT_IMAGE("account.image");
+
 
     String value;
     PropertyName(String name){

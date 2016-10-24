@@ -15,26 +15,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.ActivityListener;
 import com.dareu.mobile.adapter.CategoriesAdapter;
-import com.dareu.mobile.data.Category;
-import com.dareu.mobile.task.AsyncTaskListener;
-import com.dareu.mobile.task.CategoriesTask;
-import com.dareu.mobile.task.CreateDareTask;
-import com.dareu.mobile.task.request.NewDareRequest;
-import com.dareu.mobile.task.response.ListResponse;
+import com.dareu.mobile.net.request.NewDareRequest;
 import com.dareu.mobile.utils.DummyFactory;
 import com.dareu.mobile.utils.SharedUtils;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.List;
 
 public class NewDareActivity extends AppCompatActivity implements ActivityListener{
 
@@ -220,19 +208,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         progressDialog.setMessage("Creating your new dare...");
         progressDialog.setIndeterminate(true);
         progressDialog.show();
-        CreateDareTask task = new CreateDareTask(NewDareActivity.this, dareRequest, new AsyncTaskListener() {
-            @Override
-            public void onSuccess(String jsonText) {
-                progressDialog.dismiss();
-
-            }
-
-            @Override
-            public void onStatusCode(String jsonText, int statusCode) {
-                progressDialog.dismiss();
-            }
-        });
-        task.execute();
+        //TODO: create request here
     }
 
     @Override

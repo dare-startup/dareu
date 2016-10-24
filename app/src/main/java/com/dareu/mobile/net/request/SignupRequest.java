@@ -1,31 +1,33 @@
-package com.dareu.mobile.task.request;
+package com.dareu.mobile.net.request;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 
 /**
  * Created by jose.rubalcaba on 10/09/2016.
  */
 
-public class SignupRequest extends MultipartRequest{
+public class SignupRequest {
     private String name;
     private String email;
     private String username;
     private String password;
     private String regId;
     private String birthday;
+    private Bitmap bitmap;
 
     public SignupRequest() {
-        super(null);
+
     }
 
-    public SignupRequest(String name, String email, String username, String password, String regId, Uri image, String birthday) {
-        super(image);
+    public SignupRequest(String name, String email, String username, String password, String regId, Bitmap image, String birthday) {
         this.name = name;
         this.email = email;
         this.username = username;
         this.password = password;
         this.regId = regId;
         this.birthday = birthday;
+        this.bitmap = image;
     }
 
 
@@ -76,5 +78,13 @@ public class SignupRequest extends MultipartRequest{
 
     public void setBirthday(String birthday) {
         this.birthday = birthday;
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 }

@@ -1,4 +1,4 @@
-package com.dareu.mobile.task.response;
+package com.dareu.mobile.net.response;
 
 /**
  * Created by jose.rubalcaba on 10/11/2016.

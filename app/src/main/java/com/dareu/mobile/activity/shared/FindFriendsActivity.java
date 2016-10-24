@@ -21,8 +21,13 @@ import android.view.View;
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
 import com.dareu.mobile.adapter.FriendSearchAdapter;
+import com.dareu.mobile.data.FriendSearch;
+import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.FindFriendsTask;
 import com.dareu.mobile.utils.DummyFactory;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,10 +78,40 @@ public class FindFriendsActivity extends AppCompatActivity {
                 (SearchView) menu.findItem(R.id.searchFriendsMenuItem).getActionView();
 
         //searchview suggestions adapter
-        //searchView.setSearchableInfo(
-        //        searchManager.getSearchableInfo(getComponentName()));
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if(query.isEmpty())
+                    return false;
+                createRequest(query);
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(newText.isEmpty())
+                    return false;
+                createRequest(newText);
+                return false;
+            }
+        });
         return true;
+    }
+
+    private void createRequest(String query){
+
+        FindFriendsTask task = new FindFriendsTask(FindFriendsActivity.this, query, new AsyncTaskListener() {
+            @Override
+            public void onStatusCode(String jsonText, int statusCode) {
+                //get a list
+                if(statusCode == 200){
+                    //parse
+                    Type type = new TypeToken<List<FriendSearch>>(){}.getType();
+                }
+            }
+        });
     }
 
     @Override

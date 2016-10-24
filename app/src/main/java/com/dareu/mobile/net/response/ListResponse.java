@@ -1,4 +1,4 @@
-package com.dareu.mobile.task.response;
+package com.dareu.mobile.net.response;
 
 import java.util.List;
 

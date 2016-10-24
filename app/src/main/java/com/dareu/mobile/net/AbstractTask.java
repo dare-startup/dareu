@@ -1,4 +1,4 @@
-package com.dareu.mobile.task;
+package com.dareu.mobile.net;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -21,11 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by jose.rubalcaba on 10/09/2016.
+ * Created by jose.rubalcaba on 10/23/2016.
  */
 
 public abstract class AbstractTask extends AsyncTask<Void, Void, Map<String, String>> {
-
     private static final String TAG = "AbstractAsyncTask";
 
     protected static final String JSON_RESPONSE = "jsonResponse";
@@ -39,14 +38,8 @@ public abstract class AbstractTask extends AsyncTask<Void, Void, Map<String, Str
     protected Object entity;
     private int statusCode;
 
-    public AbstractTask(String url, Context cxt, boolean authenticated){
-        this.url = url;
-        this.cxt = cxt;
-        this.authenticated = authenticated;
-    }
-
-    public AbstractTask(String url, String requestType, Context cxt, boolean authenticated){
-        this.url = url;
+    public AbstractTask(String context, String requestType, Context cxt, boolean authenticated){
+        this.url = SharedUtils.getProperty(PropertyName.DEBUG_SERVER, cxt) + context;
         this.cxt = cxt;
         this.requestType = requestType;
         this.authenticated = authenticated;

@@ -2,10 +2,8 @@ package com.dareu.mobile.activity.service;
 
 import android.util.Log;
 
-import com.dareu.mobile.task.GcmTask;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 

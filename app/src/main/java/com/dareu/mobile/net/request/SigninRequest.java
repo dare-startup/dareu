@@ -1,4 +1,4 @@
-package com.dareu.mobile.task.request;
+package com.dareu.mobile.net.request;
 
 /**
  * Created by jose.rubalcaba on 10/11/2016.
