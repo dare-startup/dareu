@@ -4,7 +4,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,16 +19,8 @@ import android.view.View;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
-import com.dareu.mobile.adapter.FriendSearchAdapter;
-import com.dareu.mobile.data.FriendSearch;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.FindFriendsTask;
-import com.dareu.mobile.utils.DummyFactory;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class FindFriendsActivity extends AppCompatActivity {
@@ -46,23 +37,33 @@ public class FindFriendsActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        /**toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavUtils.navigateUpFromSameTask(FindFriendsActivity.this);
+                new AlertDialog.Builder(FindFriendsActivity.this)
+                        .setTitle("Cancel friend search")
+                        .setMessage("Are you sure to cancel friend search?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .create()
+                        .show();
             }
-        });**/
+        });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         //load all friends
-        //TODO: THIS IS DUMMY LAYOUT, NEED TO EXECUTE TASK FROM HERE TO GET AL FRIENDS AND THEN FILTER THEM
         this.recyclerView = (RecyclerView)findViewById(R.id.findFriendsList);
         LinearLayoutManager manager = new LinearLayoutManager(FindFriendsActivity.this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setHasFixedSize(false);
-        recyclerView.addItemDecoration(new SpaceItemDecoration(8));
+        recyclerView.addItemDecoration(new SpaceItemDecoration());
         //TODO: change this by a real task please
-        recyclerView.setAdapter(new FriendSearchAdapter(FindFriendsActivity.this, DummyFactory.getFriendSearch()));
+        //recyclerView.setAdapter(new FriendSearchAdapter(FindFriendsActivity.this, DummyFactory.getFriendSearch()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
     }
@@ -102,16 +103,18 @@ public class FindFriendsActivity extends AppCompatActivity {
 
     private void createRequest(String query){
 
-        FindFriendsTask task = new FindFriendsTask(FindFriendsActivity.this, query, new AsyncTaskListener() {
+        /**FindFriendsTask task = new FindFriendsTask(FindFriendsActivity.this, query, new AsyncTaskListener<>() {
             @Override
             public void onStatusCode(String jsonText, int statusCode) {
                 //get a list
                 if(statusCode == 200){
                     //parse
-                    Type type = new TypeToken<List<FriendSearch>>(){}.getType();
+                    List<FriendSearch> friends = SharedUtils.parseFriendsSearch(jsonText);
+                    //create the adapter
+                    FriendSearchAdapter adapter = new FriendSearchAdapter(FindFriendsActivity.this, friends);
                 }
             }
-        });
+        });**/
     }
 
     @Override
@@ -119,7 +122,7 @@ public class FindFriendsActivity extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.searchFriendsReadyItem:
                 //get selected users
-                FriendSearchAdapter adapter = (FriendSearchAdapter)recyclerView.getAdapter();
+                /**FriendSearchAdapter adapter = (FriendSearchAdapter)recyclerView.getAdapter();
                 ArrayList<String> users = (ArrayList)adapter.getSelectedUsers();
                 if(users.isEmpty()){
                     //shows a confirmation dialog
@@ -128,7 +131,7 @@ public class FindFriendsActivity extends AppCompatActivity {
                     createInvalidSizeDialog();
                 }else
                     createConfirmDialog(users);
-
+**/
                 break;
         }
         return true;

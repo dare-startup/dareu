@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_height="100dp"
+    android:layout_width="match_parent"
+    android:padding="8dp"
+    android:background="@android:color/white"
+    android:elevation="4dp">
+
+    <LinearLayout
+        android:gravity="center"
+        android:layout_weight=".2"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_gravity="center"
+            android:id="@+id/discoverUserItemImage"
+            android:src="@mipmap/ic_launcher"
+            android:layout_width="70dp"
+            android:layout_height="70dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:layout_weight=".5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/discoverUserItemName"
+            android:padding="8dp"
+            style="@style/TitleTextViewTheme"
+            android:text="Name goes here... "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_gravity="center"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_score"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+            <TextView
+                android:id="@+id/discoverUserItemScore"
+                android:layout_marginRight="8dp"
+                style="@style/TitleTextViewTheme"
+                android:layout_gravity="center"
+                android:text="5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:layout_gravity="center"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_coins"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+            <TextView
+                android:id="@+id/discoverUserItemCoins"
+                android:layout_marginRight="8dp"
+                style="@style/TitleTextViewTheme"
+                android:layout_gravity="center"
+                android:text="100"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:layout_gravity="center"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_personal_video"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+            <TextView
+                android:id="@+id/discoverUserItemResponses"
+                style="@style/TitleTextViewTheme"
+                android:layout_gravity="center"
+                android:text="17"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/discoverUserItemConnect"
+            android:layout_gravity="center"
+            app:civ_border="false"
+            app:civ_border_width="4dp"
+            app:civ_shadow="true"
+            android:src="@drawable/ic_add_white"
+            android:layout_width="50dp"
+            android:layout_height="40dp" />
+    </LinearLayout>
+</LinearLayout>

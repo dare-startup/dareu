@@ -6,6 +6,7 @@ package com.dareu.mobile.utils;
 
 public enum PropertyName {
     DEBUG_SERVER("server"),
+    DISCOVER_USERS("discover.users"),
     SIGNIN("signin"),
     SIGNUP("signup"),
     UPDATE_GCM_RE_ID("update.gcm"),

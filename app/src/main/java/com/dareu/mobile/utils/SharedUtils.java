@@ -4,8 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.telecom.ConnectionService;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -35,6 +42,16 @@ public class SharedUtils {
     public static final String PROPERTIES_FILE_NAME = "dareu_props.properties";
 
     public static final String[] TIMERS = new String[]{ "1 Hrs", "3 Hrs", "6 Hrs", "12 Hrs" };
+
+
+    public static void signout(Context cxt){
+        //delete preferences
+        SharedPreferences prefs = cxt.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+        prefs
+                .edit()
+                .clear()
+                .commit();
+    }
 
 
     public static String getRealPathFromUri(Context context, Uri contentUri) {
@@ -157,6 +174,31 @@ public class SharedUtils {
 
     public static String serializeObject(Object object){
         return new Gson().toJson(object);
+    }
+
+    public static boolean checkInternetConnection(Context cxt){
+        ConnectivityManager manager = (ConnectivityManager) cxt.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo i = manager.getActiveNetworkInfo();
+        if (i == null)
+            return false;
+        if (!i.isConnected())
+            return false;
+        if (!i.isAvailable())
+            return false;
+        return true;
+    }
+
+    public static void hideKeyboard(View view, Context cxt){
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)cxt.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    public static void showNoInternetConnectionSnackbar(CoordinatorLayout layout){
+        Snackbar.make(layout, "No internet connection", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Accept", null);
+        return;
     }
 
 }

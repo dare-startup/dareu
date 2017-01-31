@@ -2,41 +2,34 @@ package com.dareu.mobile.activity;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.net.MultiparListener;
+import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.SignupTask;
-import com.dareu.mobile.net.request.SignupRequest;
-import com.dareu.mobile.net.response.AuthenticationResponse;
+import com.dareu.web.dto.request.SignupRequest;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
-import com.google.gson.Gson;
+import com.dareu.web.dto.response.AuthenticationResponse;
 
-import java.io.IOException;
 import java.util.Calendar;
 
 public class SignupActivity extends AppCompatActivity implements ActivityListener{
 
     private static final String TAG = "SignupActivity";
-    private static final int GALLERY_REQUEST_CODE = 122;
 
-    private ImageView imageView;
-    private EditText nameText, emailText, usernameText, passwordText;
+    private EditText nameText, emailText, passwordText;
     private TextView birthdayView;
     private Button signupButton;
     private ProgressDialog progressDialog;
@@ -55,14 +48,24 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
     @Override
     public void onBackPressed(){
         //if pressed, show a confirm dialog to exit
+        new AlertDialog.Builder(SignupActivity.this)
+                .setTitle("Cancel registration")
+                .setMessage("Are you sure you want to quit registration?")
+                .setPositiveButton("Yes, cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .create()
+                .show();
     }
 
     @Override
     public void getComponents() {
-        imageView = (ImageView)findViewById(R.id.signupProfilePicture);
         nameText = (EditText)findViewById(R.id.signupNameText);
         emailText = (EditText)findViewById(R.id.signupEmailText);
-        usernameText = (EditText)findViewById(R.id.signupUsernameText);
         passwordText = (EditText)findViewById(R.id.signupPasswordText);
         signupButton = (Button)findViewById(R.id.signupButton);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
@@ -71,22 +74,12 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
 
     @Override
     public void initialize() {
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, ""), GALLERY_REQUEST_CODE);
-            }
-        });
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //get values
                 String name = nameText.getText().toString();
                 String email = emailText.getText().toString();
-                String username = usernameText.getText().toString();
                 String password = passwordText.getText().toString();
                 String birthday = currentRequest.getBirthday();
 
@@ -102,18 +95,14 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                     Snackbar.make(coordinatorLayout, "You must provide your email", Snackbar.LENGTH_LONG)
                             .show();
                     return;
-                }else if(username.isEmpty()){
-                    Snackbar.make(coordinatorLayout, "You must provide your username", Snackbar.LENGTH_LONG)
-                            .show();
-                    return;
                 }else if(password.isEmpty()){
                     //TODO: validate against a regex
                     Snackbar.make(coordinatorLayout, "You must provide a password", Snackbar.LENGTH_LONG)
                             .show();
                     return;
-                }else if(currentRequest.getBitmap() == null){
-                    Snackbar.make(coordinatorLayout, "You must provide a profile image", Snackbar.LENGTH_LONG)
-                            .show();
+                }
+                if(! SharedUtils.checkInternetConnection(SignupActivity.this)){
+                    SharedUtils.showNoInternetConnectionSnackbar(coordinatorLayout);
                     return;
                 }
                 progressDialog = new ProgressDialog(SignupActivity.this);
@@ -127,37 +116,30 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                 currentRequest.setEmail(email);
                 currentRequest.setName(name);
                 currentRequest.setPassword(password);
-                currentRequest.setUsername(username);
 
-                SignupTask task = new SignupTask(SignupActivity.this, new MultiparListener() {
+
+                SignupTask task = new SignupTask(SignupActivity.this, currentRequest, new AsyncTaskListener<AuthenticationResponse>() {
                     @Override
-                    public void onResponse(int statusCode, String jsonResponse) {
-                        if(statusCode == 500){
-                            //show message
-                            Snackbar.make(coordinatorLayout, "Something went wrong, try again", Snackbar.LENGTH_LONG)
+                    public void onTaskResponse(AuthenticationResponse response) {
+                        if(response == null){
+
+                        }else if(response.getToken() != null){
+                            SharedUtils.setStringPreference(SignupActivity.this, PrefName.SIGNIN_TOKEN, response.getToken());
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                        }else{
+                            Snackbar.make(coordinatorLayout, response.getMessage(), Snackbar.LENGTH_LONG)
                                     .show();
-                        }else if(statusCode == 400){
-                            //bad request
-                            Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_LONG)
-                                    .show();
-                        }else if(statusCode == 200){
-                            //ok
-                            AuthenticationResponse response = new Gson().fromJson(jsonResponse, AuthenticationResponse.class);
-                            if(response != null){
-                                //save token
-                                SharedUtils.setStringPreference(SignupActivity.this, PrefName.SIGNIN_TOKEN, response.getToken());
-                                Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            }
                         }
                     }
 
                     @Override
-                    public void onError(String message) {
-
+                    public void onError(String errorMessage) {
+                        Snackbar.make(coordinatorLayout, errorMessage, Snackbar.LENGTH_LONG)
+                                .show();
                     }
-                }, currentRequest);
+                });
                 task.execute();
             }
         });
@@ -181,20 +163,5 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                 dialog.show();
             }
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK) {
-            Uri selectedImageUri = data.getData();
-
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
-                imageView.setImageBitmap(bitmap);
-                currentRequest.setBitmap(bitmap);
-            } catch (IOException ex) {
-                Log.e(TAG, "Could not load bitmap: " + ex.getMessage());
-            }
-        }
     }
 }

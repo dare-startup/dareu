@@ -9,20 +9,21 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.data.Category;
+import com.dareu.web.dto.response.entity.CategoryDescription;
 
 import java.util.List;
+
 
 /**
  * Created by jose.rubalcaba on 10/12/2016.
  */
 
-public class CategoriesAdapter extends ArrayAdapter<Category> {
+public class CategoriesAdapter extends ArrayAdapter<CategoryDescription> {
 
     private Context context;
-    private List<Category> categories;
+    private List<CategoryDescription> categories;
 
-    public CategoriesAdapter(Context context, List<Category> categories) {
+    public CategoriesAdapter(Context context, List<CategoryDescription> categories) {
         super(context, R.layout.category_item, categories);
         this.context = context;
         this.categories = categories;

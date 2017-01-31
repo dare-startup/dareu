@@ -22,7 +22,7 @@ public class DareuMessagingIdService extends FirebaseInstanceIdService {
         if(SharedUtils.getStringPreference(getApplicationContext(), PrefName.SIGNIN_TOKEN) != null){
             boolean refreshed = SharedUtils.updateGcmTask(getApplicationContext(), regId);
             if(refreshed){
-                //initialize firebase application
+                //initialize fire base application
             }
         }
     }

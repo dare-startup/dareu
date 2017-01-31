@@ -67,20 +67,21 @@ public abstract class AbstractTask extends AsyncTask<Void, Void, Map<String, Str
             u = new URL(url);
             conn = (HttpURLConnection)u.openConnection();
             conn.setRequestMethod(requestType);
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoInput(true);
+            if(authenticated){
+                String authenticationToken = SharedUtils.getStringPreference(cxt, PrefName.SIGNIN_TOKEN);
+                conn.setRequestProperty("Authentication", authenticationToken);
+            }
             if(requestType.equalsIgnoreCase("POST")){
                 if (entity != null) {
+                    conn.setRequestProperty("Content-Type", "application/json");
                     conn.setDoOutput(true);
                     OutputStream out = conn.getOutputStream();
                     out.write(new Gson().toJson(entity).getBytes());
                 }
             }
-            conn.setDoInput(true);
-            conn.setRequestProperty("Accept", "application/json");
 
-            if(authenticated){
-                String authenticationToken = SharedUtils.getStringPreference(cxt, PrefName.SIGNIN_TOKEN);
-                conn.setRequestProperty("Authentication", authenticationToken);
-            }
 
             statusCode = conn.getResponseCode();
             //get input stream

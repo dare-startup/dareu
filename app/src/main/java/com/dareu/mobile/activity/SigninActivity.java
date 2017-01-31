@@ -1,25 +1,25 @@
 package com.dareu.mobile.activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.SigninTask;
-import com.dareu.mobile.net.request.SigninRequest;
-import com.dareu.mobile.net.response.AuthenticationResponse;
+import com.dareu.web.dto.request.SigninRequest;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
-import com.google.gson.Gson;
+import com.dareu.web.dto.response.AuthenticationResponse;
 
 public class SigninActivity extends AppCompatActivity implements ActivityListener{
 
@@ -72,32 +72,49 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
                         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                     return;
                 }
+
+                //hide keyboard
+                SharedUtils.hideKeyboard(getCurrentFocus(), SigninActivity.this);
+
+                //check internet connection
+                if(! SharedUtils.checkInternetConnection(SigninActivity.this)){
+                    SharedUtils.showNoInternetConnectionSnackbar(coordinatorLayout);
+                    return;
+                }
+
                 progressDialog.setMessage("Signing in to " + getString(R.string.app_name));
                 progressDialog.setIndeterminate(true);
                 progressDialog.setCancelable(false);
                 progressDialog.show();
 
                 //TODO: create request here
-                SigninTask task = new SigninTask(SigninActivity.this, new SigninRequest(username, password), new AsyncTaskListener() {
+                SigninTask task = new SigninTask(SigninActivity.this, new SigninRequest(username, password), new AsyncTaskListener<AuthenticationResponse>() {
+
+
                     @Override
-                    public void onStatusCode(String jsonText, int statusCode) {
-                        if(statusCode == 401){
-                            //bad credentials
-                            Snackbar.make(coordinatorLayout, "Bad credentials", Snackbar.LENGTH_LONG)
-                                    .show();
-                        }else if(statusCode == 200){
-                            //ok
-                            AuthenticationResponse response = new Gson().fromJson(jsonText, AuthenticationResponse.class);
-                            if(response != null){
-                                //save token
-                                SharedUtils.setStringPreference(SigninActivity.this, PrefName.SIGNIN_TOKEN, response.getToken());
-                                Intent intent = new Intent(SigninActivity.this, MainActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
+                    public void onTaskResponse(AuthenticationResponse response) {
+                        if(response != null){
+                            if(response.getToken() == null){
+                                progressDialog.dismiss();
+                                Snackbar.make(coordinatorLayout, "Bad credentials", Snackbar.LENGTH_LONG)
+                                        .show();
+                                return;
                             }
+                            //save token
+                            SharedUtils.setStringPreference(SigninActivity.this, PrefName.SIGNIN_TOKEN, response.getToken());
+                            Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
                         }
                     }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        Snackbar.make(coordinatorLayout, errorMessage, Snackbar.LENGTH_LONG)
+                                .show();
+                    }
                 });
+                task.execute();
             }
         });
     }

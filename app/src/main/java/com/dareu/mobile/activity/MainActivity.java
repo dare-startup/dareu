@@ -3,6 +3,7 @@ package com.dareu.mobile.activity;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -100,6 +101,8 @@ public class MainActivity extends AppCompatActivity
         viewPager.setAdapter(new MainContentPagerAdapter(getSupportFragmentManager()));
         TabLayout layout = (TabLayout)findViewById(R.id.tabLayout);
         layout.setupWithViewPager(viewPager);
+        final Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setSubtitle("Discover");
         layout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -119,8 +122,6 @@ public class MainActivity extends AppCompatActivity
                         subtitle = "Anchored";
                         break;
                 }
-
-                Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
                 toolbar.setSubtitle(subtitle);
             }
 
@@ -184,9 +185,36 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
+        switch(id){
+            case R.id.nav_signout:
+                //confirm dialog
+                signout();
+                break;
+            case R.id.navProfile:
+                break;
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void signout(){
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage("Do you want to logout from " + getString(R.string.app_name) + "?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //logout
+                        SharedUtils.signout(MainActivity.this);
+                        //go back to welcome activity
+                        Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("No", null)
+                .setCancelable(false)
+                .create()
+            .show();
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -196,7 +224,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch(id){
-            //TODO: cases here
+            case R.id.nav_signout:
+                signout();
+                break;
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

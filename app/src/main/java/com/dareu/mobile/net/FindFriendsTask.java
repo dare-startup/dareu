@@ -24,6 +24,6 @@ public class FindFriendsTask extends AbstractTask{
     protected void onPostExecute(Map<String, String> result) {
         int statusCode = Integer.parseInt(result.get(STATUS_CODE));
         String json = result.get(JSON_RESPONSE);
-        listener.onStatusCode(json, statusCode);
+        //listener.onStatusCode(json, statusCode);
     }
 }

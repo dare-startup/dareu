@@ -20,13 +20,17 @@ import android.widget.Spinner;
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.ActivityListener;
 import com.dareu.mobile.adapter.CategoriesAdapter;
-import com.dareu.mobile.net.request.NewDareRequest;
+import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.CategoriesTask;
+import com.dareu.web.dto.request.CreateDareRequest;
 import com.dareu.mobile.utils.DummyFactory;
 import com.dareu.mobile.utils.SharedUtils;
+import com.dareu.web.dto.response.entity.CategoryDescription;
+import com.dareu.web.dto.response.entity.Page;
 
 public class NewDareActivity extends AppCompatActivity implements ActivityListener{
 
-    private NewDareRequest dareRequest;
+    private CreateDareRequest dareRequest;
     private ProgressDialog progressDialog;
 
     @Override
@@ -44,7 +48,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavUtils.navigateUpFromSameTask(NewDareActivity.this);
+                finish();
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -54,88 +58,46 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
 
     @Override
     public void initialize() {
-        dareRequest = new NewDareRequest();
-        //initialize friend ids
-        dareRequest.setFriendsIds(new String[]{});
+        dareRequest = new CreateDareRequest();
         //set find friends listener
         Button findFriendsButton = (Button)findViewById(R.id.newDareFindFriendsButton);
         findFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(dareRequest.getFriendsIds() != null && dareRequest.getFriendsIds().length < 6){
-                    Intent intent = new Intent(NewDareActivity.this, FindFriendsActivity.class);
-                    startActivityForResult(intent, FindFriendsActivity.REQUEST_CODE);
-                }
+                Intent intent = new Intent(NewDareActivity.this, FindFriendsActivity.class);
+                startActivityForResult(intent, FindFriendsActivity.REQUEST_CODE);
             }
         });
 
-        //execute categories task
-        /**CategoriesTask task = new CategoriesTask(NewDareActivity.this, new AsyncTaskListener() {
-            @Override
-            public void onSuccess(String jsonText) {
-                Type type = new TypeToken<ListResponse<Category>>(){}.getType();
-                //parse to a list of categories
-                ListResponse<Category> response = new Gson().fromJson(jsonText, type);
-                if(response != null){
-                    //get list of categories
-                    final List<Category> categories = response.getList();
-                    //create spinner adapter
-                    CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, categories);
-                    //set to spinner
-                    Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
-                    categoriesSpinner.setAdapter(adapter);
-                    categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            if(position >= 0)
-                                dareRequest.setCategoryId(categories.get(position).getId());
-                        }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
-                            dareRequest.setCategoryId(null);
-                        }
-                    });
-                }else{
-                    //TODO: set error message or try again
-                }
+        CategoriesTask task = new CategoriesTask(NewDareActivity.this, 1, new AsyncTaskListener<Page<CategoryDescription>>() {
+            @Override
+            public void onTaskResponse(final Page<CategoryDescription> response) {
+                //create spinner adapter
+                CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, response.getItems());
+                //set to spinner
+                Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
+                categoriesSpinner.setAdapter(adapter);
+                categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if(position >= 0)
+                            dareRequest.setCategoryId(response.getItems().get(position).getId());
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        dareRequest.setCategoryId(null);
+                    }
+                });
             }
 
             @Override
-            public void onStatusCode(String jsonText, int statusCode) {
-                CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+            public void onError(String errorMessage) {
 
-                if(statusCode == 401){
-                    //TODO: go to signin activity and [WHAT THE HECK ARE YOU DOING HERE?]
-                }
-                Snackbar.make(coordinatorLayout, "Could not get categories from server", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Try again", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                //TODO: try again here
-                            }
-                        })
-                        .setActionTextColor(getResources().getColor(R.color.colorAccent))
-                        .show();
             }
         });
-        task.execute();**/ //UNCOMMENT THIS TO TEST WITH SERVER
-        CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, DummyFactory.getCategories());
-        //set to spinner
-        Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
-        categoriesSpinner.setAdapter(adapter);
-        categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(position >= 0)
-                    dareRequest.setCategoryId(DummyFactory.getCategories().get(position).getId());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                dareRequest.setCategoryId(null);
-            }
-        });
+        task.execute();
         //set timer spinner
         Spinner timerSpinner = (Spinner)findViewById(R.id.newDareTimerSpinner);
         timerSpinner.setAdapter(new ArrayAdapter<String>(NewDareActivity.this,
@@ -182,8 +144,8 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
 
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         //validate request
-        if(dareRequest.getFriendsIds().length == 0){
-            Snackbar.make(coordinatorLayout, "You must select at least one friend", Snackbar.LENGTH_LONG)
+        if(dareRequest.getFriendId() != null){
+            Snackbar.make(coordinatorLayout, "You must select a friend", Snackbar.LENGTH_LONG)
                     .show();
             return;
         }else if(dareRequest.getCategoryId() == null || dareRequest.getCategoryId().isEmpty()){

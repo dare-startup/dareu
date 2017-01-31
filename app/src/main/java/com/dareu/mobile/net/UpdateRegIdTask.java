@@ -26,6 +26,6 @@ public class UpdateRegIdTask extends AbstractTask {
         int statusCode = Integer.parseInt(result.get(STATUS_CODE));
         String json = result.get(JSON_RESPONSE);
 
-        listener.onStatusCode(json, statusCode);
+        //listener.onStatusCode(json, statusCode);
     }
 }

@@ -4,10 +4,34 @@
     android:layout_height="match_parent"
     tools:context="com.dareu.mobile.activity.fragment.DiscoverFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <TextView
+        android:visibility="gone"
+        style="@style/TitleTextViewTheme"
+        android:text="Hello"
+        android:layout_gravity="center"
+        android:id="@+id/fragmentCenteredMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Discover fragment" />
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/fragmentDiscoverRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </FrameLayout>
