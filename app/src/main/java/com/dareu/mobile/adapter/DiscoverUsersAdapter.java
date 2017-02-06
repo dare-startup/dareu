@@ -1,15 +1,22 @@
 package com.dareu.mobile.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dareu.mobile.R;
+import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.account.ConfirmConnectionTask;
+import com.dareu.mobile.net.account.LoadProfileImageTask;
+import com.dareu.mobile.net.account.RequestConnectionTask;
+import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.entity.DiscoverUserAccount;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
@@ -66,30 +73,73 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        DiscoverUsersPendingViewHolder received;
-        DiscoverUsersViewHolder sent;
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+        final DiscoverUsersPendingViewHolder received;
+        final DiscoverUsersViewHolder sent;
+        LoadProfileImageTask imageTask;
         switch(holder.getItemViewType()){
             case 0:
                 //a request has been received
                 received = (DiscoverUsersPendingViewHolder)holder;
-                //TODO:set image bitmap from here
                 received.nameView.setText(list.get(position).getName());
                 received.scoreView.setText(String.valueOf(list.get(position).getUscore()));
-                received.coinsView.setText(String.valueOf(list.get(position).getCoins()));
                 received.responsesView.setText(String.valueOf(list.get(position).getResponses()));
                 received.acceptButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //set accepted to true and make an async call to rest service
+                        ConfirmConnectionTask task = new ConfirmConnectionTask(cxt, list.get(position).getId(), true, new AsyncTaskListener<EntityRegistrationResponse>() {
+                            @Override
+                            public void onTaskResponse(EntityRegistrationResponse response) {
+                                //remove item from list
+                                list.remove(position);
+                                notifyItemRemoved(position);
+                                notifyItemRangeChanged(position, list.size());
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+
+                            }
+                        });
+                        task.execute();
                     }
                 });
                 received.declineButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //set accepted to false and make an async call to rest service
+                        ConfirmConnectionTask task = new ConfirmConnectionTask(cxt, list.get(position).getId(), false, new AsyncTaskListener<EntityRegistrationResponse>() {
+                            @Override
+                            public void onTaskResponse(EntityRegistrationResponse response) {
+                                //remove item from list
+                                list.remove(position);
+                                notifyItemRemoved(position);
+                                notifyItemRangeChanged(position, list.size());
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+
+                            }
+                        });
+                        task.execute();
                     }
                 });
+                imageTask = new LoadProfileImageTask(cxt, list.get(position).getId(), new AsyncTaskListener<Bitmap>() {
+                    @Override
+                    public void onTaskResponse(Bitmap response) {
+                        if(response == null){
+                            received.imageView.setImageResource(R.drawable.ic_account_circle_black_24dp);
+                        }else{
+                            received.imageView.setImageBitmap(response);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+                imageTask.execute();
                 break;
             case 1:
                 //a request has been sent
@@ -97,7 +147,6 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
                 //TODO:set image bitmap from here
                 sent.nameView.setText(list.get(position).getName());
                 sent.scoreView.setText(String.valueOf(list.get(position).getUscore()));
-                sent.coinsView.setText(String.valueOf(list.get(position).getCoins()));
                 sent.responsesView.setText(String.valueOf(list.get(position).getResponses()));
                 sent.addButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -106,15 +155,63 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
                     }
                 });
                 sent.addButton.setVisibility(View.GONE);
+                imageTask = new LoadProfileImageTask(cxt, list.get(position).getId(), new AsyncTaskListener<Bitmap>() {
+                    @Override
+                    public void onTaskResponse(Bitmap response) {
+                        if(response == null){
+                            sent.imageView.setImageResource(R.drawable.ic_account_circle_black_24dp);
+                        }else{
+                            sent.imageView.setImageBitmap(response);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+                imageTask.execute();
                 break;
             case 2:
                 //user ready to be added
                 sent = (DiscoverUsersViewHolder)holder;
-                //TODO:set image bitmap from here
                 sent.nameView.setText(list.get(position).getName());
                 sent.scoreView.setText(String.valueOf(list.get(position).getUscore()));
-                sent.coinsView.setText(String.valueOf(list.get(position).getCoins()));
                 sent.responsesView.setText(String.valueOf(list.get(position).getResponses()));
+                sent.addButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new RequestConnectionTask(cxt, list.get(position).getId(), new AsyncTaskListener<EntityRegistrationResponse>() {
+                            @Override
+                            public void onTaskResponse(EntityRegistrationResponse response) {
+                                list.remove(position);
+                                notifyItemRemoved(position);
+                                notifyItemRangeChanged(position, list.size());
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+
+                            }
+                        }).execute();
+                    }
+                });
+                new LoadProfileImageTask(cxt, list.get(position).getId(), new AsyncTaskListener<Bitmap>() {
+                    @Override
+                    public void onTaskResponse(Bitmap response) {
+                        if(response == null){
+                            sent.imageView.setImageResource(R.drawable.ic_account_circle_black_24dp);
+                        }else{
+                            sent.imageView.setImageBitmap(response);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                }).execute();
+
                 break;
             default:
                 break;
@@ -132,9 +229,8 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
         ImageView imageView;
         TextView nameView;
         TextView scoreView;
-        TextView coinsView;
         TextView responsesView;
-        CircularImageView addButton;
+        ImageButton addButton;
 
 
         DiscoverUsersViewHolder(View view){
@@ -142,9 +238,8 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
             this.imageView = (ImageView)view.findViewById(R.id.discoverUserItemImage);
             this.nameView = (TextView)view.findViewById(R.id.discoverUserItemName);
             this.scoreView = (TextView)view.findViewById(R.id.discoverUserItemScore);
-            this.coinsView = (TextView)view.findViewById(R.id.discoverUserItemCoins);
             this.responsesView = (TextView)view.findViewById(R.id.discoverUserItemResponses);
-            this.addButton = (CircularImageView)view.findViewById(R.id.discoverUserItemConnect);
+            this.addButton = (ImageButton)view.findViewById(R.id.discoverUserItemConnect);
         }
     }
 
@@ -153,19 +248,17 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
         ImageView imageView;
         TextView nameView;
         TextView scoreView;
-        TextView coinsView;
         TextView responsesView;
-        CircularImageView acceptButton, declineButton;
+        ImageButton acceptButton, declineButton;
 
         DiscoverUsersPendingViewHolder(View view){
             super(view);
             this.imageView = (ImageView)view.findViewById(R.id.discoverUserPendingItemImage);
             this.nameView = (TextView)view.findViewById(R.id.discoverUserPendingItemName);
             this.scoreView = (TextView)view.findViewById(R.id.discoverUserPendingItemScore);
-            this.coinsView = (TextView)view.findViewById(R.id.discoverUserPendingItemCoins);
             this.responsesView = (TextView)view.findViewById(R.id.discoverUserPendingItemResponses);
-            this.acceptButton = (CircularImageView)view.findViewById(R.id.discoverUserPendingItemAccept);
-            this.declineButton = (CircularImageView)view.findViewById(R.id.discoverUserPendingItemDecline);
+            this.acceptButton = (ImageButton)view.findViewById(R.id.discoverUserPendingItemAccept);
+            this.declineButton = (ImageButton)view.findViewById(R.id.discoverUserPendingItemDecline);
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.dareu.mobile.activity;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -9,13 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.SigninTask;
+import com.dareu.mobile.net.account.SigninTask;
 import com.dareu.web.dto.request.SigninRequest;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
@@ -110,6 +108,7 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
 
                     @Override
                     public void onError(String errorMessage) {
+                        progressDialog.dismiss();
                         Snackbar.make(coordinatorLayout, errorMessage, Snackbar.LENGTH_LONG)
                                 .show();
                     }

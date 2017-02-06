@@ -13,7 +13,14 @@ public enum PropertyName {
     CATEGORIES("categories"),
     CREATE_DARE("create.dare"),
     FIND_FRIENDS_BY_QUERY("find.friends"),
-    GET_ACCOUNT_IMAGE("account.image");
+    FIND_DARE_DESCRIPTION("find.dare.description"),
+    DARE_CONFIRMATION("new.dare.confirmation"),
+    CONFIRM_CONNECTION("confirm.connection"),
+    UPDATE_IMAGE_PROFILE("image.profile"),
+    LOAD_IMAGE_PROFILE("load.image.profile"),
+    CONNECTION_DETAILS("connection.details"),
+    CONNECTION_REQUEST("connection.request"),
+    UNACCEPTED_DARE("unaccepted.dare");
 
 
     String value;

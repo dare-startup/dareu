@@ -86,4 +86,23 @@ public abstract class AbstractApacheTask extends AsyncTask<Void, Void, ApacheRes
 
     @Override
     protected abstract void onPostExecute(ApacheResponseWrapper result);
+
+    protected String getErrorMessage(ApacheResponseWrapper wrapper){
+        if(wrapper == null)
+            return "No response received from server, try again";
+        switch(wrapper.getStatusCode()){
+            case 200:
+                return "Success";
+            case 404:
+                return "Server temporarily out of business, try again later";
+            case 500:
+                return "Something bad has happened, try again";
+            case 415:
+                return "Someone zap out this shitty developer";
+            case 401:
+                return "You are not authorized to view this content";
+            default:
+                return "N/A";
+        }
+    }
 }

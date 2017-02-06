@@ -7,13 +7,19 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.telecom.Connection;
 import android.telecom.ConnectionService;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.dareu.mobile.net.response.ApacheResponseWrapper;
+import com.dareu.web.dto.response.message.ConnectionRequestMessage;
+import com.dareu.web.dto.response.message.NewDareMessage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -27,6 +33,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -51,37 +58,6 @@ public class SharedUtils {
                 .edit()
                 .clear()
                 .commit();
-    }
-
-
-    public static String getRealPathFromUri(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    public static String getRealPathFromURI(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 
     /**
@@ -166,16 +142,6 @@ public class SharedUtils {
         }
     }
 
-    public static <T> T deserialize(Class<T> type, String json){
-        Gson gson = new Gson();
-        Type typeToken = new TypeToken<T>(){}.getType();
-        return gson.fromJson(json, typeToken);
-    }
-
-    public static String serializeObject(Object object){
-        return new Gson().toJson(object);
-    }
-
     public static boolean checkInternetConnection(Context cxt){
         ConnectivityManager manager = (ConnectivityManager) cxt.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo i = manager.getActiveNetworkInfo();
@@ -200,5 +166,45 @@ public class SharedUtils {
                 .setAction("Accept", null);
         return;
     }
+
+    public static NewDareMessage parseNewDareMessage(Map<String, String> data){
+        NewDareMessage message = new NewDareMessage();
+        message.setChallenger(data.get("challenger"));
+        message.setDareDescription(data.get("dareDescription"));
+        message.setDareId(data.get("dareId"));
+        message.setDareName(data.get("dareName"));
+        message.setTimer(Integer.parseInt(data.get("timer")));
+        return message;
+    }
+
+    public static ConnectionRequestMessage parseConnectionRequestMessage(Map<String, String> data) {
+        ConnectionRequestMessage message = new ConnectionRequestMessage();
+        message.setFriendshipId(data.get("friendshipId"));
+        message.setRequestUserId(data.get("requestUserId"));
+        message.setUserName(data.get("userName"));
+        return message;
+    }
+
+    public static String getErrorMessage(ApacheResponseWrapper wrapper){
+        if(wrapper == null)
+            return "No response received from server, try again";
+        switch(wrapper.getStatusCode()){
+            case 200:
+                return "Success";
+            case 404:
+                return "Server temporarily out of business, try again later";
+            case 500:
+                return "Something bad has happened, try again";
+            case 415:
+                return "Someone zap out this shitty developer";
+            case 401:
+                return "You are not authorized to view this content";
+            default:
+                return "N/A";
+        }
+    }
+
+
+
 
 }

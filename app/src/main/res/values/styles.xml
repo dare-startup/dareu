@@ -22,6 +22,12 @@
     </style>
 
     <!-- Buttons -->
+    <style name="PrimaryWhiteButtonTheme" parent="android:Widget.Holo.Light.Button">
+        <item name="android:background">@android:color/white</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
     <style name="PrimaryButtonTheme" parent="android:Widget.Holo.Light.Button">
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:textColor">@android:color/white</item>
@@ -36,13 +42,17 @@
 
     <!-- TextView's -->
     <style name="PrimaryTextViewTheme" parent="android:Widget.Holo.Light.TextView">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="PrimaryColorTextViewTheme" parent="android:Widget.Holo.Light.TextView">
         <item name="android:textColor">@color/colorPrimary</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TitleTextViewTheme" parent="android:Widget.Holo.Light.TextView">
-        <item name="android:textColor">@color/colorPrimaryDark</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -52,7 +62,12 @@
         <item name="android:background">@drawable/edit_text_shape</item>
         <item name="android:layout_height">35dp</item>
         <item name="android:paddingLeft">8dp</item>
-        <item name="android:textColorHint">@color/colorPrimary</item>
+        <item name="android:textColorHint">@android:color/black</item>
+    </style>
+
+    <style name="ToolbarStyle" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <!-- Customize color of navigation drawer icon and back arrow -->
+        <item name="colorControlNormal">@android:color/white</item>
     </style>
 
     <style name="NoActionBarAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

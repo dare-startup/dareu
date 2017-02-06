@@ -17,12 +17,9 @@ import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
 import com.dareu.mobile.adapter.DiscoverUsersAdapter;
 import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.DiscoverUsersTask;
-import com.dareu.mobile.utils.DummyFactory;
+import com.dareu.mobile.net.account.DiscoverUsersTask;
 import com.dareu.web.dto.response.entity.DiscoverUserAccount;
 import com.dareu.web.dto.response.entity.Page;
-
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.

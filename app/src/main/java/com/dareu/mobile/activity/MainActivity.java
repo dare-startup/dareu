@@ -1,6 +1,5 @@
 package com.dareu.mobile.activity;
 
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,7 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -21,20 +20,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.shared.NewDareActivity;
+import com.dareu.mobile.activity.shared.SettingsActivity;
 import com.dareu.mobile.adapter.MainContentPagerAdapter;
 import com.dareu.mobile.adapter.WelcomeDialogAdapter;
+import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.account.UpdateRegIdTask;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
+import com.dareu.web.dto.response.UpdatedEntityResponse;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
+    private static final String TAG = "MainActivity";
     private static final int NEW_DARE_REQUEST_CODE = 432;
 
     @Override
@@ -58,6 +62,43 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, NEW_DARE_REQUEST_CODE);
             }
         });
+        //check registration id availability
+        checkFirebaseRegistrationId();
+    }
+
+    private void checkFirebaseRegistrationId() {
+        String value = SharedUtils.getStringPreference(MainActivity.this, PrefName.ALREADY_REGISTERED_GCM_TOKEN);
+        if(value != null && ! value.isEmpty()){
+            Boolean updated = Boolean.parseBoolean(value);
+            if(! updated){
+                //get reg id
+                String regId = SharedUtils.getStringPreference(MainActivity.this, PrefName.GCM_TOKEN);
+                if(regId != null && ! regId.isEmpty()){
+                    //update it
+                    UpdateRegIdTask task = new UpdateRegIdTask(MainActivity.this, new AsyncTaskListener<UpdatedEntityResponse>() {
+                        @Override
+                        public void onTaskResponse(UpdatedEntityResponse response) {
+                            if(response != null && response.isSuccess()){
+                                SharedUtils.setStringPreference(MainActivity.this, PrefName.ALREADY_REGISTERED_GCM_TOKEN, Boolean.TRUE.toString());
+                                Log.i(TAG, response.getMessage());
+                            }
+                            else{
+                                Log.i(TAG, "Something bad just happened :(");
+                            }
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+
+                        }
+                    });
+                    task.execute();
+                }
+            }
+        }
+
+
+
     }
 
     private void setupFirstVisitDialog() {
@@ -186,11 +227,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch(id){
-            case R.id.nav_signout:
+            case R.id.navSignout:
                 //confirm dialog
                 signout();
                 break;
-            case R.id.navProfile:
+            case R.id.navPendingDares:
                 break;
         }
 
@@ -222,9 +263,21 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
+        Intent intent;
         switch(id){
-            case R.id.nav_signout:
+            case R.id.navCreatedDares:
+                Toast.makeText(MainActivity.this, "Hold on, this is still on development >:C", Toast.LENGTH_LONG)
+                        .show();
+                break;
+            case R.id.navPendingDares:
+                intent = new Intent(MainActivity.this, UnacceptedDaresActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.navSettings:
+                intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.navSignout:
                 signout();
                 break;
         }

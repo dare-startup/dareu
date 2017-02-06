@@ -15,23 +15,25 @@
         android:layout_height="wrap_content">
 
         <RelativeLayout
+            android:gravity="center"
             android:layout_weight=".2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
             android:padding="8dp">
-            <ImageView
-                android:id="@+id/friendItemImage"
-                android:background="@color/colorAccent"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_centerInParent="true"/>
 
-            <ProgressBar
-                android:id="@+id/friendItemProgressBar"
+            <com.mikhaellopez.circularimageview.CircularImageView
+                android:background="@drawable/circular_selector"
+                app:civ_border_color="@android:color/transparent"
+                android:padding="12dp"
+                android:src="@drawable/ic_account_circle_black_24dp"
+                android:layout_margin="12dp"
+                android:layout_gravity="center"
+                android:id="@+id/friendItemImage"
                 android:layout_centerInParent="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_width="80dp"
+                android:layout_height="80dp"/>
+
         </RelativeLayout>
 
         <LinearLayout
@@ -43,32 +45,13 @@
             android:padding="8dp">
 
             <TextView
+                android:textSize="16sp"
                 android:id="@+id/friendItemName"
                 style="@style/TitleTextViewTheme"
                 android:text="Some friend name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/friendItemDares"
-                style="@style/PrimaryTextViewTheme"
-                android:text="Created dares  9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/friendItemResponses"
-                style="@style/PrimaryTextViewTheme"
-                android:text="Uploaded responses  4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         </LinearLayout>
-
-        <CheckBox
-            android:id="@+id/friendItemCheckbox"
-            android:layout_gravity="center"
-            android:layout_weight=".1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content" />
     </LinearLayout>
 </android.support.v7.widget.CardView>

@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.SignupTask;
+import com.dareu.mobile.net.account.SignupTask;
 import com.dareu.web.dto.request.SignupRequest;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;

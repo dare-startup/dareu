@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_new_dare"
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.dareu.mobile.activity.shared.NewDareActivity">
@@ -14,98 +14,122 @@
                 android:id="@+id/toolbar"/>
 
 
-            <LinearLayout
+            <android.support.v7.widget.CardView
                 android:layout_below="@id/toolbar"
+                android:id="@+id/newDareCardView"
+                android:elevation="4dp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <EditText
-                    android:id="@+id/newDareNameView"
-                    android:textColorHint="@color/colorPrimary"
-                    android:paddingLeft="8dp"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:hint="Name your dare"
-                    android:layout_width="match_parent" />
-
-                <EditText
-                    android:id="@+id/newDareDescriptionView"
-                    android:textColorHint="@color/colorPrimary"
-                    android:paddingLeft="8dp"
-                    android:layout_margin="8dp"
-                    android:hint="Describe your dare here"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:lines="5"/>
+                android:layout_height="wrap_content">
 
                 <LinearLayout
-                    android:layout_margin="8dp"
+                    android:layout_below="@id/toolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:gravity="center"
-                        android:layout_weight=".4"
-                        android:layout_gravity="center_vertical"
+                    <EditText
+                        android:id="@+id/newDareNameView"
+                        android:paddingLeft="8dp"
+                        android:layout_height="wrap_content"
                         android:layout_margin="8dp"
-                        android:text="Dare Category"
-                        android:layout_width="0dp"
-                        android:layout_height="50dp"
-                        android:id="@+id/textView2" />
+                        android:hint="Name your dare"
+                        android:layout_width="match_parent" />
 
-                    <Spinner
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:layout_weight=".6"
-                        android:id="@+id/newDareCategorySpinner"
+                    <EditText
+                        android:id="@+id/newDareDescriptionView"
+                        android:paddingLeft="8dp"
                         android:layout_margin="8dp"
-                        android:layout_width="0dp"
-                        android:layout_height="50dp"/>
+                        android:hint="Describe your dare here"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lines="5"/>
+
+                    <LinearLayout
+                        android:layout_margin="8dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:textStyle="normal"
+                            style="@style/TitleTextViewTheme"
+                            android:layout_weight=".5"
+                            android:layout_gravity="center"
+                            android:layout_margin="8dp"
+                            android:text="Dare Category"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/textView2" />
+
+                        <Spinner
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_weight=".5"
+                            android:id="@+id/newDareCategorySpinner"
+                            android:layout_margin="8dp"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_margin="8dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:textStyle="normal"
+                            style="@style/TitleTextViewTheme"
+                            android:layout_weight=".5"
+                            android:layout_gravity="center_vertical"
+                            android:layout_margin="8dp"
+                            android:text="Timer"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content" />
+
+                        <Spinner
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_weight=".5"
+                            android:id="@+id/newDareTimerSpinner"
+                            android:layout_margin="8dp"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <Button
+                            android:layout_weight=".5"
+                            android:id="@+id/newDareFindFriendsButton"
+                            style="@style/PrimaryWhiteButtonTheme"
+                            android:text="Search"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:gravity="center"
+                            android:layout_weight=".5"
+                            android:id="@+id/newDareSelectedUser"
+                            android:layout_gravity="center"
+                            android:text="You must dare a user"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
                 </LinearLayout>
+            </android.support.v7.widget.CardView>
 
-                <LinearLayout
-                    android:layout_margin="8dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:gravity="center"
-                        android:layout_weight=".4"
-                        android:layout_gravity="center_vertical"
-                        android:layout_margin="8dp"
-                        android:text="Timer"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp" />
-
-                    <Spinner
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:layout_weight=".6"
-                        android:id="@+id/newDareTimerSpinner"
-                        android:layout_margin="8dp"
-                        android:layout_width="0dp"
-                        android:layout_height="50dp"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_alignParentBottom="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-
-                <Button
-                    android:id="@+id/newDareFindFriendsButton"
-                    style="@style/PrimaryDarkButtonTheme"
-                    android:text="Find friends"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
+            <TextView
+                android:textStyle="normal"
+                style="@style/TitleTextViewTheme"
+                android:padding="16dp"
+                android:gravity="center"
+                android:text="Once you dare a user, it will receive a notification with a timer, let the game begins :) "
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/newDareCardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
