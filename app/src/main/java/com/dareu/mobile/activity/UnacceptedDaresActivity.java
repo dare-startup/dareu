@@ -104,6 +104,7 @@ public class UnacceptedDaresActivity extends AppCompatActivity {
                                         message.setVisibility(View.GONE);
                                         cardView.setVisibility(View.GONE);
                                         progressBar.setVisibility(View.VISIBLE);
+                                        progressDialog.dismiss();
                                         getUnacceptedDare();
                                     }
 
@@ -146,6 +147,7 @@ public class UnacceptedDaresActivity extends AppCompatActivity {
                                     public void onTaskResponse(UpdatedEntityResponse response) {
                                         Toast.makeText(UnacceptedDaresActivity.this, "The dare has been accepted" , Toast.LENGTH_LONG)
                                                 .show();
+                                        progressDialog.dismiss();
                                         //TODO:set a flag on utils to determine if there is an active dare
                                         SharedUtils.setStringPreference(UnacceptedDaresActivity.this, PrefName.CURRENT_ACTIVE_DARE, request.getDareId());
                                         Toast.makeText(UnacceptedDaresActivity.this, "The dare has been accepted", Toast.LENGTH_LONG)

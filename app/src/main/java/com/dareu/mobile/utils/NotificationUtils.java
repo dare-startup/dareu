@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.dareu.mobile.R;
+import com.dareu.mobile.activity.MainActivity;
 import com.dareu.mobile.activity.shared.ConnectionStatusActivity;
 import com.dareu.mobile.activity.shared.NewDareDataActivity;
 import com.dareu.web.dto.response.message.AbstractMessage;
@@ -55,6 +56,9 @@ public class NotificationUtils {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(NewDareDataActivity.DARE_ID, message.getDareId());
 
+        Intent newDareIntent = new Intent(MainActivity.ACTION_NEW_DARE);
+        newDareIntent.putExtra(MainActivity.NEW_DARE_ID, message.getDareId());
+        cxt.sendBroadcast(newDareIntent);
         createNotification(cxt, NewDareDataActivity.class, "You have been dared", message.getDareDescription(), intent);
     }
 

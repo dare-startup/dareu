@@ -28,6 +28,18 @@
         <item name="android:layout_margin">8dp</item>
     </style>
 
+    <style name="DarkButtonTheme" parent="android:Widget.Holo.Light.Button">
+        <item name="android:background">@color/darkBackground</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="PrimaryColorBorderedButtonTheme" parent="android:Widget.Holo.Light.Button">
+        <item name="android:background">@drawable/white_rounded_button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
     <style name="PrimaryButtonTheme" parent="android:Widget.Holo.Light.Button">
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:textColor">@android:color/white</item>

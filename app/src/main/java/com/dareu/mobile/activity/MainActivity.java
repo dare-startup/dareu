@@ -1,9 +1,11 @@
 package com.dareu.mobile.activity;
 
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -21,6 +23,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,15 +35,20 @@ import com.dareu.mobile.adapter.MainContentPagerAdapter;
 import com.dareu.mobile.adapter.WelcomeDialogAdapter;
 import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.account.UpdateRegIdTask;
+import com.dareu.mobile.net.dare.DareDescriptionTask;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
+import com.dareu.web.dto.response.entity.DareDescription;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
     private static final String TAG = "MainActivity";
     private static final int NEW_DARE_REQUEST_CODE = 432;
+
+    public static final String ACTION_NEW_DARE = "com.dareu.mobile.intent.action.NEW_DARE";
+    public static final String NEW_DARE_ID = "dareId";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +73,75 @@ public class MainActivity extends AppCompatActivity
         });
         //check registration id availability
         checkFirebaseRegistrationId();
+
+        //register receiver
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                addNotificationLayout(context, intent);
+            }
+        }, new IntentFilter(MainActivity.ACTION_NEW_DARE));
+    }
+
+    private void addNotificationLayout(Context context, Intent intent) {
+        //get dare id
+        String dareId = intent.getStringExtra(NEW_DARE_ID);
+        //layout
+        final FrameLayout layout = (FrameLayout)findViewById(R.id.notificationLayout);
+        //inflate view
+        final View view = getLayoutInflater().inflate(R.layout.new_dare_content, null, false);
+        //set animation first
+        layout.animate().translationY(view.getHeight());
+        //get controls
+        final TextView details = (TextView)view.findViewById(R.id.notificationLayoutDetails);
+        final TextView challengerName = (TextView)view.findViewById(R.id.notificationLayoutName);
+        final TextView dareDescription = (TextView)view.findViewById(R.id.notificationLayoutDareDescription);
+        final Button acceptButton = (Button)view.findViewById(R.id.notificationLayoutAcceptButton);
+        final Button declineButton = (Button)view.findViewById(R.id.notificationLayoutDeclineButton);
+        final TextView flagDare = (TextView)view.findViewById(R.id.notificationLayoutFlag);
+
+        details.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: go to dare details activity
+            }
+        });
+        new DareDescriptionTask(context, new AsyncTaskListener<DareDescription>() {
+            @Override
+            public void onTaskResponse(DareDescription response) {
+                challengerName.setText(response.getChallenger().getName());
+                dareDescription.setText(response.getDescription());
+                acceptButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+                declineButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+                flagDare.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+
+                //add view
+
+                layout.removeAllViews();
+                layout.addView(view);
+                layout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }, dareId).execute();
     }
 
     private void checkFirebaseRegistrationId() {
@@ -279,6 +357,15 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.navSignout:
                 signout();
+                break;
+
+            case R.id.navCurrentActiveDare:
+                Toast.makeText(MainActivity.this, "Hold on, this is still on development >:C", Toast.LENGTH_LONG)
+                        .show();
+                break;
+            case R.id.navDareResponsesUploads:
+                Toast.makeText(MainActivity.this, "Hold on, this is still on development >:C", Toast.LENGTH_LONG)
+                        .show();
                 break;
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
