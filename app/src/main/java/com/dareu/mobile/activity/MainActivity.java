@@ -6,11 +6,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,21 +31,27 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.shared.NewDareActivity;
+import com.dareu.mobile.activity.shared.NewDareDataActivity;
 import com.dareu.mobile.activity.shared.SettingsActivity;
 import com.dareu.mobile.adapter.MainContentPagerAdapter;
 import com.dareu.mobile.adapter.WelcomeDialogAdapter;
 import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.account.LoadProfileImageTask;
 import com.dareu.mobile.net.account.UpdateRegIdTask;
 import com.dareu.mobile.net.dare.DareDescriptionTask;
+import com.dareu.mobile.net.dare.UnacceptedDareTask;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.DareDescription;
+import com.dareu.web.dto.response.entity.UnacceptedDare;
+import com.mikhaellopez.circularimageview.CircularImageView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
@@ -49,6 +61,11 @@ public class MainActivity extends AppCompatActivity
 
     public static final String ACTION_NEW_DARE = "com.dareu.mobile.intent.action.NEW_DARE";
     public static final String NEW_DARE_ID = "dareId";
+
+    public static final int NEW_DARE_NOTIFICATION = 123;
+    public static final int PENDING_DARE_NOTIFICATION = 321;
+
+    private boolean activeDare;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,68 +90,74 @@ public class MainActivity extends AppCompatActivity
         });
         //check registration id availability
         checkFirebaseRegistrationId();
-
+        //check if there is a pending dare
+        checkPendingDare();
+        //check if there is an active dare
+        checkActiveDare();
         //register receiver
         registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                addNotificationLayout(context, intent);
+                addNotificationLayout(context, intent, NEW_DARE_NOTIFICATION);
             }
         }, new IntentFilter(MainActivity.ACTION_NEW_DARE));
     }
 
-    private void addNotificationLayout(Context context, Intent intent) {
+    private void checkActiveDare() {
+        //TODO: CHECK THIS OPERATION
+    }
+
+    private void checkPendingDare() {
+        //if there is an active dare running, do not execute this method
+        //TODO: CHECK THIS OPERATION
+        if(activeDare)return;
+        new UnacceptedDareTask(MainActivity.this, new AsyncTaskListener<UnacceptedDare>() {
+            @Override
+            public void onTaskResponse(UnacceptedDare response) {
+                if(response != null){
+                    //pending dare
+                    Intent intent = new Intent();
+                    intent.putExtra(NEW_DARE_ID, response.getId());
+                    addNotificationLayout(MainActivity.this, intent, PENDING_DARE_NOTIFICATION);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }).execute();
+    }
+
+    private void addNotificationLayout(final Context context, Intent intent, final int notificationType) {
         //get dare id
         String dareId = intent.getStringExtra(NEW_DARE_ID);
-        //layout
-        final FrameLayout layout = (FrameLayout)findViewById(R.id.notificationLayout);
-        //inflate view
-        final View view = getLayoutInflater().inflate(R.layout.new_dare_content, null, false);
-        //set animation first
-        layout.animate().translationY(view.getHeight());
-        //get controls
-        final TextView details = (TextView)view.findViewById(R.id.notificationLayoutDetails);
-        final TextView challengerName = (TextView)view.findViewById(R.id.notificationLayoutName);
-        final TextView dareDescription = (TextView)view.findViewById(R.id.notificationLayoutDareDescription);
-        final Button acceptButton = (Button)view.findViewById(R.id.notificationLayoutAcceptButton);
-        final Button declineButton = (Button)view.findViewById(R.id.notificationLayoutDeclineButton);
-        final TextView flagDare = (TextView)view.findViewById(R.id.notificationLayoutFlag);
 
-        details.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO: go to dare details activity
-            }
-        });
+        final CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+
+        //load dare
         new DareDescriptionTask(context, new AsyncTaskListener<DareDescription>() {
             @Override
-            public void onTaskResponse(DareDescription response) {
-                challengerName.setText(response.getChallenger().getName());
-                dareDescription.setText(response.getDescription());
-                acceptButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                });
-                declineButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                });
-                flagDare.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                });
-
-                //add view
-
-                layout.removeAllViews();
-                layout.addView(view);
-                layout.setVisibility(View.VISIBLE);
+            public void onTaskResponse(final DareDescription response) {
+                Spanned text;
+                if(notificationType == PENDING_DARE_NOTIFICATION)
+                    text = Html.fromHtml(String.format("<font color=#F05B19>You have a pending dare from </font><font color=#FFFFFF>%s</font> <font color=#F05B19>called</font> <font color=#FFFFFF>%s</font>",
+                            response.getChallenger().getName(), response.getName()));
+                else
+                    text = Html.fromHtml(String.format("<font color=#FFFFFF>%s</font> <font color=#F05B19> just dared you, want to take a look?</font>",
+                            response.getChallenger().getName()));
+                Snackbar snackbar = Snackbar.make(layout, text, Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Details", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent activity = new Intent(context, NewDareDataActivity.class);
+                                activity.putExtra(NewDareDataActivity.DARE_ID, response.getId());
+                                startActivity(activity);
+                            }
+                        })
+                        .setActionTextColor(getResources().getColor(android.R.color.white));
+                snackbar.getView().setBackgroundColor(getResources().getColor(R.color.darkBackground));
+                snackbar.show();
             }
 
             @Override
@@ -380,8 +403,26 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.getHeaderView(0);
+        ImageView image = (ImageView)headerView.findViewById(R.id.navigationViewHeaderImageView);
+        TextView subtitle = (TextView)headerView.findViewById(R.id.navigationViewHeaderSubtitleView);
+        TextView name = (TextView)headerView.findViewById(R.id.navigationViewHeaderNameView);
+
+        //load profile image and name
+        new LoadProfileImageTask(MainActivity.this, null, new AsyncTaskListener<Bitmap>() {
+            @Override
+            public void onTaskResponse(Bitmap response) {
+
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }).execute();
     }
 
     @Override

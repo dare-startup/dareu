@@ -1,5 +1,6 @@
 package com.dareu.mobile.activity.shared;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.support.design.widget.CoordinatorLayout;
@@ -11,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -21,8 +23,11 @@ import com.dareu.mobile.R;
 import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.account.LoadProfileImageTask;
 import com.dareu.mobile.net.dare.DareDescriptionTask;
+import com.dareu.mobile.net.dare.FlagDareTask;
 import com.dareu.mobile.net.dare.NewDareConfirmationTask;
 import com.dareu.web.dto.request.DareConfirmationRequest;
+import com.dareu.web.dto.request.FlagDareRequest;
+import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.DareDescription;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -32,7 +37,9 @@ public class NewDareDataActivity extends AppCompatActivity {
     public static final int NEW_DARE_DATA_REQUEST_CODE = 1234;
     public static final String DARE_ID = "dareId";
 
+    private ProgressDialog progressDialog;
     private DareDescription currentDareDescription;
+    private Button flagButton;
     private ProgressBar progressBar;
     private CircularImageView challengerImage;
     private TextView challengerName, dareName,
@@ -56,14 +63,20 @@ public class NewDareDataActivity extends AppCompatActivity {
             getComponents();
             getDare(dareId);
             setSupportActionBar(toolbar);
-
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
         }
     }
 
     private void getDare(String dareId) {
         DareDescriptionTask task = new DareDescriptionTask(NewDareDataActivity.this, new AsyncTaskListener<DareDescription>() {
             @Override
-            public void onTaskResponse(DareDescription response) {
+            public void onTaskResponse(final DareDescription response) {
                 if(response != null){
                     currentDareDescription = response;
                     setTitle(response.getName());
@@ -73,7 +86,37 @@ public class NewDareDataActivity extends AppCompatActivity {
                     dareCategory.setText(response.getCategory());
                     dareTime.setText(response.getEstimatedDareTime());
                     dareCreationDate.setText(response.getCreationDate());
+                    flagButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new AlertDialog.Builder(NewDareDataActivity.this)
+                                    .setTitle("Flag dare")
+                                    .setMessage("Want to flag this dare?")
+                                    .setPositiveButton("Yes, flag", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                            progressDialog = new ProgressDialog(NewDareDataActivity.this);
+                                            progressDialog.setMessage("Flagging this dare request");
+                                            progressDialog.setCancelable(false);
+                                            progressDialog.show();
 
+                                            new FlagDareTask(NewDareDataActivity.this, new FlagDareRequest(response.getId(), ""), new AsyncTaskListener<EntityRegistrationResponse>() {
+                                                @Override
+                                                public void onTaskResponse(EntityRegistrationResponse response) {
+
+                                                }
+
+                                                @Override
+                                                public void onError(String errorMessage) {
+
+                                                }
+                                            }).execute();
+                                        }
+                                    })
+                                    .show();
+                        }
+                    });
                     progressBar.setVisibility(View.GONE);
                     layout.setVisibility(View.VISIBLE);
                     //load image
@@ -179,5 +222,6 @@ public class NewDareDataActivity extends AppCompatActivity {
         layout = (LinearLayout)findViewById(R.id.newDareDataLayout);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         toolbar = (Toolbar)findViewById(R.id.toolbar);
+        flagButton = (Button)findViewById(R.id.newDareDataFlagButton);
     }
 }

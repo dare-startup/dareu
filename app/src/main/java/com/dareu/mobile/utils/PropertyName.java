@@ -20,7 +20,9 @@ public enum PropertyName {
     LOAD_IMAGE_PROFILE("load.image.profile"),
     CONNECTION_DETAILS("connection.details"),
     CONNECTION_REQUEST("connection.request"),
-    UNACCEPTED_DARE("unaccepted.dare");
+    UNACCEPTED_DARE("unaccepted.dare"),
+    ACTIVE_DARE("active.dare"),
+    FLAG_DARE("flag.dare");
 
 
     String value;

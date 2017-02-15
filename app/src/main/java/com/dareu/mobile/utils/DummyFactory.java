@@ -29,7 +29,7 @@ public class DummyFactory {
         List<DiscoverUserAccount> list = new ArrayList();
         DiscoverUserAccount acc;
         for(int i = 0; i < 10; i ++){
-            acc = new DiscoverUserAccount("ID " + i, "Name " + i, i, i, "URL " + i);
+            acc = new DiscoverUserAccount("ID " + i, "Name " + i, i, i);
             acc.setResponses(i);
             acc.setRequestReceived(i % 2 == 0);
             acc.setRequestSent(acc.isRequestReceived() ? false : true);

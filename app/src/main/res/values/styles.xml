@@ -57,6 +57,11 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="PrimaryWhiteTextView" parent="android:Widget.Holo.Light.TextView">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
     <style name="PrimaryColorTextViewTheme" parent="android:Widget.Holo.Light.TextView">
         <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:textSize">14sp</item>
