@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -89,10 +90,17 @@ public class FindFriendsActivity extends AppCompatActivity {
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView =
                 (SearchView) menu.findItem(R.id.searchFriendsMenuItem).getActionView();
+        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        searchEditText.setTextColor(getResources().getColor(android.R.color.white));
+        searchEditText.setHintTextColor(getResources().getColor(android.R.color.white));
+        /**int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+        TextView textview = (TextView)searchView.findViewById(id);
+        textview.setTextColor(getResources().getColor(R.color.colorAccent1));**/
 
         //searchview suggestions adapter
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {

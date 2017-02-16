@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_unaccepted_dares"
     android:layout_width="match_parent"
@@ -19,74 +20,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <android.support.v7.widget.CardView
-            android:visibility="gone"
-            android:id="@+id/unacceptedDaresCardView"
-            android:elevation="4dp"
+        <LinearLayout
             android:layout_below="@id/toolbar"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
-            <LinearLayout
-                android:padding="8dp"
+            <TextView
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="16dp"
+                style="@style/CardTitleTextViewTheme"
+                android:text="Challenger"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <android.support.v7.widget.CardView
+                android:elevation="4dp"
+                android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <TextView
-                    style="@style/TitleTextViewTheme"
-                    android:text="Dare name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"/>
-                <TextView
-                    android:id="@+id/unacceptedDareName"
-                    android:text="Some dare name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"/>
+                android:layout_height="wrap_content">
 
-                <TextView
-                    style="@style/TitleTextViewTheme"
-                    android:text="Dare description"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"/>
-                <TextView
-                    android:id="@+id/unacceptedDareDescription"
-                    android:text="Some dare description"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"/>
-
-                <TextView
-                    style="@style/TitleTextViewTheme"
-                    android:text="Dare time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"/>
-                <TextView
-                    android:id="@+id/unacceptedDareTimer"
-                    android:text="666 hrs"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"/>
-                <TextView
-                    style="@style/TitleTextViewTheme"
-                    android:text="Creation date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"/>
-                <TextView
-                    android:id="@+id/unacceptedDareCreationDate"
-                    android:text="12/12/1990"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"/>
                 <LinearLayout
+                    android:padding="8dp"
                     android:layout_gravity="center"
                     android:gravity="center"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
@@ -111,37 +68,136 @@
                             android:layout_marginBottom="4dp"/>
                     </LinearLayout>
                 </LinearLayout>
+            </android.support.v7.widget.CardView>
 
-                <TextView
-                    style="@style/TitleTextViewTheme"
-                    android:text="Do you want to accept this challenge?"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="16dp"
+                style="@style/CardTitleTextViewTheme"
+                android:text="Dare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <android.support.v7.widget.CardView
+                android:id="@+id/unacceptedDaresCardView"
+                android:elevation="4dp"
+                android:layout_below="@id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
 
                 <LinearLayout
                     android:padding="8dp"
-                    android:gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <Button
-                        android:id="@+id/unacceptedDareDeclineButton"
-                        android:layout_weight=".5"
-                        style="@style/PrimaryButtonTheme"
-                        android:text="Decline"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:gravity=""
+                            android:orientation="vertical"
+                            android:layout_weight=".5"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                style="@style/TitleTextViewTheme"
+                                android:text="Dare name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"/>
+                            <TextView
+                                android:id="@+id/unacceptedDareName"
+                                android:text="Some dare name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="8dp"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_weight=".5"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                style="@style/TitleTextViewTheme"
+                                android:text="Creation date"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"/>
+                            <TextView
+                                android:id="@+id/unacceptedDareCreationDate"
+                                android:text="12/12/1990"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                />
+                        </LinearLayout>
+                    </LinearLayout>
+
+
+                    <TextView
+                        style="@style/TitleTextViewTheme"
+                        android:text="Dare description"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                    <Button
-                        android:id="@+id/unacceptedDareAcceptButton"
-                        android:layout_weight=".5"
-                        style="@style/PrimaryWhiteButtonTheme"
-                        android:text="Accept"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"/>
+                    <TextView
+                        android:id="@+id/unacceptedDareDescription"
+                        android:text="Some dare description"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        style="@style/TitleTextViewTheme"
+                        android:text="Dare time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"/>
+                    <TextView
+                        android:id="@+id/unacceptedDareTimer"
+                        android:text="666 hrs"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+
+
+                    <TextView
+                        style="@style/TitleTextViewTheme"
+                        android:text="Do you want to accept this challenge?"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <LinearLayout
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginRight="8dp"
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <Button
+                            android:id="@+id/unacceptedDareDeclineButton"
+                            android:layout_weight=".5"
+                            style="@style/PrimaryButtonTheme"
+                            android:text="Decline"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                        <Button
+                            android:id="@+id/unacceptedDareAcceptButton"
+                            android:layout_weight=".5"
+                            style="@style/PrimaryWhiteButtonTheme"
+                            android:text="Accept"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </android.support.v7.widget.CardView>
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
 
         <TextView
             android:visibility="gone"

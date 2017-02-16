@@ -2,6 +2,7 @@ package com.dareu.mobile.activity.shared;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -39,21 +40,22 @@ public class NewDareDataActivity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
     private DareDescription currentDareDescription;
-    private Button flagButton;
     private ProgressBar progressBar;
     private CircularImageView challengerImage;
     private TextView challengerName, dareName,
-            dareDescription, dareCategory, dareTime, dareCreationDate;
+            dareDescription, dareCategory, dareTime;
     private LinearLayout layout;
     private CoordinatorLayout coordinatorLayout;
     private Toolbar toolbar;
+
+    private String dareId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_dare_data);
         //get dare id
-        String dareId = getIntent().getStringExtra(DARE_ID);
+        dareId = getIntent().getStringExtra(DARE_ID);
 
         if(dareId == null || dareId.isEmpty()){
             Toast.makeText(NewDareDataActivity.this, "No dare id was provided", Toast.LENGTH_LONG)
@@ -85,38 +87,6 @@ public class NewDareDataActivity extends AppCompatActivity {
                     dareDescription.setText(response.getDescription());
                     dareCategory.setText(response.getCategory());
                     dareTime.setText(response.getEstimatedDareTime());
-                    dareCreationDate.setText(response.getCreationDate());
-                    flagButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            new AlertDialog.Builder(NewDareDataActivity.this)
-                                    .setTitle("Flag dare")
-                                    .setMessage("Want to flag this dare?")
-                                    .setPositiveButton("Yes, flag", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                            progressDialog = new ProgressDialog(NewDareDataActivity.this);
-                                            progressDialog.setMessage("Flagging this dare request");
-                                            progressDialog.setCancelable(false);
-                                            progressDialog.show();
-
-                                            new FlagDareTask(NewDareDataActivity.this, new FlagDareRequest(response.getId(), ""), new AsyncTaskListener<EntityRegistrationResponse>() {
-                                                @Override
-                                                public void onTaskResponse(EntityRegistrationResponse response) {
-
-                                                }
-
-                                                @Override
-                                                public void onError(String errorMessage) {
-
-                                                }
-                                            }).execute();
-                                        }
-                                    })
-                                    .show();
-                        }
-                    });
                     progressBar.setVisibility(View.GONE);
                     layout.setVisibility(View.VISIBLE);
                     //load image
@@ -187,6 +157,22 @@ public class NewDareDataActivity extends AppCompatActivity {
                         .create()
                         .show();
                 break;
+            case R.id.newDareDataFlag:
+                new AlertDialog.Builder(NewDareDataActivity.this)
+                        .setTitle("Flag dare")
+                        .setMessage("Want to flag this dare?")
+                        .setPositiveButton("Yes, flag", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                Intent intent = new Intent(NewDareDataActivity.this, FlagDareActivity.class);
+                                intent.putExtra(FlagDareActivity.DARE_ID, dareId);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
+                        })
+                        .show();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -218,10 +204,8 @@ public class NewDareDataActivity extends AppCompatActivity {
         dareDescription = (TextView)findViewById(R.id.newDareDataDareDescription);
         dareCategory = (TextView)findViewById(R.id.newDareDataDareCategory);
         dareTime = (TextView)findViewById(R.id.newDareDataDareTimer);
-        dareCreationDate = (TextView)findViewById(R.id.newDareDataDareCreationDate);
         layout = (LinearLayout)findViewById(R.id.newDareDataLayout);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         toolbar = (Toolbar)findViewById(R.id.toolbar);
-        flagButton = (Button)findViewById(R.id.newDareDataFlagButton);
     }
 }

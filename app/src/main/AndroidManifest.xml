@@ -73,7 +73,8 @@
             android:name=".activity.shared.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity android:name=".activity.UnacceptedDaresActivity" />
-        <activity android:name=".activity.shared.FlagDareActivity"></activity>
+        <activity android:name=".activity.shared.FlagDareActivity" />
+        <activity android:name=".activity.shared.UploadDareResponseActivity"></activity>
     </application>
 
 </manifest>

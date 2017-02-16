@@ -2,7 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:icon="@drawable/ic_clear_white_24dp"
-        app:showAsAction="always"
         android:title="Decline"
         android:id="@+id/newDareDataDecline"/>
 
@@ -10,4 +9,8 @@
         app:showAsAction="always"
         android:title="Decline"
         android:id="@+id/newDareDataAccept"/>
+
+    <item android:icon="@drawable/ic_flag_white_24dp"
+        android:title="Flag"
+        android:id="@+id/newDareDataFlag"/>
 </menu>

@@ -42,6 +42,8 @@
 
     <string name="flag_dare_text"><u>FLAG this dare request</u></string>
 
+    <string name="flag_dare_message">Once you flag a dare, you are not able to accept it or decline it. The user that created this dare will receive a notification about this issue</string>
+
     <string name="pref_title_sync_frequency">Sync frequency</string>
     <string-array name="pref_sync_frequency_titles">
         <item>15 minutes</item>

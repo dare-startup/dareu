@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/flagDareMenuItem"
+        app:showAsAction="always"
+        android:title="Flag dare"
+        android:icon="@drawable/ic_flag_white_24dp"/>
+
+</menu>

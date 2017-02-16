@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -39,19 +40,25 @@ import com.dareu.mobile.R;
 import com.dareu.mobile.activity.shared.NewDareActivity;
 import com.dareu.mobile.activity.shared.NewDareDataActivity;
 import com.dareu.mobile.activity.shared.SettingsActivity;
+import com.dareu.mobile.activity.shared.UploadDareResponseActivity;
 import com.dareu.mobile.adapter.MainContentPagerAdapter;
 import com.dareu.mobile.adapter.WelcomeDialogAdapter;
 import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.account.LoadProfileImageTask;
 import com.dareu.mobile.net.account.UpdateRegIdTask;
+import com.dareu.mobile.net.dare.ActiveDareTask;
 import com.dareu.mobile.net.dare.DareDescriptionTask;
 import com.dareu.mobile.net.dare.UnacceptedDareTask;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
+import com.dareu.web.dto.response.entity.ActiveDare;
 import com.dareu.web.dto.response.entity.DareDescription;
 import com.dareu.web.dto.response.entity.UnacceptedDare;
 import com.mikhaellopez.circularimageview.CircularImageView;
+
+import java.text.ParseException;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
@@ -66,6 +73,7 @@ public class MainActivity extends AppCompatActivity
     public static final int PENDING_DARE_NOTIFICATION = 321;
 
     private boolean activeDare;
+    private boolean snackbarAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +98,10 @@ public class MainActivity extends AppCompatActivity
         });
         //check registration id availability
         checkFirebaseRegistrationId();
-        //check if there is a pending dare
-        checkPendingDare();
         //check if there is an active dare
         checkActiveDare();
+        //check if there is a pending dare
+        checkPendingDare();
         //register receiver
         registerReceiver(new BroadcastReceiver() {
             @Override
@@ -104,7 +112,68 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkActiveDare() {
-        //TODO: CHECK THIS OPERATION
+        new ActiveDareTask(MainActivity.this, new AsyncTaskListener<ActiveDare>() {
+            @Override
+            public void onTaskResponse(ActiveDare response) {
+                //create snackbar countdown
+                createActiveDareCountdown(response);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                //no active dare, do nothing, just log message
+                Log.i(TAG, errorMessage);
+            }
+        }).execute();
+    }
+
+    private void createActiveDareCountdown(final ActiveDare dare){
+        //create snackbar
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+        final Snackbar snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_INDEFINITE);
+
+        //create two dates
+        try{
+            Date date = SharedUtils.DETAILS_DATE_FORMAT.parse(dare.getAcceptedDate());
+            Date now = new Date();
+            Long timerMs = dare.getTimer() * 3600000L;
+
+            // get difference
+            long ms = now.getTime() - date.getTime();
+            if(ms > timerMs)
+                return;
+
+            else{
+                activeDare = true;
+                snackbarAvailable = false;
+                snackbar.setAction("I'm ready!", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, UploadDareResponseActivity.class);
+                        intent.putExtra(UploadDareResponseActivity.DARE_ID, dare.getId());
+                    }
+                });
+                snackbar.show();
+                new CountDownTimer(ms, 1000){
+                    @Override
+                    public void onTick(long millis) {
+                        int seconds = (int) (millis / 1000) % 60 ;
+                        int minutes = (int) ((millis / (1000*60)) % 60);
+                        int hours   = (int) ((millis / (1000*60*60)) % 24);
+                        String text = String.format("%02d hr, %02d min, %02d sec",hours,minutes,seconds);
+                        snackbar.setText(text);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        snackbar.setText("The dare " + dare.getName() + " has expired");
+                        snackbar.setAction("Dismiss", null);
+                    }
+                }.start();
+            }
+        }catch(ParseException ex){
+
+        }
     }
 
     private void checkPendingDare() {
@@ -239,11 +308,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupViewPager() {
-        ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
+        final ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
         viewPager.setAdapter(new MainContentPagerAdapter(getSupportFragmentManager()));
         TabLayout layout = (TabLayout)findViewById(R.id.tabLayout);
         layout.setupWithViewPager(viewPager);
         final Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        //first tab
         toolbar.setSubtitle("Discover");
         layout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -258,12 +328,13 @@ public class MainActivity extends AppCompatActivity
                         subtitle = "Channel";
                         break;
                     case 2:
-                        subtitle = "Hottest";
+                        subtitle = "Hot";
                         break;
                     case 3:
                         subtitle = "Anchored";
                         break;
                 }
+                viewPager.setCurrentItem(tab.getPosition());
                 toolbar.setSubtitle(subtitle);
             }
 
@@ -407,7 +478,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         View headerView = navigationView.getHeaderView(0);
-        ImageView image = (ImageView)headerView.findViewById(R.id.navigationViewHeaderImageView);
+        final ImageView image = (ImageView)headerView.findViewById(R.id.navigationViewHeaderImageView);
         TextView subtitle = (TextView)headerView.findViewById(R.id.navigationViewHeaderSubtitleView);
         TextView name = (TextView)headerView.findViewById(R.id.navigationViewHeaderNameView);
 
@@ -415,7 +486,8 @@ public class MainActivity extends AppCompatActivity
         new LoadProfileImageTask(MainActivity.this, null, new AsyncTaskListener<Bitmap>() {
             @Override
             public void onTaskResponse(Bitmap response) {
-
+                if(response != null)
+                    image.setImageBitmap(response);
             }
 
             @Override

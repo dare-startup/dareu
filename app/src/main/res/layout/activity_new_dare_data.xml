@@ -12,6 +12,7 @@
         android:layout_height="match_parent">
 
         <ProgressBar
+            android:visibility="gone"
             android:id="@+id/progressBar"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"
@@ -33,17 +34,19 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    style="@style/TitleTextViewTheme"
+                    style="@style/CardTitleTextViewTheme"
                     android:textSize="20sp"
-                    android:layout_margin="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:text="Challenger"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <android.support.v7.widget.CardView
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="16dp"
                     android:id="@+id/challengerCardView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+
                     <LinearLayout
                         android:padding="16dp"
                         android:layout_width="match_parent"
@@ -76,14 +79,15 @@
                 </android.support.v7.widget.CardView>
 
                 <TextView
-                    style="@style/TitleTextViewTheme"
+                    style="@style/CardTitleTextViewTheme"
                     android:textSize="20sp"
-                    android:layout_margin="8dp"
+                    android:layout_marginLeft="16dp"
                     android:text="Dare"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <android.support.v7.widget.CardView
+                    android:layout_marginBottom="8dp"
                     android:elevation="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -94,89 +98,106 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:layout_marginBottom="4dp"
-                            android:textStyle="normal"
-                            style="@style/TitleTextViewTheme"
-                            android:text="Name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
-                        <TextView
-                            android:id="@+id/newDareDataDareName"
-                            android:layout_marginBottom="12dp"
-                            android:text="Dare name goes here"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            <LinearLayout
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:layout_weight=".5"
+                                android:orientation="vertical"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content">
 
-                        <TextView
-                            android:textStyle="normal"
-                            android:layout_marginBottom="4dp"
-                            style="@style/TitleTextViewTheme"
-                            android:text="Description"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                                <TextView
+                                    android:layout_marginBottom="4dp"
+                                    style="@style/TitleTextViewTheme"
+                                    android:text="Name"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
 
-                        <TextView
-                            android:id="@+id/newDareDataDareDescription"
-                            android:layout_marginBottom="12dp"
-                            android:text="Dare description goes here"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                                <TextView
+                                    android:id="@+id/newDareDataDareName"
+                                    android:layout_marginBottom="12dp"
+                                    android:text="Dare name goes here"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
 
-                        <TextView
-                            android:textStyle="normal"
-                            android:layout_marginBottom="4dp"
-                            style="@style/TitleTextViewTheme"
-                            android:text="Category"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            <LinearLayout
+                                android:padding="4dp"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:layout_weight=".5"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content">
 
-                        <TextView
-                            android:id="@+id/newDareDataDareCategory"
-                            android:layout_marginBottom="12dp"
-                            android:text="Dare category goes here"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                                <TextView
+                                    android:layout_marginBottom="4dp"
+                                    style="@style/TitleTextViewTheme"
+                                    android:text="Category"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:id="@+id/textView" />
 
-                        <TextView
-                            android:textStyle="normal"
-                            android:layout_marginBottom="4dp"
-                            style="@style/TitleTextViewTheme"
-                            android:text="Estimated dare time (Hours)"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                                <TextView
+                                    android:id="@+id/newDareDataDareCategory"
+                                    android:layout_marginBottom="12dp"
+                                    android:text="Dare category goes here"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content" />
+                            </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/newDareDataDareTimer"
-                            android:layout_marginBottom="12dp"
-                            android:text="Dare category goes here"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:textStyle="normal"
-                            android:layout_marginBottom="4dp"
-                            style="@style/TitleTextViewTheme"
-                            android:text="Creation date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                        <LinearLayout
+                            android:layout_margin="8dp"
+                            android:gravity="center"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_marginBottom="4dp"
+                                style="@style/TitleTextViewTheme"
+                                android:text="Description"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
 
-                        <TextView
-                            android:id="@+id/newDareDataDareCreationDate"
-                            android:layout_marginBottom="12dp"
-                            android:text="Dare creation date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            <TextView
+                                android:id="@+id/newDareDataDareDescription"
+                                android:layout_marginBottom="12dp"
+                                android:text="Dare description goes here"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:padding="4dp"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_marginBottom="4dp"
+                                style="@style/TitleTextViewTheme"
+                                android:text="Timer (Hours)"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+
+                            <TextView
+                                android:id="@+id/newDareDataDareTimer"
+                                android:layout_marginBottom="12dp"
+                                android:text="Dare category goes here"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
                     </LinearLayout>
                 </android.support.v7.widget.CardView>
-
-                <Button
-                    android:id="@+id/newDareDataFlagButton"
-                    android:text="Flag this dare!"
-                    style="@style/DarkButtonTheme"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
             </LinearLayout>
         </ScrollView>
     </RelativeLayout>

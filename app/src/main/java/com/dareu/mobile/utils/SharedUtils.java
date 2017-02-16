@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -23,6 +25,8 @@ import com.dareu.web.dto.response.message.NewDareMessage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -42,14 +46,16 @@ import java.util.Properties;
 
 public class SharedUtils {
 
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yy");
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
+    public static final SimpleDateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 
     private static final String PREFERENCES_NAME = "com.dareu.mobile.utils.SaredUtils.dareuPreferencesName";
 
     public static final String PROPERTIES_FILE_NAME = "dareu_props.properties";
 
     public static final String[] TIMERS = new String[]{ "1 Hrs", "3 Hrs", "6 Hrs", "12 Hrs" };
-
+    public static File VIDEO_DIRECTORY = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/DareU/");
+    public static File IMAGE_DIRECTORY = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/DareU/");
 
     public static void signout(Context cxt){
         //delete preferences
@@ -205,6 +211,12 @@ public class SharedUtils {
     }
 
 
+    public static void saveBitmapToFile(Bitmap bitmap, String path)throws IOException{
+        File file = new File(path);
+        FileOutputStream out = new FileOutputStream(file);
 
-
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+        out.flush();
+        out.close();
+    }
 }

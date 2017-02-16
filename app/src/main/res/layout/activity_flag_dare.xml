@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_flag_dare"
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.dareu.mobile.activity.shared.FlagDareActivity">
@@ -13,25 +13,83 @@
         <include layout="@layout/toolbar"
             android:id="@+id/toolbar"/>
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
         <LinearLayout
+            android:id="@+id/flagDareLayout"
             android:orientation="vertical"
             android:layout_below="@id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
-                style="@style/TitleTextViewTheme"
+                style="@style/CardTitleTextViewTheme"
                 android:text="Flag a dare"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"/>
+                android:layout_margin="16dp"
+                android:layout_marginTop="16dp"/>
+
             <android.support.v7.widget.CardView
+                android:layout_marginBottom="8dp"
                 android:elevation="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <LinearLayout
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
+                    <TextView
+                        android:layout_margin="8dp"
+                        style="@style/TitleTextViewTheme"
+                        android:text="Dare name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/flagDareName"
+                        android:text="Some dare name"
+                        android:layout_margin="8dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_margin="8dp"
+                        style="@style/TitleTextViewTheme"
+                        android:text="Dare description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/flagDareDescription"
+                        android:text="Some dare description here"
+                        android:layout_margin="8dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <EditText
+                        android:id="@+id/flagDareComment"
+                        android:hint="Write a comment about why you are flagging this dare, it can be empty"
+                        android:lines="4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"/>
+
+                </LinearLayout>
             </android.support.v7.widget.CardView>
+            <TextView
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="@string/flag_dare_message"
+                style="@style/PrimaryColorTextViewTheme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </RelativeLayout>
 
