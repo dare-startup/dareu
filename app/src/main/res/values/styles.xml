@@ -13,6 +13,7 @@
         <item name="colorControlHighlight">@color/colorPrimary</item>
         <item name="android:editTextStyle">@style/PrimaryEditTextTheme</item>
         <item name="colorControlNormal">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
         <item name="android:checkboxStyle">@style/CheckBoxTheme</item>
     </style>
 

@@ -134,16 +134,17 @@ public class MainActivity extends AppCompatActivity
 
         //create two dates
         try{
-            Date date = SharedUtils.DETAILS_DATE_FORMAT.parse(dare.getAcceptedDate());
+            Date acceptedDate = SharedUtils.DETAILS_DATE_FORMAT.parse(dare.getAcceptedDate());
             Date now = new Date();
+
+            //get total ms from timer
             Long timerMs = dare.getTimer() * 3600000L;
-
-            // get difference
-            long ms = now.getTime() - date.getTime();
-            if(ms > timerMs)
+            Long diff = now.getTime() - acceptedDate.getTime();
+            if(diff > timerMs){
+                //expired
                 return;
-
-            else{
+            }else{
+                Long timeLeft = timerMs - diff;
                 activeDare = true;
                 snackbarAvailable = false;
                 snackbar.setAction("I'm ready!", new View.OnClickListener() {
@@ -151,17 +152,18 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(View v) {
                         Intent intent = new Intent(MainActivity.this, UploadDareResponseActivity.class);
                         intent.putExtra(UploadDareResponseActivity.DARE_ID, dare.getId());
+                        startActivity(intent);
                     }
                 });
                 snackbar.show();
-                new CountDownTimer(ms, 1000){
+                new CountDownTimer(timeLeft, 1000){
                     @Override
                     public void onTick(long millis) {
                         int seconds = (int) (millis / 1000) % 60 ;
                         int minutes = (int) ((millis / (1000*60)) % 60);
                         int hours   = (int) ((millis / (1000*60*60)) % 24);
-                        String text = String.format("%02d hr, %02d min, %02d sec",hours,minutes,seconds);
-                        snackbar.setText(text);
+                        String text = String.format("Active dare expiration timer: <font color=#F05B19>%02d hr, %02d min, %02d sec</font>",hours,minutes,seconds);
+                        snackbar.setText(Html.fromHtml(text));
                     }
 
                     @Override

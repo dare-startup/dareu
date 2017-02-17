@@ -11,23 +11,32 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dareu.mobile.R;
+import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.dare.DareDescriptionTask;
 import com.dareu.mobile.utils.SharedUtils;
+import com.dareu.web.dto.response.entity.DareDescription;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +51,8 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     private TextView dareName, dareDescription;
     private ImageView thumbImage;
     private EditText comment;
-    private MenuItem uploadMenuItem;
+    private LinearLayout layout;
+    private CoordinatorLayout coordinatorLayout;
 
     private static final int CAPTURE_REQUEST_CODE = 1231;
     private static final int GALLERY_REQUEST_CODE = 1231;
@@ -51,6 +61,9 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     private File thumbFile;
     private Bitmap currentThumbBitmap;
     private boolean videoFileReady;
+    private DareDescription currentDareDescription;
+
+    private String dareId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +73,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     }
 
     private void getComponents() {
+        dareId = getIntent().getStringExtra(DARE_ID);
         //create directory if does not exists
         SharedUtils.VIDEO_DIRECTORY.mkdir();
         newFileName = new File(SharedUtils.VIDEO_DIRECTORY, System.currentTimeMillis() + ".mp4");
@@ -68,7 +82,8 @@ public class UploadDareResponseActivity extends AppCompatActivity {
         dareDescription = (TextView)findViewById(R.id.uploadDareResponseDareDescription);
         thumbImage = (ImageView)findViewById(R.id.uploadDareResponseThumb);
         comment = (EditText)findViewById(R.id.uploadDareResponseComment);
-
+        layout = (LinearLayout)findViewById(R.id.uploadDareResponseLayout);
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Upload dare response");
@@ -77,15 +92,40 @@ public class UploadDareResponseActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //ask if really want to cancel upload
+                new AlertDialog.Builder(UploadDareResponseActivity.this)
+                        .setTitle("Cancel dare upload")
+                        .setMessage("Do you want to cancel upload?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
             }
         });
+        new DareDescriptionTask(UploadDareResponseActivity.this, new AsyncTaskListener<DareDescription>() {
+            @Override
+            public void onTaskResponse(DareDescription response) {
+                dareName.setText(response.getName());
+                dareDescription.setText(response.getDescription());
+                progressBar.setVisibility(View.GONE);
+                layout.setVisibility(View.VISIBLE);
+                currentDareDescription = response;
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        }, dareId).execute();
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.upload_dare_response, menu);
-        uploadMenuItem = menu.getItem(1);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -94,6 +134,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.uploadDareResponseMenuItem:
                 //upload
+                uploadDareResponse();
                 break;
             case R.id.uploadDareResponseAttachFile:
                 //choose file
@@ -103,25 +144,44 @@ public class UploadDareResponseActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void uploadDareResponse() {
+        if(currentThumbBitmap == null)
+            Snackbar.make(coordinatorLayout, "You must create a video response to upload", Snackbar.LENGTH_LONG)
+            .setAction("Dismiss", null)
+            .show();
+        else if(comment.getText().toString().isEmpty())
+            Snackbar.make(coordinatorLayout, "You must create a comment for this video response", Snackbar.LENGTH_LONG)
+                    .setAction("Dismiss", null)
+                    .show();
+        else{
+            //TODO: create a new task here
+        }
+    }
+
     private void chooseDareResponse() {
-        new AlertDialog.Builder(UploadDareResponseActivity.this)
-                .setTitle("Choose file")
-                .setItems(new String[]{ "Gallery", "Camera" }, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch(which){
-                            case 0:
-                                //gallery
-                                showGallerySelector();
-                                break;
-                            case 1:
-                                //camera
-                                recordVideo();
-                                break;
+        if(currentDareDescription != null){
+            new AlertDialog.Builder(UploadDareResponseActivity.this)
+                    .setTitle("Choose file")
+                    .setItems(new String[]{ "Gallery", "Camera" }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch(which){
+                                case 0:
+                                    //gallery
+                                    showGallerySelector();
+                                    break;
+                                case 1:
+                                    //camera
+                                    recordVideo();
+                                    break;
+                            }
                         }
-                    }
-                })
-                .show();
+                    })
+                    .show();
+        }else{
+            Toast.makeText(UploadDareResponseActivity.this, "Wait until the dare info is fully loaded", Toast.LENGTH_LONG)
+                    .show();
+        }
     }
 
     private void showGallerySelector() {
@@ -169,18 +229,14 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     }
 
     private void processDareVideo(Uri uri){
-        currentThumbBitmap = ThumbnailUtils.createVideoThumbnail(thumbFile.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
         //save bitmap to file
         try{
             thumbFile = new File(SharedUtils.IMAGE_DIRECTORY, System.currentTimeMillis() + ".jpg");
+            currentThumbBitmap = ThumbnailUtils.createVideoThumbnail(newFileName.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
             SharedUtils.saveBitmapToFile(currentThumbBitmap, thumbFile.getAbsolutePath());
             //set bitmap
             thumbImage.setImageBitmap(currentThumbBitmap);
             videoFileReady = true;
-            if(! comment.getText().toString().isEmpty()){
-                uploadMenuItem.setEnabled(true);
-                invalidateOptionsMenu();
-            }
         }catch(IOException ex){
             Log.e(TAG, ex.getMessage());
         }
