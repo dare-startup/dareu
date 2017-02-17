@@ -35,6 +35,8 @@ import android.widget.Toast;
 import com.dareu.mobile.R;
 import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.dare.DareDescriptionTask;
+import com.dareu.mobile.net.dare.UploadDareResponseTask;
+import com.dareu.mobile.net.request.UploadDareResponseRequest;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.response.entity.DareDescription;
 
@@ -155,6 +157,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
                     .show();
         else{
             //TODO: create a new task here
+            new UploadDareResponseTask(UploadDareResponseActivity.this, )
         }
     }
 
