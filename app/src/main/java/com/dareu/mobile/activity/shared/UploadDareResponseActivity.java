@@ -157,7 +157,8 @@ public class UploadDareResponseActivity extends AppCompatActivity {
                     .show();
         else{
             //TODO: create a new task here
-            new UploadDareResponseTask(UploadDareResponseActivity.this, )
+            UploadDareResponseRequest request = new UploadDareResponseRequest();
+            new UploadDareResponseTask(UploadDareResponseActivity.this, request)
         }
     }
 
