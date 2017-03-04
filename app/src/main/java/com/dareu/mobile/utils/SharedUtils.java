@@ -13,19 +13,39 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.telecom.Connection;
 import android.telecom.ConnectionService;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.dareu.mobile.R;
+import com.dareu.mobile.activity.MainActivity;
+import com.dareu.mobile.adapter.WelcomeDialogAdapter;
+import com.dareu.mobile.net.AsyncTaskListener;
+import com.dareu.mobile.net.account.UpdateRegIdTask;
 import com.dareu.mobile.net.response.ApacheResponseWrapper;
+import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.message.ConnectionRequestMessage;
 import com.dareu.web.dto.response.message.NewDareMessage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.picasso.OkHttpDownloader;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +66,12 @@ import java.util.Properties;
 
 public class SharedUtils {
 
+    private static final String TAG = "SharedUtils";
+
+    private static Picasso picassoInstance;
+
+    private static Picasso authenticatedPicassoInstance;
+
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
     public static final SimpleDateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 
@@ -53,11 +79,11 @@ public class SharedUtils {
 
     public static final String PROPERTIES_FILE_NAME = "dareu_props.properties";
 
-    public static final String[] TIMERS = new String[]{ "1 Hrs", "3 Hrs", "6 Hrs", "12 Hrs" };
+    public static final String[] TIMERS = new String[]{"1 Hrs", "3 Hrs", "6 Hrs", "12 Hrs"};
     public static File VIDEO_DIRECTORY = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/DareU/");
     public static File IMAGE_DIRECTORY = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/DareU/");
 
-    public static void signout(Context cxt){
+    public static void signout(Context cxt) {
         //delete preferences
         SharedPreferences prefs = cxt.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
         prefs
@@ -65,6 +91,7 @@ public class SharedUtils {
                 .clear()
                 .commit();
     }
+
 
     /**
      * Get a String from shared preferences
@@ -75,6 +102,17 @@ public class SharedUtils {
     public static String getStringPreference(Context cxt, PrefName prefName){
         SharedPreferences prefs = cxt.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
         return prefs.getString(prefName.toString(), "");
+    }
+
+    public static String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = context.getContentResolver().query(contentUri, new String[] { android.provider.MediaStore.Images.ImageColumns.DATA }, null, null, null);
+        cursor.moveToFirst();
+
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        String selectedImagePath = cursor.getString(idx);
+        cursor.close();
+
+        return selectedImagePath;
     }
 
     public static void setStringPreference(Context cxt, PrefName prefName, String value){
@@ -210,6 +248,41 @@ public class SharedUtils {
         }
     }
 
+    public static void checkFirebaseRegistrationId(final Context cxt) {
+        String value = getStringPreference(cxt, PrefName.ALREADY_REGISTERED_GCM_TOKEN);
+        if(value != null && ! value.isEmpty()){
+            Boolean updated = Boolean.parseBoolean(value);
+            if(! updated){
+                //get reg id
+                String regId = getStringPreference(cxt, PrefName.GCM_TOKEN);
+                if(regId != null && ! regId.isEmpty()){
+                    //update it
+                    UpdateRegIdTask task = new UpdateRegIdTask(cxt, new AsyncTaskListener<UpdatedEntityResponse>() {
+                        @Override
+                        public void onTaskResponse(UpdatedEntityResponse response) {
+                            if(response != null && response.isSuccess()){
+                                setStringPreference(cxt, PrefName.ALREADY_REGISTERED_GCM_TOKEN, Boolean.TRUE.toString());
+                                Log.i(TAG, response.getMessage());
+                            }
+                            else{
+                                Log.i(TAG, "Something bad just happened :(");
+                            }
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+
+                        }
+                    });
+                    task.execute();
+                }
+            }
+        }
+
+
+
+    }
+
 
     public static void saveBitmapToFile(Bitmap bitmap, String path)throws IOException{
         File file = new File(path);
@@ -218,5 +291,90 @@ public class SharedUtils {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
         out.flush();
         out.close();
+    }
+
+    public static InputStream getStreamFromBitmap(Bitmap bitmap){
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+        byte[] data = out.toByteArray();
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        return in;
+    }
+
+    public static InputStream getStreamFromFile(File file)throws IOException{
+        FileInputStream stream = new FileInputStream(file);
+        return stream;
+    }
+
+    public static void setupFirstVisitDialog(final Context cxt) {
+        //check if user is for the first time here
+        if(SharedUtils.getBooleanPreference(cxt, PrefName.FIRST_TIME)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(cxt);
+            builder.setCancelable(false);
+            //create view
+            View welcomeDialogView = LayoutInflater.from(cxt).inflate(R.layout.welcome_dialog, null);
+
+            //get view pager
+            ViewPager pager = (ViewPager)welcomeDialogView.findViewById(R.id.welcomeDialogViewPager);
+
+            //create adapter
+            pager.setAdapter(new WelcomeDialogAdapter(((AppCompatActivity)cxt).getSupportFragmentManager()));
+
+            //set listener for close label
+            TextView closeView = (TextView)welcomeDialogView.findViewById(R.id.welcomeDialogCloseView);
+
+            //set view
+            builder.setView(welcomeDialogView);
+            //create dialog
+            final AlertDialog dialog = builder.create();
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.dimAmount = 0.0f;
+            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            closeView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SharedUtils.setBooleanPreference(cxt, PrefName.FIRST_TIME, Boolean.FALSE);
+                    //close dialog
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+        }
+    }
+
+    private static Picasso instance(Context context){
+        if(picassoInstance == null){
+
+        }
+
+        return picassoInstance;
+    }
+
+    private static Picasso getAuthenticatedPicassoInstance(Context cxt){
+        if(authenticatedPicassoInstance == null){
+            //create client
+            OkHttpClient client = new OkHttpClient();
+
+            authenticatedPicassoInstance = new Picasso.Builder(cxt)
+                    //TODO: change here
+                    .build();
+        }
+        return authenticatedPicassoInstance;
+    }
+
+
+    public static void loadImagePicasso(ImageView imageView, Context context, String uri){
+        try{
+            RequestCreator creator = instance(context).load(Uri.parse(uri))
+                    .config(Bitmap.Config.ARGB_8888)
+                    .error(android.R.drawable.stat_notify_error)
+                    .placeholder(R.mipmap.ic_launcher);
+
+            creator.fit();
+
+            creator.into(imageView);
+        }catch(Exception ex){
+
+        }
     }
 }

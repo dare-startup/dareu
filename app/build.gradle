@@ -55,5 +55,12 @@ dependencies {
     compile 'com.dareu.web.dto:dareu-dto:1.0'
     compile 'com.mikhaellopez:circularimageview:3.0.2'
     compile 'com.android.support:support-vector-drawable:23.4.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
+
+    //test
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
+    compile 'com.squareup.okhttp:okhttp:2.0.+'
+    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
     testCompile 'junit:junit:4.12'
 }

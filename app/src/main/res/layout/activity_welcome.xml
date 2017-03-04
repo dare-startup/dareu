@@ -1,45 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_welcome"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.dareu.mobile.activity.WelcomeActivity"
-    android:orientation="vertical">
-
-    <android.support.v4.view.ViewPager
-        android:background="@color/colorPrimaryDark"
-        android:layout_weight=".7"
-        android:id="@+id/welcomeViewPager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="8dp">
-
-        <android.support.v4.view.PagerTitleStrip
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom" />
-
-    </android.support.v4.view.ViewPager>
+    android:background="@drawable/welcome_background"
+    tools:context="com.dareu.mobile.activity.WelcomeActivity">
 
     <LinearLayout
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+        <TextView
+            android:textStyle="bold"
+            android:textSize="22sp"
+            style="@style/PrimaryWhiteTextView"
+            android:text="Get dared wherever you are"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"/>
+        <TextView
+            android:gravity="center"
+            android:textSize="16sp"
+            style="@style/PrimaryWhiteTextView"
+            android:text="Create your dares widely, earn rewards, have fun"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight=".3"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <Button
             android:id="@+id/welcomeSignupButton"
             style="@style/PrimaryButtonTheme"
+            android:layout_marginBottom="8dp"
             android:text="Sign up"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
+            style="@style/PrimaryWhiteTextView"
             android:id="@+id/welcomeSigninTextView"
             android:layout_gravity="center"
             android:text="Already a user?"
@@ -47,4 +56,4 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

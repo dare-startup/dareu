@@ -24,8 +24,8 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
+
                 android:id="@+id/uploadDareResponseLayout"
-                android:visibility="gone"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -44,8 +44,7 @@
                     android:layout_height="wrap_content">
 
                     <LinearLayout
-                        android:gravity="center"
-                        android:padding="8dp"
+                        android:padding="16dp"
                         android:orientation="vertical"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
@@ -86,31 +85,40 @@
                     android:layout_height="wrap_content" />
 
                 <android.support.v7.widget.CardView
+                    android:elevation="4dp"
+                    android:layout_marginBottom="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <LinearLayout
-                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
-
-                        <EditText
-                            android:id="@+id/uploadDareResponseComment"
-                            android:padding="8dp"
-                            android:hint="Write a comment about this response"
-                            android:layout_width="match_parent"
-                            android:lines="4"
-                            android:layout_height="wrap_content" />
 
                         <ImageView
                             android:layout_margin="16dp"
                             android:id="@+id/uploadDareResponseThumb"
                             android:scaleType="fitXY"
                             android:layout_gravity="center"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp" />
+                        <EditText
+                            android:id="@+id/uploadDareResponseComment"
+                            android:hint="Write a comment about this response"
                             android:layout_width="match_parent"
-                            android:layout_height="250dp" />
+                            android:lines="4"
+                            android:layout_height="wrap_content" />
                     </LinearLayout>
                 </android.support.v7.widget.CardView>
+                <TextView
+                    android:padding="16dp"
+                    style="@style/PrimaryColorTextViewTheme"
+                    android:gravity="center"
+                    android:text="Your video will be uploaded to DareÜ servers, and will be available to users"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </ScrollView>
     </RelativeLayout>

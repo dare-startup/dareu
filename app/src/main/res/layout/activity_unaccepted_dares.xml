@@ -5,7 +5,7 @@
     android:id="@+id/activity_unaccepted_dares"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.dareu.mobile.activity.UnacceptedDaresActivity">
+    tools:context="com.dareu.mobile.activity.user.UnacceptedDaresActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"

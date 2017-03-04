@@ -23,7 +23,10 @@ public enum PropertyName {
     UNACCEPTED_DARE("unaccepted.dare"),
     ACTIVE_DARE("active.dare"),
     FLAG_DARE("flag.dare"),
-    UPLOAD_DARE_RESPONSE("upload.dare.response");
+    UPLOAD_DARE_RESPONSE("upload.dare.response"),
+    DARE_EXPIRATION("dare.expiration"),
+    RESPONSE_THUMBNAIL("dare.response.thumb"),
+    CHANNEL("dare.response.channel");
 
 
     String value;

@@ -33,20 +33,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
+import com.dareu.mobile.activity.service.UploadDareResponseIntentService;
 import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.dare.DareDescriptionTask;
 import com.dareu.mobile.net.dare.UploadDareResponseTask;
 import com.dareu.mobile.net.request.UploadDareResponseRequest;
 import com.dareu.mobile.utils.SharedUtils;
+import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.entity.DareDescription;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class UploadDareResponseActivity extends AppCompatActivity {
 
     private static final String TAG = "UploadDareResponse";
     public static final String DARE_ID = "dareId";
+    public static final String UPLOADING = "uplaodingDareResponse";
 
     private Toolbar toolbar;
     private ProgressBar progressBar;
@@ -57,7 +64,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     private CoordinatorLayout coordinatorLayout;
 
     private static final int CAPTURE_REQUEST_CODE = 1231;
-    private static final int GALLERY_REQUEST_CODE = 1231;
+    private static final int GALLERY_REQUEST_CODE = 1234;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 5423;
     private File newFileName;
     private File thumbFile;
@@ -79,6 +86,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
         //create directory if does not exists
         SharedUtils.VIDEO_DIRECTORY.mkdir();
         newFileName = new File(SharedUtils.VIDEO_DIRECTORY, System.currentTimeMillis() + ".mp4");
+        thumbFile = new File(SharedUtils.IMAGE_DIRECTORY, System.currentTimeMillis() + ".jpg");
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         dareName= (TextView)findViewById(R.id.uploadDareResponseDareName);
         dareDescription = (TextView)findViewById(R.id.uploadDareResponseDareDescription);
@@ -86,6 +94,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
         comment = (EditText)findViewById(R.id.uploadDareResponseComment);
         layout = (LinearLayout)findViewById(R.id.uploadDareResponseLayout);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Upload dare response");
@@ -156,9 +165,33 @@ public class UploadDareResponseActivity extends AppCompatActivity {
                     .setAction("Dismiss", null)
                     .show();
         else{
-            //TODO: create a new task here
-            UploadDareResponseRequest request = new UploadDareResponseRequest();
-            new UploadDareResponseTask(UploadDareResponseActivity.this, request)
+            try{
+                //save current bitmap to a afile
+                String thumbPath = SharedUtils.IMAGE_DIRECTORY.getAbsolutePath() + System.currentTimeMillis() + ".jpg";
+                SharedUtils.saveBitmapToFile(currentThumbBitmap, thumbPath);
+                String videoPath = newFileName.getAbsolutePath();
+                String commentValue = comment.getText().toString();
+
+                //start service
+                Intent intent = new Intent(this, UploadDareResponseIntentService.class);
+                intent.putExtra(UploadDareResponseIntentService.THUMBNAIL_PATH, thumbPath);
+                intent.putExtra(UploadDareResponseIntentService.VIDEO_PATH, videoPath);
+                intent.putExtra(UploadDareResponseIntentService.COMMENT, commentValue);
+                intent.putExtra(UploadDareResponseIntentService.DARE_ID, dareId);
+                startService(intent);
+
+                //toast
+                Toast.makeText(UploadDareResponseActivity.this, "Your response will start uploading shortly", Toast.LENGTH_LONG)
+                        .show();
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(UPLOADING, String.valueOf(Boolean.TRUE));
+
+                setResult(RESULT_OK, resultIntent);
+                //finish activity
+                finish();
+            }catch(IOException ex){
+                //file not found
+            }
         }
     }
 
@@ -189,7 +222,10 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     }
 
     private void showGallerySelector() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("video/mp4");
 
+        startActivityForResult(intent, GALLERY_REQUEST_CODE);
     }
 
     private void recordVideo() {
@@ -230,12 +266,23 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     }
 
     private void processDareVideoFile(Uri data) {
+        try{
+            String path = SharedUtils.getRealPathFromURI(UploadDareResponseActivity.this, data);
+            newFileName = new File(path);
+            currentThumbBitmap = ThumbnailUtils.createVideoThumbnail(newFileName.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
+            SharedUtils.saveBitmapToFile(currentThumbBitmap, thumbFile.getAbsolutePath());
+            thumbImage.setImageBitmap(currentThumbBitmap);
+            videoFileReady = true;
+        }catch(FileNotFoundException ex){
+            Log.e(TAG, ex.getMessage());
+        }catch (IOException ex){
+            Log.e(TAG, ex.getMessage());
+        }
     }
 
     private void processDareVideo(Uri uri){
         //save bitmap to file
         try{
-            thumbFile = new File(SharedUtils.IMAGE_DIRECTORY, System.currentTimeMillis() + ".jpg");
             currentThumbBitmap = ThumbnailUtils.createVideoThumbnail(newFileName.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
             SharedUtils.saveBitmapToFile(currentThumbBitmap, thumbFile.getAbsolutePath());
             //set bitmap

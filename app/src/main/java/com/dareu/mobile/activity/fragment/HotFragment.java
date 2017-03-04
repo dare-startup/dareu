@@ -16,6 +16,8 @@ import com.dareu.mobile.R;
  */
 public class HotFragment extends Fragment {
 
+    private View currentView;
+
     public HotFragment() {
         // Required empty public constructor
     }

@@ -35,8 +35,10 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 public class NewDareDataActivity extends AppCompatActivity {
 
+    public static final int PENDING_DARE_REQUEST_CODE = 532;
     public static final int NEW_DARE_DATA_REQUEST_CODE = 1234;
     public static final String DARE_ID = "dareId";
+    public static final String ACCEPTED = "acceptedDare";
 
     private ProgressDialog progressDialog;
     private DareDescription currentDareDescription;
@@ -186,6 +188,9 @@ public class NewDareDataActivity extends AppCompatActivity {
                 String value = accepted ? "accepted" : "declined";
                 Toast.makeText(NewDareDataActivity.this, "Dare has been " + value, Toast.LENGTH_LONG)
                         .show();
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(ACCEPTED, String.valueOf(accepted));
+                setResult(RESULT_OK, resultIntent);
                 finish();
             }
 

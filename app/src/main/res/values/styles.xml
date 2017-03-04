@@ -13,7 +13,6 @@
         <item name="colorControlHighlight">@color/colorPrimary</item>
         <item name="android:editTextStyle">@style/PrimaryEditTextTheme</item>
         <item name="colorControlNormal">@android:color/white</item>
-        <item name="android:textColorSecondary">@android:color/white</item>
         <item name="android:checkboxStyle">@style/CheckBoxTheme</item>
     </style>
 
@@ -76,6 +75,13 @@
         <item name="android:textColor">@color/colorPrimaryDark</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="UnderCardTextViewTheme" parent="android:Widget.Holo.Light.TextView">
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginTop">8dp</item>
     </style>
 
     <!-- EditText -->

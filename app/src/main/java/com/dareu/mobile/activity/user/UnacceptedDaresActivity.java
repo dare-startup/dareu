@@ -1,4 +1,4 @@
-package com.dareu.mobile.activity;
+package com.dareu.mobile.activity.user;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -24,7 +24,6 @@ import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.request.DareConfirmationRequest;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
-import com.dareu.web.dto.response.entity.DareDescription;
 import com.dareu.web.dto.response.entity.UnacceptedDare;
 import com.mikhaellopez.circularimageview.CircularImageView;
 

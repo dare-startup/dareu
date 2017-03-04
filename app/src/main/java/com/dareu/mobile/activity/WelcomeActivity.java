@@ -14,7 +14,6 @@ import com.dareu.mobile.R;
 import com.dareu.mobile.adapter.ScreenSlidePagerAdapter;
 
 public class WelcomeActivity extends AppCompatActivity implements ActivityListener{
-    private ViewPager viewPager;
 
     private PagerAdapter pagerAdapter;
 
@@ -33,7 +32,6 @@ public class WelcomeActivity extends AppCompatActivity implements ActivityListen
 
     @Override
     public void getComponents() {
-        this.viewPager = (ViewPager)findViewById(R.id.welcomeViewPager);
         this.pagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
 
         this.signupButton = (Button)findViewById(R.id.welcomeSignupButton);
@@ -42,8 +40,6 @@ public class WelcomeActivity extends AppCompatActivity implements ActivityListen
 
     @Override
     public void initialize() {
-        viewPager.setAdapter(pagerAdapter);
-
         //set listeners
         this.signupButton.setOnClickListener(new View.OnClickListener() {
             @Override

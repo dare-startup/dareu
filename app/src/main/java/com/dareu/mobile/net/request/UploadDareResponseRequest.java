@@ -1,5 +1,6 @@
 package com.dareu.mobile.net.request;
 
+import java.io.File;
 import java.io.InputStream;
 
 /**

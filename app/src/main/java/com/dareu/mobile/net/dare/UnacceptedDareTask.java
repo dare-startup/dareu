@@ -2,7 +2,6 @@ package com.dareu.mobile.net.dare;
 
 import android.content.Context;
 
-import com.dareu.mobile.activity.UnacceptedDaresActivity;
 import com.dareu.mobile.net.AbstractApacheTask;
 import com.dareu.mobile.net.AsyncTaskListener;
 import com.dareu.mobile.net.response.ApacheResponseWrapper;

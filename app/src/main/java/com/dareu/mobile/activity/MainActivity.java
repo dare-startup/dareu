@@ -13,7 +13,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
@@ -30,8 +29,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +38,7 @@ import com.dareu.mobile.activity.shared.NewDareActivity;
 import com.dareu.mobile.activity.shared.NewDareDataActivity;
 import com.dareu.mobile.activity.shared.SettingsActivity;
 import com.dareu.mobile.activity.shared.UploadDareResponseActivity;
+import com.dareu.mobile.activity.user.UnacceptedDaresActivity;
 import com.dareu.mobile.adapter.MainContentPagerAdapter;
 import com.dareu.mobile.adapter.WelcomeDialogAdapter;
 import com.dareu.mobile.net.AsyncTaskListener;
@@ -48,6 +46,7 @@ import com.dareu.mobile.net.account.LoadProfileImageTask;
 import com.dareu.mobile.net.account.UpdateRegIdTask;
 import com.dareu.mobile.net.dare.ActiveDareTask;
 import com.dareu.mobile.net.dare.DareDescriptionTask;
+import com.dareu.mobile.net.dare.DareExpirationTask;
 import com.dareu.mobile.net.dare.UnacceptedDareTask;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
@@ -55,7 +54,6 @@ import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.ActiveDare;
 import com.dareu.web.dto.response.entity.DareDescription;
 import com.dareu.web.dto.response.entity.UnacceptedDare;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -65,6 +63,8 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
     private static final int NEW_DARE_REQUEST_CODE = 432;
+    private static final int UPLOAD_DARE_RESPONSE_REQUEST_CODE = 632;
+
 
     public static final String ACTION_NEW_DARE = "com.dareu.mobile.intent.action.NEW_DARE";
     public static final String NEW_DARE_ID = "dareId";
@@ -97,11 +97,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
         //check registration id availability
-        checkFirebaseRegistrationId();
+        SharedUtils.checkFirebaseRegistrationId(MainActivity.this);
         //check if there is an active dare
         checkActiveDare();
-        //check if there is a pending dare
-        checkPendingDare();
         //register receiver
         registerReceiver(new BroadcastReceiver() {
             @Override
@@ -141,8 +139,26 @@ public class MainActivity extends AppCompatActivity
             Long timerMs = dare.getTimer() * 3600000L;
             Long diff = now.getTime() - acceptedDate.getTime();
             if(diff > timerMs){
-                //expired
-                return;
+                new DareExpirationTask(MainActivity.this, dare.getId(), new AsyncTaskListener<UpdatedEntityResponse>() {
+                    @Override
+                    public void onTaskResponse(UpdatedEntityResponse response) {
+                        snackbar
+                                .setText("You have an expired dare")
+                                .setAction("Dismiss", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        //check if there is a pending dare
+                                        checkPendingDare();
+                                    }
+                                }).show();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                }).execute();
+
             }else{
                 Long timeLeft = timerMs - diff;
                 activeDare = true;
@@ -152,7 +168,7 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(View v) {
                         Intent intent = new Intent(MainActivity.this, UploadDareResponseActivity.class);
                         intent.putExtra(UploadDareResponseActivity.DARE_ID, dare.getId());
-                        startActivity(intent);
+                        startActivityForResult(intent, UPLOAD_DARE_RESPONSE_REQUEST_CODE);
                     }
                 });
                 snackbar.show();
@@ -180,7 +196,6 @@ public class MainActivity extends AppCompatActivity
 
     private void checkPendingDare() {
         //if there is an active dare running, do not execute this method
-        //TODO: CHECK THIS OPERATION
         if(activeDare)return;
         new UnacceptedDareTask(MainActivity.this, new AsyncTaskListener<UnacceptedDare>() {
             @Override
@@ -223,7 +238,7 @@ public class MainActivity extends AppCompatActivity
                             public void onClick(View v) {
                                 Intent activity = new Intent(context, NewDareDataActivity.class);
                                 activity.putExtra(NewDareDataActivity.DARE_ID, response.getId());
-                                startActivity(activity);
+                                startActivityForResult(activity, NewDareDataActivity.PENDING_DARE_REQUEST_CODE);
                             }
                         })
                         .setActionTextColor(getResources().getColor(android.R.color.white));
@@ -238,76 +253,9 @@ public class MainActivity extends AppCompatActivity
         }, dareId).execute();
     }
 
-    private void checkFirebaseRegistrationId() {
-        String value = SharedUtils.getStringPreference(MainActivity.this, PrefName.ALREADY_REGISTERED_GCM_TOKEN);
-        if(value != null && ! value.isEmpty()){
-            Boolean updated = Boolean.parseBoolean(value);
-            if(! updated){
-                //get reg id
-                String regId = SharedUtils.getStringPreference(MainActivity.this, PrefName.GCM_TOKEN);
-                if(regId != null && ! regId.isEmpty()){
-                    //update it
-                    UpdateRegIdTask task = new UpdateRegIdTask(MainActivity.this, new AsyncTaskListener<UpdatedEntityResponse>() {
-                        @Override
-                        public void onTaskResponse(UpdatedEntityResponse response) {
-                            if(response != null && response.isSuccess()){
-                                SharedUtils.setStringPreference(MainActivity.this, PrefName.ALREADY_REGISTERED_GCM_TOKEN, Boolean.TRUE.toString());
-                                Log.i(TAG, response.getMessage());
-                            }
-                            else{
-                                Log.i(TAG, "Something bad just happened :(");
-                            }
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-
-                        }
-                    });
-                    task.execute();
-                }
-            }
-        }
 
 
 
-    }
-
-    private void setupFirstVisitDialog() {
-        //check if user is for the first time here
-        if(SharedUtils.getBooleanPreference(MainActivity.this, PrefName.FIRST_TIME)){
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setCancelable(false);
-            //create view
-            View welcomeDialogView = LayoutInflater.from(MainActivity.this).inflate(R.layout.welcome_dialog, null);
-
-            //get view pager
-            ViewPager pager = (ViewPager)welcomeDialogView.findViewById(R.id.welcomeDialogViewPager);
-
-            //create adapter
-            pager.setAdapter(new WelcomeDialogAdapter(getSupportFragmentManager()));
-
-            //set listener for close label
-            TextView closeView = (TextView)welcomeDialogView.findViewById(R.id.welcomeDialogCloseView);
-
-            //set view
-            builder.setView(welcomeDialogView);
-            //create dialog
-            final AlertDialog dialog = builder.create();
-            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-            params.dimAmount = 0.0f;
-            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            closeView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    SharedUtils.setBooleanPreference(MainActivity.this, PrefName.FIRST_TIME, Boolean.FALSE);
-                    //close dialog
-                    dialog.dismiss();
-                }
-            });
-            dialog.show();
-        }
-    }
 
     private void setupViewPager() {
         final ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
@@ -511,4 +459,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(requestCode == NEW_DARE_REQUEST_CODE && resultCode == RESULT_OK){
+            //TODO: what to do after a user creates a dare
+        }else if(requestCode == NewDareDataActivity.PENDING_DARE_REQUEST_CODE && resultCode == RESULT_OK){
+            Boolean accepted = data.getBooleanExtra(NewDareDataActivity.ACCEPTED, false);
+            if(accepted){
+                //check active dare
+                checkActiveDare();
+            }else
+                checkPendingDare();
+        }else if(requestCode == UPLOAD_DARE_RESPONSE_REQUEST_CODE && resultCode == RESULT_OK){
+            Boolean uploading = data.getBooleanExtra(UploadDareResponseActivity.UPLOADING, false);
+            if(uploading){
+                //load next dare
+                checkPendingDare();
+            }else{
+                //the dare is still active then
+            }
+        }
+    }
 }
