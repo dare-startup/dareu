@@ -106,13 +106,18 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
                         SharedUtils.showNoInternetConnectionSnackbar(coordinatorLayout, SigninActivity.this);
                         break;
                     default:
+                        SigninRequest request = new SigninRequest(username, password);
+                        String fcmToken = SharedUtils.getStringPreference(SigninActivity.this, PrefName.GCM_TOKEN);
+                        if(fcmToken == null || fcmToken.isEmpty())
+                            request.setFcmToken(fcmToken);
+
                         progressDialog.setTitle("Connecting");
                         progressDialog.setIndeterminate(true);
                         progressDialog.setCancelable(false);
                         progressDialog.show();
                         try{
                             Call<AuthenticationResponse> call = openService
-                                    .signin(new SigninRequest(username, password));
+                                    .signin(request);
                             call.enqueue(new Callback<AuthenticationResponse>() {
                                 @Override
                                 public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
@@ -170,6 +175,9 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
         request.setGoogleId(account.getId());
         request.setCurrentSigninType(SigninRequest.SigninType.GOOGLE);
         request.setUser(account.getEmail());
+        String fcmToken = SharedUtils.getStringPreference(this, PrefName.GCM_TOKEN);
+        if(fcmToken == null || fcmToken.isEmpty())
+            request.setFcmToken(fcmToken);
         //create progress dialog
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Connecting");

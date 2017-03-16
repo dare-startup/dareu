@@ -52,6 +52,7 @@ import com.dareu.web.dto.response.entity.ActiveDare;
 import com.dareu.web.dto.response.entity.DareDescription;
 import com.dareu.web.dto.response.entity.UnacceptedDare;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -124,7 +125,22 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onResponse(Call<ActiveDare> call, Response<ActiveDare> response) {
                         //create snackbar countdown
-                        createActiveDareCountdown(response.body());
+                        switch(response.code()){
+                            case 200:
+                                createActiveDareCountdown(response.body());
+                                break;
+                            case 204:
+                                //no dare found, check pending dare
+                                checkPendingDare();
+                                break;
+                            default:
+                                try{
+                                    Log.e(TAG, response.errorBody().string());
+                                }catch(IOException ex){
+                                    Log.e(TAG, ex.getMessage());
+                                }
+                                break;
+                        }
                     }
 
                     @Override
@@ -245,10 +261,10 @@ public class MainActivity extends AppCompatActivity
                     public void onResponse(Call<DareDescription> call, final Response<DareDescription> response) {
                         Spanned text;
                         if(notificationType == PENDING_DARE_NOTIFICATION)
-                            text = Html.fromHtml(String.format("<font color=#F05B19>You have a pending dare from </font><font color=#FFFFFF>%s</font> <font color=#F05B19>called</font> <font color=#FFFFFF>%s</font>",
+                            text = Html.fromHtml(String.format("<font color=#FFFFFF>You have a pending dare from </font><font color=#F05B19>%s</font> <font color=#FFFFFF>called</font> <font color=#F05B19>%s</font>",
                                     response.body().getChallenger().getName(), response.body().getName()));
                         else
-                            text = Html.fromHtml(String.format("<font color=#FFFFFF>%s</font> <font color=#F05B19> just dared you, want to take a look?</font>",
+                            text = Html.fromHtml(String.format("<font color=#F05B19>%s</font> <font color=#FFFFFF> just dared you, want to take a look?</font>",
                                     response.body().getChallenger().getName()));
                         Snackbar snackbar = Snackbar.make(layout, text, Snackbar.LENGTH_INDEFINITE)
                                 .setAction("Details", new View.OnClickListener() {
