@@ -1,6 +1,7 @@
 package com.dareu.mobile.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.database.Cursor;
@@ -8,57 +9,47 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.telecom.Connection;
-import android.telecom.ConnectionService;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.activity.MainActivity;
-import com.dareu.mobile.adapter.WelcomeDialogAdapter;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.account.UpdateRegIdTask;
-import com.dareu.mobile.net.response.ApacheResponseWrapper;
+import com.dareu.mobile.activity.SignupActivity;
+import com.dareu.mobile.service.DareuFirebaseTokenCleanerService;
+import com.dareu.web.dto.client.AccountClientService;
+import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
+import com.dareu.web.dto.response.entity.AccountProfile;
 import com.dareu.web.dto.response.message.ConnectionRequestMessage;
 import com.dareu.web.dto.response.message.NewDareMessage;
+import com.dareu.web.dto.response.message.QueuedDareMessage;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by jose.rubalcaba on 10/08/2016.
@@ -67,10 +58,9 @@ import java.util.Properties;
 public class SharedUtils {
 
     private static final String TAG = "SharedUtils";
-
+    public static final String SERVICE_PACKAGE = "com.dareu.mobile.service";
+    public static final int GOOGLE_SIGNIN_REQUEST_CODE = 289;
     private static Picasso picassoInstance;
-
-    private static Picasso authenticatedPicassoInstance;
 
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
     public static final SimpleDateFormat DETAILS_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm");
@@ -89,6 +79,23 @@ public class SharedUtils {
         prefs
                 .edit()
                 .clear()
+                .commit();
+
+        //start service to delete firebase registration
+        Intent intent = new Intent(cxt, DareuFirebaseTokenCleanerService.class);
+        cxt.startService(intent);
+        //TODO:delete other stuff here
+    }
+
+    public static AccountProfile getCurrentProfile(Context cxt){
+        String json = cxt.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getString(PrefName.CURRENT_PROFILE.toString(), "");
+        return new Gson().fromJson(json, AccountProfile.class);
+    }
+
+    public static void saveCurrentProfile(AccountProfile profile, Context cxt){
+        cxt.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putString(PrefName.CURRENT_PROFILE.toString(), new Gson().toJson(profile))
                 .commit();
     }
 
@@ -155,6 +162,7 @@ public class SharedUtils {
 
     public static boolean validateDate(String date){
         try{
+            if(date == null)return false;
             Date d = DATE_FORMAT.parse(date);
             return true;
         }catch(ParseException pe){
@@ -162,41 +170,25 @@ public class SharedUtils {
         }
     }
 
-    public static boolean updateGcmTask(Context cxt, String regId){
-        String url  = getProperty(PropertyName.DEBUG_SERVER, cxt) + getProperty(PropertyName.UPDATE_GCM_RE_ID, cxt);
-        setStringPreference(cxt, PrefName.GCM_TOKEN, regId);
-        try{
-            String authToken = SharedUtils.getStringPreference(cxt, PrefName.SIGNIN_TOKEN);
-
-            url += regId;
-            HttpURLConnection conn = (HttpURLConnection)new URL(url).openConnection();
-            conn.setRequestMethod("POST");
-
-            conn.setRequestProperty("Authorization", authToken);
-            conn.setDoInput(true);
-            int responseCode = conn.getResponseCode();
-
-            if(responseCode == 200)
-                return true;
-            return false;
-        }catch(MalformedURLException e){
-            return false;
-        }catch(IOException ex){
-            return false;
-        }
+    public static ConnectionType checkInternetConnection(Context cxt){
+        ConnectivityManager mgr = (ConnectivityManager)cxt.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = mgr.getActiveNetworkInfo();
+        if(info == null)
+            return ConnectionType.NOT_CONNECTED;
+        if(! info.isConnected())
+            return ConnectionType.NOT_CONNECTED;
+        if(! info.isAvailable())
+            return ConnectionType.NOT_CONNECTED;
+        if(info.getType() == ConnectivityManager.TYPE_MOBILE)
+            return ConnectionType.MOBILE;
+        else if(info.getType() == ConnectivityManager.TYPE_WIFI)
+            return ConnectionType.WIFI;
+        else return ConnectionType.NOT_CONNECTED;
     }
 
-    public static boolean checkInternetConnection(Context cxt){
-        ConnectivityManager manager = (ConnectivityManager) cxt.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo i = manager.getActiveNetworkInfo();
-        if (i == null)
-            return false;
-        if (!i.isConnected())
-            return false;
-        if (!i.isAvailable())
-            return false;
-        return true;
-    }
+
+
+
 
     public static void hideKeyboard(View view, Context cxt){
         if (view != null) {
@@ -205,10 +197,10 @@ public class SharedUtils {
         }
     }
 
-    public static void showNoInternetConnectionSnackbar(CoordinatorLayout layout){
-        Snackbar.make(layout, "No internet connection", Snackbar.LENGTH_INDEFINITE)
-                .setAction("Accept", null);
-        return;
+    public static void showNoInternetConnectionSnackbar(CoordinatorLayout layout, Context cxt){
+        Snackbar.make(layout, cxt.getResources().getString(R.string.no_internet_connection), Snackbar.LENGTH_INDEFINITE)
+                .setAction("Dismiss", null)
+                .show();
     }
 
     public static NewDareMessage parseNewDareMessage(Map<String, String> data){
@@ -229,25 +221,6 @@ public class SharedUtils {
         return message;
     }
 
-    public static String getErrorMessage(ApacheResponseWrapper wrapper){
-        if(wrapper == null)
-            return "No response received from server, try again";
-        switch(wrapper.getStatusCode()){
-            case 200:
-                return "Success";
-            case 404:
-                return "Server temporarily out of business, try again later";
-            case 500:
-                return "Something bad has happened, try again";
-            case 415:
-                return "Someone zap out this shitty developer";
-            case 401:
-                return "You are not authorized to view this content";
-            default:
-                return "N/A";
-        }
-    }
-
     public static void checkFirebaseRegistrationId(final Context cxt) {
         String value = getStringPreference(cxt, PrefName.ALREADY_REGISTERED_GCM_TOKEN);
         if(value != null && ! value.isEmpty()){
@@ -257,12 +230,15 @@ public class SharedUtils {
                 String regId = getStringPreference(cxt, PrefName.GCM_TOKEN);
                 if(regId != null && ! regId.isEmpty()){
                     //update it
-                    UpdateRegIdTask task = new UpdateRegIdTask(cxt, new AsyncTaskListener<UpdatedEntityResponse>() {
+                    Call<UpdatedEntityResponse> call = RetroFactory.getInstance()
+                            .create(AccountClientService.class)
+                            .updateFcmId(regId, getStringPreference(cxt, PrefName.SIGNIN_TOKEN));
+                    call.enqueue(new Callback<UpdatedEntityResponse>() {
                         @Override
-                        public void onTaskResponse(UpdatedEntityResponse response) {
-                            if(response != null && response.isSuccess()){
+                        public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
+                            if(response != null && response.body().isSuccess()){
                                 setStringPreference(cxt, PrefName.ALREADY_REGISTERED_GCM_TOKEN, Boolean.TRUE.toString());
-                                Log.i(TAG, response.getMessage());
+                                Log.i(TAG, response.body().getMessage());
                             }
                             else{
                                 Log.i(TAG, "Something bad just happened :(");
@@ -270,11 +246,10 @@ public class SharedUtils {
                         }
 
                         @Override
-                        public void onError(String errorMessage) {
+                        public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
 
                         }
                     });
-                    task.execute();
                 }
             }
         }
@@ -293,88 +268,55 @@ public class SharedUtils {
         out.close();
     }
 
-    public static InputStream getStreamFromBitmap(Bitmap bitmap){
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
-        byte[] data = out.toByteArray();
-        ByteArrayInputStream in = new ByteArrayInputStream(data);
-        return in;
-    }
-
-    public static InputStream getStreamFromFile(File file)throws IOException{
-        FileInputStream stream = new FileInputStream(file);
-        return stream;
-    }
-
-    public static void setupFirstVisitDialog(final Context cxt) {
-        //check if user is for the first time here
-        if(SharedUtils.getBooleanPreference(cxt, PrefName.FIRST_TIME)){
-            AlertDialog.Builder builder = new AlertDialog.Builder(cxt);
-            builder.setCancelable(false);
-            //create view
-            View welcomeDialogView = LayoutInflater.from(cxt).inflate(R.layout.welcome_dialog, null);
-
-            //get view pager
-            ViewPager pager = (ViewPager)welcomeDialogView.findViewById(R.id.welcomeDialogViewPager);
-
-            //create adapter
-            pager.setAdapter(new WelcomeDialogAdapter(((AppCompatActivity)cxt).getSupportFragmentManager()));
-
-            //set listener for close label
-            TextView closeView = (TextView)welcomeDialogView.findViewById(R.id.welcomeDialogCloseView);
-
-            //set view
-            builder.setView(welcomeDialogView);
-            //create dialog
-            final AlertDialog dialog = builder.create();
-            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-            params.dimAmount = 0.0f;
-            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            closeView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    SharedUtils.setBooleanPreference(cxt, PrefName.FIRST_TIME, Boolean.FALSE);
-                    //close dialog
-                    dialog.dismiss();
-                }
-            });
-            dialog.show();
-        }
-    }
-
     private static Picasso instance(Context context){
-        if(picassoInstance == null){
-
-        }
+        if(picassoInstance == null)
+            picassoInstance = Picasso.with(context);
 
         return picassoInstance;
-    }
-
-    private static Picasso getAuthenticatedPicassoInstance(Context cxt){
-        if(authenticatedPicassoInstance == null){
-            //create client
-            OkHttpClient client = new OkHttpClient();
-
-            authenticatedPicassoInstance = new Picasso.Builder(cxt)
-                    //TODO: change here
-                    .build();
-        }
-        return authenticatedPicassoInstance;
     }
 
 
     public static void loadImagePicasso(ImageView imageView, Context context, String uri){
         try{
-            RequestCreator creator = instance(context).load(Uri.parse(uri))
-                    .config(Bitmap.Config.ARGB_8888)
-                    .error(android.R.drawable.stat_notify_error)
-                    .placeholder(R.mipmap.ic_launcher);
+                instance(context)
+                        .load(Uri.parse(uri))
+                        .config(Bitmap.Config.ARGB_8888)
+                        .error(R.drawable.ic_info_black_24dp)
+                        //.placeholder(R.drawable.progress_animation)
+                        .fit()
+                        .into(imageView);
 
-            creator.fit();
-
-            creator.into(imageView);
         }catch(Exception ex){
 
         }
+    }
+
+    public static QueuedDareMessage parseQueuedDareMessage(Map<String, String> data) {
+        QueuedDareMessage message = new QueuedDareMessage();
+        message.setDareId(data.get("dareId"));
+        message.setCreationDate(data.get("creationDate"));
+        message.setCurrentDareStatus(data.get("currentDareStatus"));
+        return message;
+    }
+
+    public static Intent getGoogleSigninIntent(FragmentActivity cxt){
+        GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestProfile()
+                .build();
+
+        //build client
+        GoogleApiClient client = new GoogleApiClient.Builder(cxt)
+                .enableAutoManage(cxt, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, options)
+                .build();
+
+        Intent intent = Auth.GoogleSignInApi.getSignInIntent(client);
+        return intent;
     }
 }

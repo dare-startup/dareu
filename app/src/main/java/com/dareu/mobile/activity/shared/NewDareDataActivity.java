@@ -3,7 +3,6 @@ package com.dareu.mobile.activity.shared;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -13,25 +12,24 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.account.LoadProfileImageTask;
-import com.dareu.mobile.net.dare.DareDescriptionTask;
-import com.dareu.mobile.net.dare.FlagDareTask;
-import com.dareu.mobile.net.dare.NewDareConfirmationTask;
+import com.dareu.mobile.utils.PrefName;
+import com.dareu.mobile.utils.SharedUtils;
+import com.dareu.web.dto.client.DareClientService;
+import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.request.DareConfirmationRequest;
-import com.dareu.web.dto.request.FlagDareRequest;
-import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.DareDescription;
 import com.mikhaellopez.circularimageview.CircularImageView;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NewDareDataActivity extends AppCompatActivity {
 
@@ -51,6 +49,7 @@ public class NewDareDataActivity extends AppCompatActivity {
     private Toolbar toolbar;
 
     private String dareId;
+    private DareClientService dareService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +57,8 @@ public class NewDareDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_dare_data);
         //get dare id
         dareId = getIntent().getStringExtra(DARE_ID);
-
+        dareService = RetroFactory.getInstance()
+                .create(DareClientService.class);
         if(dareId == null || dareId.isEmpty()){
             Toast.makeText(NewDareDataActivity.this, "No dare id was provided", Toast.LENGTH_LONG)
                     .show();
@@ -75,46 +75,37 @@ public class NewDareDataActivity extends AppCompatActivity {
                 }
             });
         }
+
     }
 
     private void getDare(String dareId) {
-        DareDescriptionTask task = new DareDescriptionTask(NewDareDataActivity.this, new AsyncTaskListener<DareDescription>() {
-            @Override
-            public void onTaskResponse(final DareDescription response) {
-                if(response != null){
-                    currentDareDescription = response;
-                    setTitle(response.getName());
-                    challengerName.setText(response.getChallenger().getName());
-                    dareName.setText(response.getName());
-                    dareDescription.setText(response.getDescription());
-                    dareCategory.setText(response.getCategory());
-                    dareTime.setText(response.getEstimatedDareTime());
-                    progressBar.setVisibility(View.GONE);
-                    layout.setVisibility(View.VISIBLE);
-                    //load image
-                    LoadProfileImageTask task = new LoadProfileImageTask(NewDareDataActivity.this, response.getChallenger().getId(), new AsyncTaskListener<Bitmap>() {
-                        @Override
-                        public void onTaskResponse(Bitmap response) {
-                            if(response != null)
-                                challengerImage.setImageBitmap(response);
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
+        dareService.dareDescription(dareId, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<DareDescription>() {
+                    @Override
+                    public void onResponse(Call<DareDescription> call, Response<DareDescription> response) {
+                        if(response != null){
+                            currentDareDescription = response.body();
+                            setTitle(response.body().getName());
+                            challengerName.setText(response.body().getChallenger().getName());
+                            dareName.setText(response.body().getName());
+                            dareDescription.setText(response.body().getDescription());
+                            dareCategory.setText(response.body().getCategory());
+                            dareTime.setText(response.body().getEstimatedDareTime());
+                            progressBar.setVisibility(View.GONE);
+                            layout.setVisibility(View.VISIBLE);
+                            //load image
+                            SharedUtils.loadImagePicasso(challengerImage, NewDareDataActivity.this,
+                                    response.body().getChallenger().getImageUrl());
 
                         }
-                    });
-                    task.execute();
-                }
-            }
+                    }
 
-            @Override
-            public void onError(String errorMessage) {
-                Snackbar.make(coordinatorLayout, errorMessage, Snackbar.LENGTH_LONG).show();
-                progressBar.setVisibility(View.GONE);
-            }
-        }, dareId);
-        task.execute();
+                    @Override
+                    public void onFailure(Call<DareDescription> call, Throwable t) {
+                        Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
     }
 
     @Override
@@ -182,23 +173,24 @@ public class NewDareDataActivity extends AppCompatActivity {
 
     private void confirmDare(final boolean accepted){
         progressBar.setVisibility(View.VISIBLE);
-        new NewDareConfirmationTask(NewDareDataActivity.this, new DareConfirmationRequest(currentDareDescription.getId(), accepted), new AsyncTaskListener<UpdatedEntityResponse>() {
-            @Override
-            public void onTaskResponse(UpdatedEntityResponse response) {
-                String value = accepted ? "accepted" : "declined";
-                Toast.makeText(NewDareDataActivity.this, "Dare has been " + value, Toast.LENGTH_LONG)
-                        .show();
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra(ACCEPTED, String.valueOf(accepted));
-                setResult(RESULT_OK, resultIntent);
-                finish();
-            }
+        dareService.confirmDare(new DareConfirmationRequest(currentDareDescription.getId(), accepted), SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<UpdatedEntityResponse>() {
+                    @Override
+                    public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
+                        String value = accepted ? "accepted" : "declined";
+                        Toast.makeText(NewDareDataActivity.this, "Dare has been " + value, Toast.LENGTH_LONG)
+                                .show();
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra(ACCEPTED, accepted);
+                        setResult(RESULT_OK, resultIntent);
+                        finish();
+                    }
 
-            @Override
-            public void onError(String errorMessage) {
+                    @Override
+                    public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
 
-            }
-        }).execute();
+                    }
+                });
     }
 
     private void getComponents() {

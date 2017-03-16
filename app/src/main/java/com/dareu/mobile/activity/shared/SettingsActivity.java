@@ -1,22 +1,15 @@
 package com.dareu.mobile.activity.shared;
 
 import android.Manifest;
-import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -25,19 +18,25 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.account.LoadProfileImageTask;
-import com.dareu.mobile.net.account.UpdateProfileImageTask;
+import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
+import com.dareu.web.dto.client.AccountClientService;
+import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
+import com.dareu.web.dto.response.entity.AccountProfile;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -50,12 +49,14 @@ public class SettingsActivity extends AppCompatActivity {
     private CoordinatorLayout coordinatorLayout;
     private Toolbar toolbar;
     private File capture;
+    private AccountClientService accountService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-
+        accountService = RetroFactory.getInstance()
+                .create(AccountClientService.class);
         getComponents();
     }
 
@@ -71,7 +72,12 @@ public class SettingsActivity extends AppCompatActivity {
         }
         image = (CircularImageView)findViewById(R.id.settingsImage);
         toolbar = (Toolbar)findViewById(R.id.toolbar);
-
+        //load current image
+        AccountProfile accountProfile = SharedUtils.getCurrentProfile(this);
+        if(accountProfile != null){
+            //load it
+            SharedUtils.loadImagePicasso(image, this, accountProfile.getImageUrl());
+        }
         setSupportActionBar(toolbar);
         setTitle("Settings");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -125,19 +131,7 @@ public class SettingsActivity extends AppCompatActivity {
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 
         //load current image profile
-        LoadProfileImageTask task = new LoadProfileImageTask(SettingsActivity.this, null, new AsyncTaskListener<Bitmap>() {
-            @Override
-            public void onTaskResponse(Bitmap response) {
-                if(response != null)
-                    image.setImageBitmap(response);
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-
-            }
-        });
-        task.execute();
+        //SharedUtils.loadImagePicasso(image, SettingsActivity.this, , true);
     }
 
     @Override
@@ -159,22 +153,38 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void processCapturedImage(){
         try{
+
             InputStream is = getContentResolver().openInputStream(imageUri);
-            UpdateProfileImageTask task = new UpdateProfileImageTask(SettingsActivity.this, is, new AsyncTaskListener<UpdatedEntityResponse>() {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            //write bytes into output stream
+            int read = -1;
+            byte[] bytes = new byte[1024];
+
+            while((read = is.read(bytes)) != -1)
+                out.write(bytes);
+
+            RequestBody filePart = RequestBody.create(MediaType.parse("image/jpeg"), out.toByteArray());
+            //RequestBody filePart = RequestBody.create(MediaType.parse("image/jpeg"), new File(imageUri.getPath()));
+            accountService.updateProfileImage(filePart, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+            .enqueue(new Callback<UpdatedEntityResponse>() {
                 @Override
-                public void onTaskResponse(UpdatedEntityResponse response) {
+                public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
+                    //update image url
+                    AccountProfile profile = SharedUtils.getCurrentProfile(SettingsActivity.this);
+                    profile.setImageUrl(response.body().getMessage());
                     Snackbar.make(coordinatorLayout, "Your profile image has been updated", Snackbar.LENGTH_LONG)
                             .show();
                 }
 
                 @Override
-                public void onError(String errorMessage) {
-                    Snackbar.make(coordinatorLayout, errorMessage, Snackbar.LENGTH_LONG)
+                public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
+                    Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG)
                             .show();
                 }
             });
-            task.execute();
         }catch(FileNotFoundException ex){
+
+        }catch(Exception ex){
 
         }
     }

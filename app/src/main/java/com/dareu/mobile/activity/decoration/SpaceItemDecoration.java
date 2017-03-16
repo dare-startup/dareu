@@ -10,10 +10,13 @@ import android.view.View;
 
 public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
 
-    private static final int space = 12;
+    private int space = 30;
 
     public SpaceItemDecoration(){
+    }
 
+    public SpaceItemDecoration(int space){
+        this.space = space;
     }
 
     @Override

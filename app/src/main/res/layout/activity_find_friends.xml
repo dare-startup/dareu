@@ -12,7 +12,9 @@
         android:layout_height="match_parent">
 
         <include layout="@layout/toolbar" android:id="@+id/toolbar"/>
+
         <android.support.v7.widget.RecyclerView
+            android:visibility="gone"
             android:layout_below="@id/toolbar"
             android:id="@+id/findFriendsList"
             android:layout_width="match_parent"
@@ -20,12 +22,12 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         <TextView
+            android:layout_centerInParent="true"
+            android:textSize="16sp"
+            style="@style/PrimaryColorTextViewTheme"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/toolbar"
-            android:id="@+id/findFriendsMessage"
-            android:visibility="gone"
-            android:text="Some sad message goes here"
-            android:layout_gravity="center"
+            android:id="@+id/message"
+            android:text="Start searching connections"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RelativeLayout>

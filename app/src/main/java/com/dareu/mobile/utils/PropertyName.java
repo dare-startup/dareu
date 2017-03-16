@@ -26,7 +26,8 @@ public enum PropertyName {
     UPLOAD_DARE_RESPONSE("upload.dare.response"),
     DARE_EXPIRATION("dare.expiration"),
     RESPONSE_THUMBNAIL("dare.response.thumb"),
-    CHANNEL("dare.response.channel");
+    CHANNEL("dare.response.channel"),
+    RESPONSE_VIDEO("dare.response.video");
 
 
     String value;

@@ -74,6 +74,7 @@
                         android:layout_height="wrap_content" />
 
                     <EditText
+                        android:gravity="start"
                         android:id="@+id/flagDareComment"
                         android:hint="Write a comment about why you are flagging this dare, it can be empty"
                         android:lines="4"

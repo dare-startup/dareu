@@ -13,7 +13,8 @@
 
     <TextView
         android:visibility="gone"
-        style="@style/TitleTextViewTheme"
+        android:textSize="16sp"
+        style="@style/PrimaryColorTextViewTheme"
         android:text="Hello"
         android:layout_gravity="center"
         android:id="@+id/fragmentCenteredMessage"

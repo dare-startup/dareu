@@ -1,6 +1,5 @@
 package com.dareu.mobile.utils;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -9,12 +8,13 @@ import android.support.v4.app.NotificationCompat;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.MainActivity;
-import com.dareu.mobile.activity.shared.ConnectionStatusActivity;
+import com.dareu.mobile.activity.shared.PendingRequestsActivity;
 import com.dareu.mobile.activity.shared.NewDareDataActivity;
 import com.dareu.web.dto.response.message.AbstractMessage;
 import com.dareu.web.dto.response.message.ConnectionRequestMessage;
 import com.dareu.web.dto.response.message.MessageType;
 import com.dareu.web.dto.response.message.NewDareMessage;
+import com.dareu.web.dto.response.message.QueuedDareMessage;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,19 +36,41 @@ public class NotificationUtils {
             //connection request received from another user
             connectionRequestNotification(cxt, data);
         }else if(messageType.equalsIgnoreCase(MessageType.CONNECT_CONFIRMATION_MESSAGE.toString())){
-            //someone accepted a connection request from this device
+            //TODO:someone accepted a connection request from this device
+
+        }else if(messageType.equalsIgnoreCase(MessageType.QUEUED_DARE_MESSAGE.toString())){
+            //user has a queued dare
+            queuedDareNotification(cxt, data);
+        } else if(messageType.equalsIgnoreCase(MessageType.CLAPPED_RESPONSE_MESSAGE.toString())){
+            //someone clapped a response this user uploaded
 
         }
     }
 
+    private static void queuedDareNotification(Context cxt, Map<String, String> data) {
+        QueuedDareMessage message = SharedUtils.parseQueuedDareMessage(data);
+        Intent intent = new Intent();
+        //send user to check current active or
+        if(message.getCurrentDareStatus().equalsIgnoreCase(QueuedDareMessage.ACTIVE)){
+            //there is an active dare right now
+            createNotification(cxt, MainActivity.class, "You have dares waiting for you",
+                    "A user just dared you, but you must complete an active dare", intent);
+        }else {
+            //there is a pending dare right now
+            createNotification(cxt, MainActivity.class, "You have dares waiting for you",
+                    "A user just dared you, but you must confirm a pending dare", intent);
+        }
+
+    }
+
     private static void connectionRequestNotification(Context cxt, Map<String, String> data){
         ConnectionRequestMessage message = SharedUtils.parseConnectionRequestMessage(data);
-        Intent intent = new Intent(cxt, ConnectionStatusActivity.class);
+        Intent intent = new Intent(cxt, PendingRequestsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(ConnectionStatusActivity.FRIENDSHIP_ID, message.getFriendshipId()) ;
+        intent.putExtra(PendingRequestsActivity.FRIENDSHIP_ID, message.getFriendshipId()) ;
 
         String text = message.getUserName() + " want to connect with you";
-        createNotification(cxt, ConnectionStatusActivity.class, "You have a connection request", text, intent);
+        createNotification(cxt, PendingRequestsActivity.class, "You have a connection request", text, intent);
     }
 
     private static void newDareNotification(Context cxt, Map<String, String> data){

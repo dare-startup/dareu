@@ -26,12 +26,18 @@ import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
 import com.dareu.mobile.adapter.FriendSearchAdapter;
 import com.dareu.mobile.adapter.RecyclerViewOnItemClickListener;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.account.FindFriendsTask;
+import com.dareu.mobile.utils.PrefName;
+import com.dareu.mobile.utils.SharedUtils;
+import com.dareu.web.dto.client.AccountClientService;
+import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.response.entity.FriendSearchDescription;
 import com.dareu.web.dto.response.entity.Page;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class FindFriendsActivity extends AppCompatActivity {
@@ -43,12 +49,15 @@ public class FindFriendsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private CoordinatorLayout coordinatorLayout;
+    private AccountClientService accountService;
+    private TextView message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_friends);
-
+        accountService = RetroFactory.getInstance()
+                .create(AccountClientService.class);
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -79,6 +88,7 @@ public class FindFriendsActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
+        message = (TextView)findViewById(R.id.message);
     }
 
     @Override
@@ -93,10 +103,6 @@ public class FindFriendsActivity extends AppCompatActivity {
         EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
         searchEditText.setTextColor(getResources().getColor(android.R.color.white));
         searchEditText.setHintTextColor(getResources().getColor(android.R.color.white));
-        /**int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-        TextView textview = (TextView)searchView.findViewById(id);
-        textview.setTextColor(getResources().getColor(R.color.colorAccent1));**/
-
         //searchview suggestions adapter
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
@@ -116,7 +122,7 @@ public class FindFriendsActivity extends AppCompatActivity {
                     FriendSearchAdapter adapter = new FriendSearchAdapter(new ArrayList<FriendSearchDescription>(), null);
                     recyclerView.setAdapter(adapter);
                     //show message
-                    TextView message = (TextView)findViewById(R.id.findFriendsMessage);
+                    TextView message = (TextView)findViewById(R.id.message);
                     message.setText("Empty result");
                     message.setVisibility(View.VISIBLE);
                     return false;
@@ -131,49 +137,72 @@ public class FindFriendsActivity extends AppCompatActivity {
 
     private void createRequest(String query){
         progressBar.setVisibility(View.VISIBLE);
-        FindFriendsTask task = new FindFriendsTask(FindFriendsActivity.this, query, new AsyncTaskListener<Page<FriendSearchDescription>>() {
-            @Override
-            public void onTaskResponse(Page<FriendSearchDescription> response) {
-                //creates a new adapter
-                FriendSearchAdapter adapter = new FriendSearchAdapter(response.getItems(), new RecyclerViewOnItemClickListener<FriendSearchDescription>() {
-                    @Override
-                    public void onItemClickListener(int position, final FriendSearchDescription object) {
-                        new AlertDialog.Builder(FindFriendsActivity.this)
-                                .setTitle("Select user")
-                                .setMessage("Do you want to select " + object.getName() + "?")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                         Intent intent = new Intent();
-                                        //create array
-                                        String[] array = new String[2];
-                                        array[0] = object.getId();//id
-                                        array[1] = object.getName();
-
-                                        intent.putExtra(SELECTED_USER_ID, array);
-                                        setResult(RESULT_OK, intent);
-                                        finish();
-                                    }
-                                })
-                                .setNegativeButton("No", null)
-                                .create()
-                                .show();
-                    }
-                });
+        switch(SharedUtils.checkInternetConnection(this)){
+            case NOT_CONNECTED:
                 progressBar.setVisibility(View.GONE);
-                recyclerView.setAdapter(adapter);
-                TextView message = (TextView)findViewById(R.id.findFriendsMessage);
-                message.setVisibility(View.GONE);
-            }
+                message.setText(getResources().getString(R.string.no_internet_connection));
+                message.setVisibility(View.VISIBLE);
+                break;
+            default:
+                accountService.findFriends(query, pageNumber, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+                        .enqueue(new Callback<Page<FriendSearchDescription>>() {
+                            @Override
+                            public void onResponse(Call<Page<FriendSearchDescription>> call, Response<Page<FriendSearchDescription>> response) {
+                               switch(response.code()){
+                                   case 200:
+                                       if(response.body().getItems().isEmpty()){
+                                           recyclerView.setVisibility(View.GONE);
+                                           message.setText("No results to display");
+                                           message.setVisibility(View.VISIBLE);
+                                       }else{
+                                           //creates a new adapter
+                                           FriendSearchAdapter adapter = new FriendSearchAdapter(response.body().getItems(), new RecyclerViewOnItemClickListener<FriendSearchDescription>() {
+                                               @Override
+                                               public void onItemClickListener(int position, final FriendSearchDescription object) {
+                                                   new AlertDialog.Builder(FindFriendsActivity.this)
+                                                           .setTitle("Select user")
+                                                           .setMessage("Do you want to select " + object.getName() + "?")
+                                                           .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                               @Override
+                                                               public void onClick(DialogInterface dialog, int which) {
+                                                                   Intent intent = new Intent();
+                                                                   //create array
+                                                                   String[] array = new String[2];
+                                                                   array[0] = object.getId();//id
+                                                                   array[1] = object.getName();
 
-            @Override
-            public void onError(String errorMessage) {
-                progressBar.setVisibility(View.GONE);
-                Snackbar.make(coordinatorLayout, errorMessage, Snackbar.LENGTH_LONG)
-                        .show();
-            }
-        }, pageNumber);
-        task.execute();
+                                                                   intent.putExtra(SELECTED_USER_ID, array);
+                                                                   setResult(RESULT_OK, intent);
+                                                                   finish();
+                                                               }
+                                                           })
+                                                           .setNegativeButton("No", null)
+                                                           .create()
+                                                           .show();
+                                               }
+                                           });
+                                           progressBar.setVisibility(View.GONE);
+                                           recyclerView.setAdapter(adapter);
+                                           recyclerView.setVisibility(View.VISIBLE);
+                                           TextView message = (TextView)findViewById(R.id.message);
+                                           message.setVisibility(View.GONE);
+                                       }
+                                       break;
+                                   default:
+                                       break;
+                               }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Page<FriendSearchDescription>> call, Throwable t) {
+                                progressBar.setVisibility(View.GONE);
+                                Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG)
+                                        .show();
+                            }
+                        });
+                break;
+        }
+
     }
 
     @Override
@@ -182,12 +211,9 @@ public class FindFriendsActivity extends AppCompatActivity {
         return true;
     }
 
-    private void createInvalidSizeDialog() {
-        new AlertDialog.Builder(FindFriendsActivity.this)
-                .setMessage("You can select up to 6 users")
-                .setNeutralButton("OK", null)
-                .create()
-                .show();
+    @Override
+    public void onBackPressed(){
+        createExitConfirmDialog();
     }
 
 

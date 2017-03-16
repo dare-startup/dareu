@@ -9,7 +9,8 @@ public enum PrefName {
     GCM_TOKEN("com.dareu.mobile.utils.SharedUtils.gcmToken"),
     FIRST_TIME("com.dareu.mobile.utils.SharedUtils.isFirstTimeHere"),
     CURRENT_ACTIVE_DARE("com.dareu.mobile.utils.SharedUtils.currentActiveDare"),
-    ALREADY_REGISTERED_GCM_TOKEN("com.dareu.mobile.utils.SharedUtils.gcmAlreadyRegistered");
+    ALREADY_REGISTERED_GCM_TOKEN("com.dareu.mobile.utils.SharedUtils.gcmAlreadyRegistered"),
+    CURRENT_PROFILE("com.dareu.mobile.utils.SharedUtils.currentUserProfile");
 
     String value;
 

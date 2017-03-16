@@ -1,15 +1,12 @@
 package com.dareu.mobile.activity.shared;
 
 import android.Manifest;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -19,8 +16,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,21 +28,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.activity.service.UploadDareResponseIntentService;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.dare.DareDescriptionTask;
-import com.dareu.mobile.net.dare.UploadDareResponseTask;
-import com.dareu.mobile.net.request.UploadDareResponseRequest;
+import com.dareu.mobile.service.UploadDareResponseIntentService;
+import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
-import com.dareu.web.dto.response.EntityRegistrationResponse;
+import com.dareu.web.dto.client.DareClientService;
+import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.response.entity.DareDescription;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class UploadDareResponseActivity extends AppCompatActivity {
 
@@ -73,11 +67,14 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     private DareDescription currentDareDescription;
 
     private String dareId;
+    private DareClientService dareService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_dare_response);
+        dareService = RetroFactory.getInstance()
+                .create(DareClientService.class);
         getComponents();
     }
 
@@ -116,21 +113,22 @@ public class UploadDareResponseActivity extends AppCompatActivity {
                         .show();
             }
         });
-        new DareDescriptionTask(UploadDareResponseActivity.this, new AsyncTaskListener<DareDescription>() {
-            @Override
-            public void onTaskResponse(DareDescription response) {
-                dareName.setText(response.getName());
-                dareDescription.setText(response.getDescription());
-                progressBar.setVisibility(View.GONE);
-                layout.setVisibility(View.VISIBLE);
-                currentDareDescription = response;
-            }
+        dareService.dareDescription(dareId, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<DareDescription>() {
+                    @Override
+                    public void onResponse(Call<DareDescription> call, Response<DareDescription> response) {
+                        dareName.setText(response.body().getName());
+                        dareDescription.setText(response.body().getDescription());
+                        progressBar.setVisibility(View.GONE);
+                        layout.setVisibility(View.VISIBLE);
+                        currentDareDescription = response.body();
+                    }
 
-            @Override
-            public void onError(String errorMessage) {
+                    @Override
+                    public void onFailure(Call<DareDescription> call, Throwable t) {
 
-            }
-        }, dareId).execute();
+                    }
+                });
 
     }
 
@@ -246,7 +244,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
 
     private void startCameraIntent() {
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 30);
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 25);
         intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
         intent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, 32949120L); // 30MB
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(newFileName));

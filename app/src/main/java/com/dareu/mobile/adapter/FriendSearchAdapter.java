@@ -1,16 +1,13 @@
 package com.dareu.mobile.adapter;
 
-import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.account.LoadProfileImageTask;
+import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.response.entity.FriendSearchDescription;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
@@ -46,19 +43,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                 listener.onItemClickListener(position, list.get(position));
             }
         });
-        LoadProfileImageTask task = new LoadProfileImageTask(holder.imageView.getContext(), list.get(position).getId(), new AsyncTaskListener<Bitmap>() {
-            @Override
-            public void onTaskResponse(Bitmap response) {
-                if(response != null)
-                    holder.imageView.setImageBitmap(response);
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-
-            }
-        });
-        task.execute();
+        SharedUtils.loadImagePicasso(holder.imageView, holder.imageView.getContext(), list.get(position).getImageUrl());
     }
 
     @Override

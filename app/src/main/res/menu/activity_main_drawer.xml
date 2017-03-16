@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    >
 
     <group android:checkableBehavior="single">
         <item
@@ -8,19 +9,29 @@
             android:title="Pending dare requests" />
 
         <item
+            android:id="@+id/navFriendshipRequests"
+            android:icon="@drawable/ic_supervisor_account_black_24dp"
+            android:title="Friendship requests"/>
+
+        <!--<item
             android:id="@+id/navCreatedDares"
             android:icon="@drawable/ic_folder_black_24dp"
-            android:title="Created dares" />
+            android:title="Created dares" />-->
 
-        <item
+        <!--<item
             android:id="@+id/navCurrentActiveDare"
             android:icon="@drawable/ic_thumb_up_black_24dp"
-            android:title="Current active dare"/>
+            android:title="Current active dare"/>-->
 
         <item
             android:id="@+id/navDareResponsesUploads"
             android:icon="@drawable/ic_file_upload_black_24dp"
             android:title="My responses"/>
+
+        <!--<item
+            android:id="@+id/navHowTo"
+            android:icon="@drawable/ic_info_black_24dp"
+            android:title="FAQ"/>-->
     </group>
 
     <item android:title="Account">
@@ -32,7 +43,7 @@
             <item
                 android:id="@+id/navSignout"
                 android:icon="@drawable/ic_power_settings_new_black_24dp"
-                android:title="Sign out"/>
+                android:title="Take a break"/>
             <!--<item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"

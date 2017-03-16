@@ -43,7 +43,9 @@ public class SplashActivity extends AppCompatActivity implements ActivityListene
             startActivity(intent);
         }else {
             //go to signin activity
-            startActivity(new Intent(this, WelcomeActivity.class));
+            intent = new Intent(this, WelcomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         }
     }
 }

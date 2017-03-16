@@ -56,31 +56,48 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".activity.service.DareuMessagingService">
+        <service android:name=".service.DareuMessagingService"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".activity.service.UploadDareResponseIntentService">
+        <service android:name=".service.UploadDareResponseIntentService"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.dareu.mobile.activity.service.UploadDareResponseIntentService.action"/>
+                <action android:name="com.dareu.mobile.activity.service.UploadDareResponseIntentService.action" />
             </intent-filter>
         </service>
-        <service android:name=".activity.service.DareuMessagingIdService">
+        <service android:name=".service.DareuMessagingIdService"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+        <service android:name=".service.DareuFirebaseTokenCleanerService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.dareu.mobile.service.DareuFirebaseTokenCleanerService.ACTION" />
+            </intent-filter>
+        </service>
+
 
         <activity android:name=".activity.shared.NewDareDataActivity" />
-        <activity android:name=".activity.shared.ConnectionStatusActivity" />
+        <activity android:name=".activity.shared.PendingRequestsActivity" />
         <activity
             android:name=".activity.shared.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity android:name=".activity.user.UnacceptedDaresActivity" />
         <activity android:name=".activity.shared.FlagDareActivity" />
         <activity android:name=".activity.shared.UploadDareResponseActivity" />
-        <activity android:name=".activity.user.DareResponseActivity"></activity>
+        <activity
+            android:name=".activity.user.DareResponseActivity"
+            android:windowSoftInputMode="adjustResize"></activity>
+        <activity android:name=".activity.user.UserResponsesActivity"></activity>
     </application>
 
 </manifest>

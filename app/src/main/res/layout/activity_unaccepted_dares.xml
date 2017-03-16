@@ -21,6 +21,8 @@
             android:layout_height="wrap_content" />
 
         <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/unacceptedDareLayout"
             android:layout_below="@id/toolbar"
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -200,13 +202,12 @@
         </LinearLayout>
 
         <TextView
+            android:layout_centerInParent="true"
             android:visibility="gone"
-            android:layout_centerHorizontal="true"
             android:id="@+id/unacceptedDareMessage"
             android:padding="8dp"
             style="@style/PrimaryColorTextViewTheme"
             android:gravity="center"
-            android:layout_below="@id/unacceptedDaresCardView"
             android:text="You have to accept/decline dares one by one, in order to receive another dare request"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

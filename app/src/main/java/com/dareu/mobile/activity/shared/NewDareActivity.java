@@ -1,9 +1,11 @@
 package com.dareu.mobile.activity.shared;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -21,14 +23,18 @@ import android.widget.Toast;
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.ActivityListener;
 import com.dareu.mobile.adapter.CategoriesAdapter;
-import com.dareu.mobile.net.AsyncTaskListener;
-import com.dareu.mobile.net.dare.CategoriesTask;
-import com.dareu.mobile.net.dare.CreateDareTask;
+import com.dareu.mobile.utils.PrefName;
+import com.dareu.web.dto.client.DareClientService;
+import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.request.CreateDareRequest;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.entity.CategoryDescription;
 import com.dareu.web.dto.response.entity.Page;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NewDareActivity extends AppCompatActivity implements ActivityListener{
 
@@ -38,12 +44,17 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
 
     public static final String DARE_CREATION_STATUS = "dareCreationStatus";
 
+    private DareClientService dareService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_dare);
+        dareService = RetroFactory.getInstance()
+                .create(DareClientService.class);
         getComponents();
         initialize();
+
     }
 
     @Override
@@ -53,12 +64,37 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                new AlertDialog.Builder(NewDareActivity.this)
+                        .setTitle("Exit")
+                        .setMessage("Do you want to cancel new dare creation?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         selectedUserView = (TextView)findViewById(R.id.newDareSelectedUser);
+    }
+
+    @Override
+    public void onBackPressed(){
+        new AlertDialog.Builder(this)
+                .setTitle("Exit")
+                .setMessage("Do you want to cancel new dare creation?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     @Override
@@ -74,35 +110,34 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
             }
         });
 
-
-        CategoriesTask task = new CategoriesTask(NewDareActivity.this, 1, new AsyncTaskListener<Page<CategoryDescription>>() {
-            @Override
-            public void onTaskResponse(final Page<CategoryDescription> response) {
-                //create spinner adapter
-                CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, response.getItems());
-                //set to spinner
-                Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
-                categoriesSpinner.setAdapter(adapter);
-                categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        dareService.getCategories(1, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<Page<CategoryDescription>>() {
                     @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if(position >= 0)
-                            dareRequest.setCategoryId(response.getItems().get(position).getId());
+                    public void onResponse(Call<Page<CategoryDescription>> call, final Response<Page<CategoryDescription>> response) {
+                        //create spinner adapter
+                        CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, response.body().getItems());
+                        //set to spinner
+                        Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
+                        categoriesSpinner.setAdapter(adapter);
+                        categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                if(position >= 0)
+                                    dareRequest.setCategoryId(response.body().getItems().get(position).getId());
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) {
+                                dareRequest.setCategoryId(null);
+                            }
+                        });
                     }
 
                     @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        dareRequest.setCategoryId(null);
+                    public void onFailure(Call<Page<CategoryDescription>> call, Throwable t) {
+
                     }
                 });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-
-            }
-        });
-        task.execute();
         //set timer spinner
         Spinner timerSpinner = (Spinner)findViewById(R.id.newDareTimerSpinner);
         timerSpinner.setAdapter(new ArrayAdapter<String>(NewDareActivity.this,
@@ -175,26 +210,26 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         progressDialog.setMessage("Creating new dare...");
         progressDialog.setIndeterminate(true);
         progressDialog.show();
-        CreateDareTask task = new CreateDareTask(NewDareActivity.this, dareRequest, new AsyncTaskListener<EntityRegistrationResponse>() {
-            @Override
-            public void onTaskResponse(EntityRegistrationResponse response) {
-                Toast.makeText(NewDareActivity.this, "Your dare has been created", Toast.LENGTH_LONG)
-                    .show();
-                Intent intent = new Intent();
-                intent.putExtra(DARE_CREATION_STATUS, Boolean.TRUE.toString());
-                setResult(RESULT_OK, intent);
-                progressDialog.dismiss();
-                finish();
-            }
+        dareService.createDare(dareRequest, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<EntityRegistrationResponse>() {
+                    @Override
+                    public void onResponse(Call<EntityRegistrationResponse> call, Response<EntityRegistrationResponse> response) {
+                        Toast.makeText(NewDareActivity.this, "Your dare has been created", Toast.LENGTH_LONG)
+                                .show();
+                        Intent intent = new Intent();
+                        intent.putExtra(DARE_CREATION_STATUS, Boolean.TRUE.toString());
+                        setResult(RESULT_OK, intent);
+                        progressDialog.dismiss();
+                        finish();
+                    }
 
-            @Override
-            public void onError(String errorMessage) {
-                progressDialog.dismiss();
-                Toast.makeText(NewDareActivity.this, "Could not create dare, please try again", Toast.LENGTH_LONG)
-                        .show();
-            }
-        });
-        task.execute();
+                    @Override
+                    public void onFailure(Call<EntityRegistrationResponse> call, Throwable t) {
+                        progressDialog.dismiss();
+                        Toast.makeText(NewDareActivity.this, "Could not create dare, please try again", Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
     }
 
     @Override
