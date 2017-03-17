@@ -24,7 +24,8 @@
             android:layout_height="wrap_content">
 
             <LinearLayout
-
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:id="@+id/uploadDareResponseLayout"
                 android:orientation="vertical"
                 android:layout_width="match_parent"

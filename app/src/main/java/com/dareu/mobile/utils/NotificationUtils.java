@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.MainActivity;
@@ -26,9 +27,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NotificationUtils {
 
     private static AtomicInteger atomicInteger = new AtomicInteger(0);
+    private static final String TAG = "NotificationUtils";
 
     public static void dispatchNotification(Context cxt, Map<String, String> data){
         String messageType = data.get(AbstractMessage.MESSAGE_TYPE);
+        Log.i(TAG, "Received PUSH notification " + messageType);
         if(messageType.equalsIgnoreCase(MessageType.NEW_DARE.toString())){
             //new dare notification
             newDareNotification(cxt, data);
