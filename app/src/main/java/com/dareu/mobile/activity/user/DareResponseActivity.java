@@ -29,6 +29,7 @@ import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.client.DareClientService;
 import com.dareu.web.dto.client.factory.RetroFactory;
+import com.dareu.web.dto.request.ClapRequest;
 import com.dareu.web.dto.request.NewCommentRequest;
 import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.entity.CommentDescription;
@@ -99,13 +100,6 @@ public class DareResponseActivity extends AppCompatActivity {
             }
         });
         dareResponseThumb = (ImageButton)findViewById(R.id.dareResponseThumb);
-        dareResponseThumb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO: create a new thumb request here....
-                dareResponseThumb.setImageDrawable(getResources().getDrawable(R.drawable.ic_thumb_grey));
-            }
-        });
         commentEditText = (EditText) findViewById(R.id.dareResponseCommentEditText);
         commentSelfImageView = (ImageView)findViewById(R.id.dareResponseCommentImageView);
         shareButton = (ImageView)findViewById(R.id.dareResponseShare);
@@ -142,6 +136,15 @@ public class DareResponseActivity extends AppCompatActivity {
                                 thumbs.setText(String.valueOf(response.body().getClaps()));
                                 views.setText(String.valueOf(response.body().getViews()));
                                 comments.setText(String.valueOf(response.body().getComments()));
+                                dareResponseThumb.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        //ClapRequest request = new ClapRequest()
+                                        //dareService.clapResponse()
+                                        //TODO: create a new thumb request here....
+                                        dareResponseThumb.setImageDrawable(getResources().getDrawable(R.drawable.ic_thumb_grey));
+                                    }
+                                });
                                 break;
                             case 404:
                                 break;
@@ -159,7 +162,6 @@ public class DareResponseActivity extends AppCompatActivity {
                 .enqueue(new Callback<Page<CommentDescription>>() {
                     @Override
                     public void onResponse(Call<Page<CommentDescription>> call, Response<Page<CommentDescription>> response) {
-                        //TODO: create adapter here
                         switch(response.code()){
                             case 200:
                                 if(response.body().getItems().isEmpty()){
