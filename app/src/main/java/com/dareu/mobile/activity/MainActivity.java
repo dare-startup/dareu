@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity
                                 }catch(IOException ex){
                                     Log.e(TAG, ex.getMessage());
                                 }
+
                                 break;
                         }
                     }
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity
 
                             @Override
                             public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
-
+                                Log.e(TAG, "Failed to set dare expiration: " + t.getMessage());
                             }
                         });
 
@@ -216,6 +217,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 }.start();
             }
+
         }catch(ParseException ex){
 
         }
@@ -332,16 +334,16 @@ public class MainActivity extends AppCompatActivity
         for(int i = 0; i < layout.getTabCount(); i ++){
             switch(i){
                 case 0:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_action_discover);
+                    layout.getTabAt(i).setIcon(R.drawable.ic_explore_white_24dp);
                     break;
                 case 1:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_action_channel);
+                    layout.getTabAt(i).setIcon(R.drawable.ic_ondemand_video_white_24dp);
                     break;
                 case 2:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_action_fire);
+                    layout.getTabAt(i).setIcon(R.drawable.ic_whatshot_white_24dp);
                     break;
                 case 3:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_action_anchor);
+                    layout.getTabAt(i).setIcon(R.drawable.ic_star_white_24dp);
                     break;
             }
         }
