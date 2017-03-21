@@ -89,63 +89,70 @@ public class ChannelFragment extends Fragment {
                 break;
             default:
                 //executes task
-                dareService.channel(currentPageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
-                        .enqueue(new Callback<Page<DareResponseDescription>>() {
-                            @Override
-                            public void onResponse(Call<Page<DareResponseDescription>> call, Response<Page<DareResponseDescription>> response) {
-                                if(response.body().getItems().isEmpty()){
-                                    //shows text view and hide everything
-                                    progressBar.setVisibility(View.GONE);
-                                    textView.setVisibility(View.VISIBLE);
-                                    textView.setText("There are no content available right now, try again in a while");
-                                    recyclerView.setVisibility(View.GONE);
-
-                                }else{
-                                    //hide progress bar and show text view
-                                    progressBar.setVisibility(View.GONE);
-                                    textView.setVisibility(View.GONE);
-                                    recyclerView.setVisibility(View.VISIBLE);
-                                    //creates an adapter
-                                    ResponseDescriptionAdapter adapter =
-                                            new ResponseDescriptionAdapter(getActivity(), response.body().getItems(), new ResponseDescriptionAdapter.ResponseDescriptionCallbacks() {
-                                                @Override
-                                                public void onButtonClicked(DareResponseDescription description, int position, ResponseDescriptionAdapter.ResponseDescriptionCallbackType type) {
-                                                    Intent intent = null;
-                                                    switch(type){
-                                                        case CONTACT:
-                                                            //TODO: Go to user profile activity from here
-                                                            Toast.makeText(getActivity(), "Hold on, this is still on development", Toast.LENGTH_SHORT).show();
-                                                            break;
-                                                        case PLAY:
-                                                            //TODO: go to response activity from here
-                                                            intent = new Intent(getActivity(), DareResponseActivity.class);
-                                                            intent.putExtra(DareResponseActivity.DARE_RESPONSE_ID, description.getId());
-
-                                                            startActivity(intent);
-                                                            break;
-                                                        case SHARE:
-                                                            //TODO: Start share intent from here
-                                                            Toast.makeText(getActivity(), "Hold on, this is still on development", Toast.LENGTH_SHORT).show();
-                                                            break;
-                                                    }
-                                                }
-                                            });
-                                    recyclerView.setAdapter(adapter);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<Page<DareResponseDescription>> call, Throwable t) {
-                                //shows text view and hide everything
-                                progressBar.setVisibility(View.GONE);
-                                textView.setVisibility(View.VISIBLE);
-                                textView.setText(t.getMessage());
-                                recyclerView.setVisibility(View.GONE);
-                            }
-                        });
+                getChannel();
                 break;
         }
         return currentView;
+    }
+
+    private void getChannel(){
+        dareService.channel(currentPageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<Page<DareResponseDescription>>() {
+                    @Override
+                    public void onResponse(Call<Page<DareResponseDescription>> call, Response<Page<DareResponseDescription>> response) {
+                        if(response.body().getItems().isEmpty()){
+                            //shows text view and hide everything
+                            progressBar.setVisibility(View.GONE);
+                            textView.setVisibility(View.VISIBLE);
+                            textView.setText("There are no content available right now, try again in a while");
+                            recyclerView.setVisibility(View.GONE);
+
+                        }else{
+                            //hide progress bar and show text view
+                            progressBar.setVisibility(View.GONE);
+                            textView.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                            //creates an adapter
+                            ResponseDescriptionAdapter adapter =
+                                    new ResponseDescriptionAdapter(getActivity(), response.body().getItems(), new ResponseDescriptionAdapter.ResponseDescriptionCallbacks() {
+                                        @Override
+                                        public void onButtonClicked(DareResponseDescription description, int position, ResponseDescriptionAdapter.ResponseDescriptionCallbackType type) {
+                                            Intent intent = null;
+                                            switch(type){
+                                                case CONTACT:
+                                                    //TODO: Go to user profile activity from here
+                                                    Toast.makeText(getActivity(), "Hold on, this is still on development", Toast.LENGTH_SHORT).show();
+                                                    break;
+                                                case PLAY:
+                                                    //TODO: go to response activity from here
+                                                    intent = new Intent(getActivity(), DareResponseActivity.class);
+                                                    intent.putExtra(DareResponseActivity.DARE_RESPONSE_ID, description.getId());
+
+                                                    startActivity(intent);
+                                                    break;
+                                                case SHARE:
+                                                    //TODO: Start share intent from here
+                                                    Toast.makeText(getActivity(), "Hold on, this is still on development", Toast.LENGTH_SHORT).show();
+                                                    break;
+                                            }
+                                        }
+                                    }, ResponseDescriptionAdapter.ResponseType.DEFAULT);
+                            recyclerView.setAdapter(adapter);
+                            if(refreshLayout.isRefreshing()){
+                                refreshLayout.setRefreshing(false);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Page<DareResponseDescription>> call, Throwable t) {
+                        //shows text view and hide everything
+                        progressBar.setVisibility(View.GONE);
+                        textView.setVisibility(View.VISIBLE);
+                        textView.setText(t.getMessage());
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                });
     }
 
     private void getCurrentComponents(){
@@ -156,9 +163,15 @@ public class ChannelFragment extends Fragment {
             recyclerView = (RecyclerView)currentView.findViewById(R.id.channelFragmentRecyclerView);
         LinearLayoutManager mgr = new LinearLayoutManager(getActivity());
 
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getChannel();
+            }
+        });
         recyclerView.setLayoutManager(mgr);
         recyclerView.setHasFixedSize(false);
-        recyclerView.addItemDecoration(new SpaceItemDecoration());
+        recyclerView.addItemDecoration(new SpaceItemDecoration(5));
         if(progressBar == null)
             progressBar = (ProgressBar)currentView.findViewById(R.id.progressBar);
 

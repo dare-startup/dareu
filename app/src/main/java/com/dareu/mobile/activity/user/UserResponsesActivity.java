@@ -100,7 +100,7 @@ public class UserResponsesActivity extends AppCompatActivity {
                                                     break;
                                             }
                                         }
-                                    });
+                                    }, ResponseDescriptionAdapter.ResponseType.DEFAULT);
                             recyclerView.setHasFixedSize(false);
                             recyclerView.setLayoutManager(new LinearLayoutManager(UserResponsesActivity.this));
                             recyclerView.addItemDecoration(new SpaceItemDecoration(5));

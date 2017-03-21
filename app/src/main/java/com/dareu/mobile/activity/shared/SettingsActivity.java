@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.TextView;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.utils.PrefName;
@@ -77,6 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
         if(accountProfile != null){
             //load it
             SharedUtils.loadImagePicasso(image, this, accountProfile.getImageUrl());
+            ((TextView)findViewById(R.id.settingsName)).setText(accountProfile.getName());
         }
         setSupportActionBar(toolbar);
         setTitle("Settings");
@@ -130,8 +132,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
 
-        //load current image profile
-        //SharedUtils.loadImagePicasso(image, SettingsActivity.this, , true);
+
     }
 
     @Override

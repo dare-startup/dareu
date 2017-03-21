@@ -83,7 +83,7 @@ public class ReceivedPendingRequestsFragment extends Fragment {
                                 switch(response.code()){
                                     case 200:
                                         //get items
-                                        adapter = new PendingRequestsAdapter(getActivity().getApplicationContext(), response.body(), new PendingRequestsAdapter.ViewClickListener() {
+                                        adapter = new PendingRequestsAdapter(getActivity(), response.body(), new PendingRequestsAdapter.ViewClickListener() {
                                             @Override
                                             public void onViewClick(ConnectionRequest request, PendingRequestsAdapter.ButtonType type) {
                                                 Intent intent;

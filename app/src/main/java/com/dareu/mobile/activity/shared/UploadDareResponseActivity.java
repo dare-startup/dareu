@@ -246,8 +246,8 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     private void startCameraIntent() {
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 25);
-        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
-        intent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, 32949120L); // 30MB
+        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+        intent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, 10983040L); // 10MB
         Uri uri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", newFileName);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

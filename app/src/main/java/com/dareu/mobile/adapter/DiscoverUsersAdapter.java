@@ -55,9 +55,10 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
         sent.addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                DiscoverUserAccount acc = list.get(position);
                 list.remove(position);
                 notifyItemRemoved(position);
-                listener.onButtonClicked(list.get(position), ButtonType.ADD);
+                listener.onButtonClicked(acc, ButtonType.ADD);
             }
         });
         SharedUtils.loadImagePicasso(sent.imageView, cxt, list.get(position).getImageUrl());

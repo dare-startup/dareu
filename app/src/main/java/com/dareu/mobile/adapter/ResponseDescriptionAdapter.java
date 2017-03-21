@@ -27,19 +27,20 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
     private List<DareResponseDescription> descriptions;
     private Context cxt;
     private ResponseDescriptionCallbacks callback;
+    private ResponseType responseType;
 
     public ResponseDescriptionAdapter(Context cxt, List<DareResponseDescription> page,
-                                      ResponseDescriptionCallbacks callback) {
+                                      ResponseDescriptionCallbacks callback, ResponseType type) {
         this.cxt = cxt;
         this.descriptions = page;
         this.callback = callback;
+        this.responseType = type;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.dare_response_card, parent, false);
-
         return new ViewHolder(view);
     }
 
@@ -89,27 +90,7 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         //set creation date
         holder.date.setText(desc.getUploadDate());
 
-        //TODO: set comments, update web service and data tables
         holder.comments.setText(String.valueOf(desc.getComments()));
-
-        //set menu
-        holder.menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PopupMenu popup = new PopupMenu(cxt, holder.menu);
-                popup.inflate(R.menu.dare_response_item_menu);
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch(item.getItemId()){
-                            //menu cases here
-                        }
-                        return false;
-                    }
-                });
-                popup.show();
-            }
-        });
     }
 
     @Override
@@ -120,7 +101,7 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
     static class ViewHolder extends RecyclerView.ViewHolder{
 
         ImageView thumb, user, share, play;
-        TextView views, claps, comments, title, date, menu;
+        TextView views, claps, comments, title, date;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -133,15 +114,24 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
             comments = (TextView)itemView.findViewById(R.id.dareResponseItemComments);
             title = (TextView)itemView.findViewById(R.id.dareResponseItemTitle);
             date = (TextView)itemView.findViewById(R.id.dareResponseItemDate);
-            menu = (TextView)itemView.findViewById(R.id.dareResponseItemMenu);
         }
     }
+
 
     public interface ResponseDescriptionCallbacks{
         void onButtonClicked(DareResponseDescription description, int position, ResponseDescriptionCallbackType type);
     }
 
     public enum ResponseDescriptionCallbackType{
-        SHARE, PLAY, CONTACT, MENU
+        SHARE, PLAY, CONTACT, MENU, UNANCHOR
+    }
+
+    public enum ResponseType{
+        DEFAULT(0), ANCHORED(1), HOT(2);
+
+        int value;
+        ResponseType(int value){
+            this.value = value;
+        }
     }
 }

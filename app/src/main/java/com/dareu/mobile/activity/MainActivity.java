@@ -297,28 +297,11 @@ public class MainActivity extends AppCompatActivity
         layout.setupWithViewPager(viewPager);
         final Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         //first tab
-        toolbar.setSubtitle("Discover");
+
         layout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                String subtitle = "";
-                //change title
-                switch(tab.getPosition()){
-                    case 0:
-                        subtitle = "Discover";
-                        break;
-                    case 1:
-                        subtitle = "Channel";
-                        break;
-                    case 2:
-                        subtitle = "Hot";
-                        break;
-                    case 3:
-                        subtitle = "Anchored";
-                        break;
-                }
                 viewPager.setCurrentItem(tab.getPosition());
-                toolbar.setSubtitle(subtitle);
             }
 
             @Override
@@ -470,16 +453,22 @@ public class MainActivity extends AppCompatActivity
                 .enqueue(new Callback<AccountProfile>() {
                     @Override
                     public void onResponse(Call<AccountProfile> call, Response<AccountProfile> response) {
-                        //update current profile
-                        AccountProfile profile = response.body();
-                        //save
-                        SharedUtils.saveCurrentProfile(profile, MainActivity.this);
-                        //load image profile
-                        SharedUtils.loadImagePicasso(image, MainActivity.this, profile.getImageUrl());
-                        //load name
-                        name.setText(profile.getName());
-                        //load email
-                        subtitle.setText(profile.getEmail());
+                        switch(response.code()){
+                            case 200:
+                                //update current profile
+                                AccountProfile profile = response.body();
+                                //save
+                                SharedUtils.saveCurrentProfile(profile, MainActivity.this);
+                                //load image profile
+                                SharedUtils.loadImagePicasso(image, MainActivity.this, profile.getImageUrl());
+                                //load name
+                                name.setText(profile.getName());
+                                //load email
+                                subtitle.setText(profile.getEmail());
+                                break;
+                            default:
+                                break;
+                        }
                     }
 
                     @Override

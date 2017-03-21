@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="dareBlue">#9cbad5</color>
     <color name="colorPrimary">#F05B19</color>
     <color name="colorPrimaryDark">#C04814</color>
     <color name="colorAccent">#FBB148</color>

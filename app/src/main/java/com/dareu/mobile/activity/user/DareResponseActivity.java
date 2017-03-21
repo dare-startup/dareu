@@ -29,12 +29,17 @@ import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.client.DareClientService;
 import com.dareu.web.dto.client.factory.RetroFactory;
+import com.dareu.web.dto.request.AnchorContentRequest;
 import com.dareu.web.dto.request.ClapRequest;
 import com.dareu.web.dto.request.NewCommentRequest;
 import com.dareu.web.dto.response.EntityRegistrationResponse;
+import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.CommentDescription;
 import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.Page;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -61,12 +66,14 @@ public class DareResponseActivity extends AppCompatActivity {
     private ImageButton commentButton;
     private ImageButton dareResponseThumb;
     private TextView commentsMessage;
+    private ImageView dareResponseAnchor;
 
     //utility classes
     private String dareResponseId;
     private DareClientService dareService;
     private int currentPageNumber = 1;
     private ResponseCommentAdapter commentsAdapter;
+    private DareResponseDescription currentResponseDescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,12 +117,14 @@ public class DareResponseActivity extends AppCompatActivity {
         thumbs = (TextView)findViewById(R.id.dareResponseThumbs);
         comments = (TextView)findViewById(R.id.dareResponseComments);
         views = (TextView)findViewById(R.id.dareResponseViews);
+        dareResponseAnchor = (ImageView)findViewById(R.id.dareResponseAnchor);
         dareService.findDareResponseDescription(dareResponseId, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
                 .enqueue(new Callback<DareResponseDescription>() {
                     @Override
                     public void onResponse(Call<DareResponseDescription> call, final Response<DareResponseDescription> response) {
                         switch(response.code()){
                             case 200:
+                                currentResponseDescription = response.body();
                                 //load header
                                 videoView = (VideoView)findViewById(R.id.dareResponseVideoView);
                                 videoView.setVideoPath(response.body().getVideoUrl());
@@ -132,17 +141,146 @@ public class DareResponseActivity extends AppCompatActivity {
                                         videoView.start();
                                     }
                                 });
+                                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    @Override
+                                    public void onCompletion(MediaPlayer mediaPlayer) {
+                                        dareService.viewedResponse(currentResponseDescription.getId(),
+                                                SharedUtils.getStringPreference(DareResponseActivity.this, PrefName.SIGNIN_TOKEN))
+                                                .enqueue(new Callback<UpdatedEntityResponse>() {
+                                                    @Override
+                                                    public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
+                                                        switch(response.code()){
+                                                            case 200:
+                                                                //increment views text
+                                                                currentResponseDescription.setViews(currentResponseDescription.getViews() + 1);
+                                                                views.setText(String.valueOf(currentResponseDescription.getViews()));
+                                                                break;
+                                                            default:
+                                                                break;
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
+
+                                                    }
+                                                });
+                                    }
+                                });
                                 //set values
                                 thumbs.setText(String.valueOf(response.body().getClaps()));
+                                if(currentResponseDescription.isClapped())
+                                    dareResponseThumb.setColorFilter(getResources().getColor(R.color.darkBackground));
+
                                 views.setText(String.valueOf(response.body().getViews()));
                                 comments.setText(String.valueOf(response.body().getComments()));
+                                if(currentResponseDescription.isAnchored())
+                                    dareResponseAnchor.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_white_24dp));
+
+                                dareResponseAnchor.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        if(currentResponseDescription.isAnchored()){
+                                            dareService.unpinAnchorContent(currentResponseDescription.getId(),
+                                                    SharedUtils.getStringPreference(DareResponseActivity.this, PrefName.SIGNIN_TOKEN))
+                                                    .enqueue(new Callback<EntityRegistrationResponse>() {
+                                                        @Override
+                                                        public void onResponse(Call<EntityRegistrationResponse> call, Response<EntityRegistrationResponse> response) {
+                                                            switch (response.code()){
+                                                                case 200:
+                                                                    Toast.makeText(DareResponseActivity.this, "This dare response has been deleted from your anchored content", Toast.LENGTH_LONG)
+                                                                            .show();
+                                                                    dareResponseAnchor.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_border_white_24dp));
+                                                                    break;
+                                                                default:
+                                                                    break;
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onFailure(Call<EntityRegistrationResponse> call, Throwable t) {
+
+                                                        }
+                                                    });
+                                        }
+
+                                        else{
+                                            dareService.anchorContent(currentResponseDescription.getId(),
+                                                    SharedUtils.getStringPreference(DareResponseActivity.this, PrefName.SIGNIN_TOKEN))
+                                                    .enqueue(new Callback<EntityRegistrationResponse>() {
+                                                        @Override
+                                                        public void onResponse(Call<EntityRegistrationResponse> call, Response<EntityRegistrationResponse> response) {
+                                                            switch(response.code()){
+                                                                case 200:
+                                                                    Toast.makeText(DareResponseActivity.this, "This dare response has been added to your anchored content", Toast.LENGTH_LONG)
+                                                                            .show();
+                                                                    dareResponseAnchor.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_white_24dp));
+                                                                    break;
+                                                                default:
+                                                                    break;
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onFailure(Call<EntityRegistrationResponse> call, Throwable t) {
+
+                                                        }
+                                                    });
+                                        }
+
+                                    }
+                                });
                                 dareResponseThumb.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        //ClapRequest request = new ClapRequest()
-                                        //dareService.clapResponse()
-                                        //TODO: create a new thumb request here....
-                                        dareResponseThumb.setImageDrawable(getResources().getDrawable(R.drawable.ic_thumb_grey));
+                                        ClapRequest request = new ClapRequest();
+                                        request.setResponseId(currentResponseDescription.getId());
+                                        if(currentResponseDescription.isClapped()){
+                                            //un-clap
+                                            request.setClapped(false);
+                                            currentResponseDescription.setClapped(false);
+                                        }else{
+                                            //clap
+                                            request.setClapped(true);
+                                            currentResponseDescription.setClapped(true);
+                                        }
+                                        dareService.clapResponse(request, SharedUtils.getStringPreference(DareResponseActivity.this, PrefName.SIGNIN_TOKEN))
+                                        .enqueue(new Callback<UpdatedEntityResponse>() {
+                                            @Override
+                                            public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
+                                                switch(response.code()){
+                                                    case 200:
+                                                        Integer clapsNumber = Integer.parseInt(thumbs.getText().toString());
+                                                        if(currentResponseDescription.isClapped()){
+                                                            dareResponseThumb.setColorFilter(getResources().getColor(R.color.dareBlue));
+                                                            //increment clap number
+                                                            clapsNumber ++;
+                                                            thumbs.setText(String.valueOf(clapsNumber));
+                                                        }
+                                                        else{
+                                                            dareResponseThumb.setColorFilter(getResources().getColor(android.R.color.white));
+                                                            //decrement claps number
+                                                            if(clapsNumber < 1)return;
+                                                            clapsNumber --;
+                                                            thumbs.setText(String.valueOf(clapsNumber));
+                                                        }
+
+                                                        break;
+                                                    default:
+                                                        try{
+                                                            Log.e(TAG, response.errorBody().string());
+                                                        }catch(IOException ex){
+                                                            Log.e(TAG, ex.getMessage());
+                                                        }
+                                                        break;
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
+
+                                            }
+                                        });
                                     }
                                 });
                                 break;
@@ -165,18 +303,22 @@ public class DareResponseActivity extends AppCompatActivity {
                         switch(response.code()){
                             case 200:
                                 if(response.body().getItems().isEmpty()){
+                                    commentsRecyclerView.setVisibility(View.GONE);
+                                    commentsprogressBar.setVisibility(View.GONE);
+                                    commentsMessage.setVisibility(View.VISIBLE);
+                                    commentsMessage.setText("Be the first to comment this dare");
+                                }else{
+                                    commentsAdapter =
+                                            new ResponseCommentAdapter(DareResponseActivity.this, response.body().getItems());
+                                    commentsRecyclerView.addItemDecoration(new SpaceItemDecoration(5));
+                                    commentsRecyclerView.setAdapter(commentsAdapter);
+                                    commentsRecyclerView.setLayoutManager(new LinearLayoutManager(DareResponseActivity.this));
+                                    commentsRecyclerView.setHasFixedSize(false);
+                                    commentsRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
+                                    commentsprogressBar.setVisibility(View.GONE);
+                                    commentsRecyclerView.setVisibility(View.VISIBLE);
                                 }
-                                commentsAdapter =
-                                        new ResponseCommentAdapter(DareResponseActivity.this, response.body().getItems());
-                                commentsRecyclerView.addItemDecoration(new SpaceItemDecoration(5));
-                                commentsRecyclerView.setAdapter(commentsAdapter);
-                                commentsRecyclerView.setLayoutManager(new LinearLayoutManager(DareResponseActivity.this));
-                                commentsRecyclerView.setHasFixedSize(false);
-                                commentsRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-                                commentsprogressBar.setVisibility(View.GONE);
-                                commentsRecyclerView.setVisibility(View.VISIBLE);
                                 break;
                             case 404:
                                 break;

@@ -54,11 +54,12 @@
                             android:layout_margin="12dp"/>
 
                         <TextView
+                            android:id="@+id/settingsName"
                             android:layout_marginLeft="8dp"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             style="@style/PrimaryTextViewTheme"
-                            android:text="Alberto Rubalcaba"
+                            android:text=""
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
@@ -112,7 +113,6 @@
 
                             <Button
                                 android:layout_weight=".5"
-                                android:layout_margin="8dp"
                                 style="@style/Widget.AppCompat.Button.Borderless"
                                 android:text="Change Password"
                                 android:layout_width="0dp"
@@ -151,12 +151,12 @@
                                 android:textSize="16sp"
                                 style="@style/PrimaryColorTextViewTheme"
                                 android:text="After connection request"
-                                android:layout_weight=".8"
+                                android:layout_weight=".9"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />
 
                             <CheckBox
-                                android:layout_weight=".2"
+                                android:layout_weight=".1"
                                 android:gravity="center"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />
@@ -174,12 +174,12 @@
                                 android:textSize="16sp"
                                 style="@style/PrimaryColorTextViewTheme"
                                 android:text="After being dared"
-                                android:layout_weight=".8"
+                                android:layout_weight=".9"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />
 
                             <CheckBox
-                                android:layout_weight=".2"
+                                android:layout_weight=".1"
                                 android:gravity="center"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />

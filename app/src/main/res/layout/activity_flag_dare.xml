@@ -88,7 +88,7 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="@string/flag_dare_message"
-                style="@style/PrimaryColorTextViewTheme"
+                style="@style/UnderCardTextViewTheme"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>

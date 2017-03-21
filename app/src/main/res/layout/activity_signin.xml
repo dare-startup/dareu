@@ -94,7 +94,11 @@
                                 android:layout_marginBottom="8dp"
                                 android:id="@+id/signinGoogleButton"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"></com.google.android.gms.common.SignInButton>
+                                android:layout_height="wrap_content"
+                                app:buttonSize="wide"
+                                app:colorScheme="auto">
+
+                            </com.google.android.gms.common.SignInButton>
                         </LinearLayout>
 
 

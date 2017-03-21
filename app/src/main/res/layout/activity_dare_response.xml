@@ -45,13 +45,14 @@
                 <LinearLayout
                     android:id="@+id/dareResponseDataLayout"
                     android:gravity="start|center"
-                    android:padding="16dp"
+                    android:padding="6dp"
                     android:background="@color/colorPrimary"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <ImageButton
+                        android:scaleType="fitXY"
                         android:background="@android:color/transparent"
                         android:id="@+id/dareResponseThumb"
                         android:layout_marginRight="8dp"
@@ -66,7 +67,9 @@
                         android:text=""
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
+
                     <ImageView
+                        android:scaleType="fitXY"
                         android:layout_marginRight="8dp"
                         android:src="@drawable/ic_remove_red_eye_white_24dp"
                         android:layout_width="wrap_content"
@@ -81,6 +84,7 @@
                         android:layout_height="wrap_content" />
 
                     <ImageView
+                        android:scaleType="fitXY"
                         android:layout_marginRight="8dp"
                         android:src="@drawable/ic_comment_white_24dp"
                         android:layout_width="wrap_content"
@@ -101,6 +105,7 @@
 
 
                     <ImageView
+                        android:scaleType="fitXY"
                         android:layout_marginRight="8dp"
                         android:id="@+id/dareResponseAnchor"
                         android:src="@drawable/ic_star_border_white_24dp"
@@ -109,6 +114,7 @@
 
 
                     <ImageView
+                        android:scaleType="fitXY"
                         android:id="@+id/dareResponseShare"
                         android:src="@drawable/ic_share_white_24dp"
                         android:layout_width="wrap_content"
