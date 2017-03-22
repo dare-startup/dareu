@@ -34,8 +34,7 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"
-                style="@style/PrimaryColorTextViewTheme"
-                android:text="Alberto Rubalcaba"
+                style="@style/PrimaryTextViewTheme"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -44,7 +43,6 @@
                 android:textSize="12sp"
                 android:layout_marginBottom="4dp"
                 style="@style/PrimaryTextViewTheme"
-                android:text="Damn, that was gross!! "
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -57,7 +55,6 @@
                     android:id="@+id/responseCommentItemDate"
                     android:layout_marginRight="16dp"
                     android:textSize="10sp"
-                    android:text="00/00/19"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 

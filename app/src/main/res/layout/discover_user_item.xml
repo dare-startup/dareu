@@ -70,7 +70,7 @@
                 <ImageView
                     android:layout_marginRight="8dp"
                     android:src="@drawable/ic_dare"
-                    android:layout_width="25dp"
+                    android:layout_width="18dp"
                     android:layout_height="25dp" />
 
                 <TextView

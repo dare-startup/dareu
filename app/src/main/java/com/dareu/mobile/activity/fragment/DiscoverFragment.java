@@ -1,6 +1,7 @@
 package com.dareu.mobile.activity.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
+import com.dareu.mobile.activity.shared.ProfileActivity;
 import com.dareu.mobile.adapter.DiscoverUsersAdapter;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
@@ -120,21 +122,35 @@ public class DiscoverFragment extends Fragment {
                     }else{
                         adapter = new DiscoverUsersAdapter(getActivity(), response.body().getItems(), new DiscoverUsersAdapter.OnButtonClicked() {
                             @Override
-                            public void onButtonClicked(DiscoverUserAccount account, DiscoverUsersAdapter.ButtonType type) {
-                                accountService.requestConnection(account.getId(),
-                                        SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
-                                        .enqueue(new Callback<EntityRegistrationResponse>() {
-                                            @Override
-                                            public void onResponse(Call<EntityRegistrationResponse> call, Response<EntityRegistrationResponse> response) {
-                                                Toast.makeText(getActivity(), "You request has been sent", Toast.LENGTH_LONG)
-                                                        .show();
-                                            }
+                            public void onButtonClicked(DiscoverUserAccount account, DiscoverUsersAdapter.ButtonType type, final int position) {
+                                switch (type){
+                                    case ADD:
+                                        accountService.requestConnection(account.getId(),
+                                                SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
+                                                .enqueue(new Callback<EntityRegistrationResponse>() {
+                                                    @Override
+                                                    public void onResponse(Call<EntityRegistrationResponse> call, Response<EntityRegistrationResponse> response) {
+                                                        Toast.makeText(getActivity(), "You request has been sent", Toast.LENGTH_LONG)
+                                                                .show();
+                                                        adapter.remove(position);
+                                                    }
 
-                                            @Override
-                                            public void onFailure(Call<EntityRegistrationResponse> call, Throwable t) {
-
-                                            }
-                                        });
+                                                    @Override
+                                                    public void onFailure(Call<EntityRegistrationResponse> call, Throwable t) {
+                                                        Toast.makeText(getActivity(), "There has been an error", Toast.LENGTH_LONG)
+                                                                .show();
+                                                    }
+                                                });
+                                        break;
+                                    case CONTACT:
+                                        Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                                        intent.putExtra(ProfileActivity.USER_PROFILE_PARAM, ProfileActivity.USER_PROFILE);
+                                        intent.putExtra(ProfileActivity.USER_IMAGE_URL, account.getImageUrl());
+                                        intent.putExtra(ProfileActivity.USER_ID, account.getId());
+                                        intent.putExtra(ProfileActivity.USER_NAME, account.getName());
+                                        startActivity(intent);
+                                        break;
+                                }
                             }
                         });
                         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));

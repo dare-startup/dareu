@@ -56,12 +56,28 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
             @Override
             public void onClick(View v) {
                 DiscoverUserAccount acc = list.get(position);
-                list.remove(position);
-                notifyItemRemoved(position);
-                listener.onButtonClicked(acc, ButtonType.ADD);
+                listener.onButtonClicked(acc, ButtonType.ADD, position);
+            }
+        });
+        sent.nameView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onButtonClicked(list.get(position), ButtonType.CONTACT, position);
+            }
+        });
+
+        sent.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onButtonClicked(list.get(position), ButtonType.CONTACT, position);
             }
         });
         SharedUtils.loadImagePicasso(sent.imageView, cxt, list.get(position).getImageUrl());
+    }
+
+    public void remove(int position){
+        list.remove(position);
+        notifyItemRemoved(position);
     }
 
     @Override
@@ -88,10 +104,10 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public interface OnButtonClicked{
-        public void onButtonClicked(DiscoverUserAccount account, ButtonType type);
+        public void onButtonClicked(DiscoverUserAccount account, ButtonType type, int position);
     }
 
     public enum ButtonType{
-        ADD
+        ADD, CONTACT
     }
 }

@@ -1,8 +1,6 @@
 package com.dareu.mobile.activity.user;
 
 import android.media.MediaPlayer;
-import android.net.Uri;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,13 +9,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -29,7 +28,6 @@ import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.client.DareClientService;
 import com.dareu.web.dto.client.factory.RetroFactory;
-import com.dareu.web.dto.request.AnchorContentRequest;
 import com.dareu.web.dto.request.ClapRequest;
 import com.dareu.web.dto.request.NewCommentRequest;
 import com.dareu.web.dto.response.EntityRegistrationResponse;
@@ -38,8 +36,11 @@ import com.dareu.web.dto.response.entity.CommentDescription;
 import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.Page;
 
+import org.w3c.dom.Comment;
+
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -58,7 +59,7 @@ public class DareResponseActivity extends AppCompatActivity {
     private TextView thumbs;
     private TextView views;
     private ImageView shareButton;
-    private ProgressBar commentsprogressBar;
+    private ProgressBar commentsProgressBar;
     private RecyclerView commentsRecyclerView;
     private TextView comments;
     private ImageView commentSelfImageView;
@@ -108,9 +109,18 @@ public class DareResponseActivity extends AppCompatActivity {
         });
         dareResponseThumb = (ImageButton)findViewById(R.id.dareResponseThumb);
         commentEditText = (EditText) findViewById(R.id.dareResponseCommentEditText);
+        commentEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if(i == EditorInfo.IME_ACTION_DONE){
+
+                }
+                return false;
+            }
+        });
         commentSelfImageView = (ImageView)findViewById(R.id.dareResponseCommentImageView);
         shareButton = (ImageView)findViewById(R.id.dareResponseShare);
-        commentsprogressBar = (ProgressBar)findViewById(R.id.dareResponseCommentsProgressBar);
+        commentsProgressBar = (ProgressBar)findViewById(R.id.dareResponseCommentsProgressBar);
         commentsRecyclerView = (RecyclerView)findViewById(R.id.dareResponseCommentsRecyclerView);
         coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         videoProgressBar = (ProgressBar)findViewById(R.id.dareResponseVideoProgressBar);
@@ -170,12 +180,15 @@ public class DareResponseActivity extends AppCompatActivity {
                                 //set values
                                 thumbs.setText(String.valueOf(response.body().getClaps()));
                                 if(currentResponseDescription.isClapped())
-                                    dareResponseThumb.setColorFilter(getResources().getColor(R.color.darkBackground));
+                                    dareResponseThumb.setColorFilter(getResources().getColor(R.color.colorPrimary));
 
                                 views.setText(String.valueOf(response.body().getViews()));
                                 comments.setText(String.valueOf(response.body().getComments()));
-                                if(currentResponseDescription.isAnchored())
+                                if(currentResponseDescription.isAnchored()){
                                     dareResponseAnchor.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_white_24dp));
+                                    dareResponseAnchor.setColorFilter(getResources().getColor(R.color.colorPrimary));
+                                }
+
 
                                 dareResponseAnchor.setOnClickListener(new View.OnClickListener() {
                                     @Override
@@ -191,6 +204,8 @@ public class DareResponseActivity extends AppCompatActivity {
                                                                     Toast.makeText(DareResponseActivity.this, "This dare response has been deleted from your anchored content", Toast.LENGTH_LONG)
                                                                             .show();
                                                                     dareResponseAnchor.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_border_white_24dp));
+                                                                    dareResponseAnchor.setColorFilter(getResources().getColor(android.R.color.darker_gray));
+                                                                    currentResponseDescription.setAnchored(false);
                                                                     break;
                                                                 default:
                                                                     break;
@@ -215,6 +230,8 @@ public class DareResponseActivity extends AppCompatActivity {
                                                                     Toast.makeText(DareResponseActivity.this, "This dare response has been added to your anchored content", Toast.LENGTH_LONG)
                                                                             .show();
                                                                     dareResponseAnchor.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_white_24dp));
+                                                                    dareResponseAnchor.setColorFilter(getResources().getColor(R.color.colorPrimary));
+                                                                    currentResponseDescription.setAnchored(true);
                                                                     break;
                                                                 default:
                                                                     break;
@@ -252,13 +269,13 @@ public class DareResponseActivity extends AppCompatActivity {
                                                     case 200:
                                                         Integer clapsNumber = Integer.parseInt(thumbs.getText().toString());
                                                         if(currentResponseDescription.isClapped()){
-                                                            dareResponseThumb.setColorFilter(getResources().getColor(R.color.dareBlue));
+                                                            dareResponseThumb.setColorFilter(getResources().getColor(R.color.colorPrimary));
                                                             //increment clap number
                                                             clapsNumber ++;
                                                             thumbs.setText(String.valueOf(clapsNumber));
                                                         }
                                                         else{
-                                                            dareResponseThumb.setColorFilter(getResources().getColor(android.R.color.white));
+                                                            dareResponseThumb.setColorFilter(getResources().getColor(android.R.color.darker_gray));
                                                             //decrement claps number
                                                             if(clapsNumber < 1)return;
                                                             clapsNumber --;
@@ -304,19 +321,19 @@ public class DareResponseActivity extends AppCompatActivity {
                             case 200:
                                 if(response.body().getItems().isEmpty()){
                                     commentsRecyclerView.setVisibility(View.GONE);
-                                    commentsprogressBar.setVisibility(View.GONE);
+                                    commentsProgressBar.setVisibility(View.GONE);
                                     commentsMessage.setVisibility(View.VISIBLE);
                                     commentsMessage.setText("Be the first to comment this dare");
                                 }else{
                                     commentsAdapter =
                                             new ResponseCommentAdapter(DareResponseActivity.this, response.body().getItems());
-                                    commentsRecyclerView.addItemDecoration(new SpaceItemDecoration(5));
+                                    commentsRecyclerView.addItemDecoration(new SpaceItemDecoration(15));
                                     commentsRecyclerView.setAdapter(commentsAdapter);
                                     commentsRecyclerView.setLayoutManager(new LinearLayoutManager(DareResponseActivity.this));
                                     commentsRecyclerView.setHasFixedSize(false);
                                     commentsRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-                                    commentsprogressBar.setVisibility(View.GONE);
+                                    commentsProgressBar.setVisibility(View.GONE);
                                     commentsRecyclerView.setVisibility(View.VISIBLE);
                                 }
                                 break;
@@ -326,7 +343,7 @@ public class DareResponseActivity extends AppCompatActivity {
                                 commentsMessage.setText("Something went wrong, try again");
                                 commentsMessage.setVisibility(View.VISIBLE);
                                 commentsRecyclerView.setVisibility(View.GONE);
-                                commentsprogressBar.setVisibility(View.GONE);
+                                commentsProgressBar.setVisibility(View.GONE);
                                 break;
                         }
 
@@ -372,7 +389,9 @@ public class DareResponseActivity extends AppCompatActivity {
 
                         @Override
                         public void onFailure(Call<EntityRegistrationResponse> call, Throwable t) {
-                            //TODO: comment could not be created
+                            Log.e(TAG, t.getMessage());
+                            Toast.makeText(DareResponseActivity.this, "Could not create comment, try asgain", Toast.LENGTH_LONG)
+                                    .show();
                         }
                     });
         }
@@ -385,6 +404,12 @@ public class DareResponseActivity extends AppCompatActivity {
                     public void onResponse(Call<CommentDescription> call, Response<CommentDescription> response) {
                         switch(response.code()){
                             case 200:
+                                if(commentsAdapter == null){
+                                    List<CommentDescription> descs = new ArrayList<CommentDescription>();
+                                    commentsAdapter = new ResponseCommentAdapter(DareResponseActivity.this, descs);
+                                    commentsRecyclerView.setAdapter(commentsAdapter);
+                                }
+
                                 commentsAdapter.add(response.body());
                                 commentEditText.setText("");
                                 break;

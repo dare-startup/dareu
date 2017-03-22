@@ -2,6 +2,7 @@ package com.dareu.mobile.activity.fragment;
 
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -17,13 +18,17 @@ import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
+import com.dareu.mobile.activity.shared.ProfileActivity;
+import com.dareu.mobile.activity.user.DareResponseActivity;
 import com.dareu.mobile.adapter.AnchoredContentAdapter;
 import com.dareu.mobile.adapter.ResponseDescriptionAdapter;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.client.DareClientService;
 import com.dareu.web.dto.client.factory.RetroFactory;
+import com.dareu.web.dto.request.ClapRequest;
 import com.dareu.web.dto.response.EntityRegistrationResponse;
+import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.AnchoredDescription;
 import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.Page;
@@ -148,6 +153,74 @@ public class AnchoredFragment extends Fragment {
                                                             })
                                                             .setNegativeButton("No", null)
                                                             .show();
+                                                    break;
+                                                case CONTACT:
+                                                    Intent intent = new Intent(getActivity(), ProfileActivity.class);
+
+                                                    if(SharedUtils.getCurrentProfile(getActivity())
+                                                            .getId().equals(desc.getContent().getUser().getId())){
+                                                        intent.putExtra(ProfileActivity.USER_PROFILE_PARAM, ProfileActivity.OWN_PROFILE);
+                                                    }else{
+                                                        intent.putExtra(ProfileActivity.USER_ID, desc.getContent().getUser().getId());
+                                                        intent.putExtra(ProfileActivity.USER_PROFILE_PARAM, ProfileActivity.USER_PROFILE);
+                                                        intent.putExtra(ProfileActivity.USER_IMAGE_URL, desc.getContent().getUser().getImageUrl());
+                                                        intent.putExtra(ProfileActivity.USER_NAME, desc.getContent().getUser().getName());
+                                                    }
+
+                                                    startActivity(intent);
+                                                    break;
+                                                case PLAY:
+                                                    intent = new Intent(getActivity(), DareResponseActivity.class);
+                                                    intent.putExtra(DareResponseActivity.DARE_RESPONSE_ID, desc.getContent().getId());
+                                                    startActivity(intent);
+                                                    break;
+                                                case SHARE:
+                                                    //TODO: WORK to do here
+                                                    Toast.makeText(getActivity(), "Hold on, this is still on development", Toast.LENGTH_SHORT).show();
+                                                    break;
+                                                case THUMB:
+                                                    if(desc.getContent().isClapped()){
+                                                        //unclap
+                                                        clientService.clapResponse(new ClapRequest(desc.getContent().getId(), false), SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
+                                                                .enqueue(new Callback<UpdatedEntityResponse>() {
+                                                                    @Override
+                                                                    public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
+                                                                        switch (response.code()){
+                                                                            case 200:
+                                                                                adapter.clapResponse(position, false);
+                                                                                break;
+                                                                            default:
+                                                                                break;
+                                                                        }
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
+
+                                                                    }
+                                                                });
+                                                    }else{
+                                                        //clap
+                                                        clientService.clapResponse(new ClapRequest(desc.getContent().getId(), true),
+                                                                SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
+                                                                .enqueue(new Callback<UpdatedEntityResponse>() {
+                                                                    @Override
+                                                                    public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
+                                                                        switch (response.code()){
+                                                                            case 200:
+                                                                                adapter.clapResponse(position, true);
+                                                                                break;
+                                                                            default:
+                                                                                break;
+                                                                        }
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
+
+                                                                    }
+                                                                });
+                                                    }
                                                     break;
                                             }
                                         }

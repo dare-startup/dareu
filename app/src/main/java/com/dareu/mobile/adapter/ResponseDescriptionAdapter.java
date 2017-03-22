@@ -56,6 +56,16 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         //load user image
         SharedUtils.loadImagePicasso(holder.user, cxt, desc.getUser().getImageUrl());
 
+        //set name listener
+
+        holder.play.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //go to response activity, (oh god..)
+                callback.onButtonClicked(desc, position, ResponseDescriptionCallbackType.PLAY);
+            }
+        });
+
         //set play listener
         holder.play.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +91,18 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
             }
         });
 
+        holder.thumbUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                callback.onButtonClicked(desc, position, ResponseDescriptionCallbackType.THUMB);
+            }
+        });
+
+        if(desc.isClapped())
+            holder.thumbUp.setColorFilter(cxt.getResources().getColor(R.color.colorPrimary));
+        else
+            holder.thumbUp.setColorFilter(cxt.getResources().getColor(android.R.color.darker_gray));
+
         //set views
         holder.views.setText(String.valueOf(desc.getViews()));
 
@@ -93,6 +115,14 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         holder.comments.setText(String.valueOf(desc.getComments()));
     }
 
+    public void clapResponse(int position, boolean clap){
+        DareResponseDescription desc = descriptions.get(position);
+        desc.setClapped(clap);
+        desc.setClaps(clap ? desc.getClaps() + 1 : desc.getClaps() - 1);
+        notifyItemChanged(position);
+
+    }
+
     @Override
     public int getItemCount() {
         return descriptions.size();
@@ -100,7 +130,7 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
 
     static class ViewHolder extends RecyclerView.ViewHolder{
 
-        ImageView thumb, user, share, play;
+        ImageView thumb, user, share, play, thumbUp;
         TextView views, claps, comments, title, date;
 
         public ViewHolder(View itemView) {
@@ -114,6 +144,7 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
             comments = (TextView)itemView.findViewById(R.id.dareResponseItemComments);
             title = (TextView)itemView.findViewById(R.id.dareResponseItemTitle);
             date = (TextView)itemView.findViewById(R.id.dareResponseItemDate);
+            thumbUp = (ImageView)itemView.findViewById(R.id.dareResponseItemThumbButton);
         }
     }
 
@@ -123,7 +154,7 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
     }
 
     public enum ResponseDescriptionCallbackType{
-        SHARE, PLAY, CONTACT, MENU, UNANCHOR
+        SHARE, PLAY, CONTACT, MENU, THUMB
     }
 
     public enum ResponseType{

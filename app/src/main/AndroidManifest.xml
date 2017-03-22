@@ -56,35 +56,38 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.DareuMessagingService"
+        <service
+            android:name=".service.DareuMessagingService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".service.UploadDareResponseIntentService"
+        <service
+            android:name=".service.UploadDareResponseIntentService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.dareu.mobile.activity.service.UploadDareResponseIntentService.action" />
             </intent-filter>
         </service>
-        <service android:name=".service.DareuMessagingIdService"
+        <service
+            android:name=".service.DareuMessagingIdService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".service.DareuFirebaseTokenCleanerService"
+        <service
+            android:name=".service.DareuFirebaseTokenCleanerService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.dareu.mobile.service.DareuFirebaseTokenCleanerService.ACTION" />
             </intent-filter>
         </service>
-
 
         <activity android:name=".activity.shared.NewDareDataActivity" />
         <activity android:name=".activity.shared.PendingRequestsActivity" />
@@ -93,11 +96,12 @@
             android:label="@string/title_activity_settings" />
         <activity android:name=".activity.user.UnacceptedDaresActivity" />
         <activity android:name=".activity.shared.FlagDareActivity" />
-        <activity android:name=".activity.shared.UploadDareResponseActivity" />
+        <activity android:name=".activity.shared.UploadDareResponseActivity"
+            android:windowSoftInputMode="adjustResize"></activity>
         <activity
             android:name=".activity.user.DareResponseActivity"
-            android:windowSoftInputMode="adjustResize"></activity>
-        <activity android:name=".activity.user.UserResponsesActivity"></activity>
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".activity.user.UserResponsesActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -106,8 +110,10 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
+
+        <activity android:name=".activity.shared.ProfileActivity"></activity>
     </application>
 
 </manifest>

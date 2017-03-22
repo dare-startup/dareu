@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.dareu.mobile.R;
 import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.response.entity.AnchoredDescription;
+import com.dareu.web.dto.response.entity.DareResponseDescription;
 
 import java.util.List;
 
@@ -49,6 +50,19 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
 
         //load user image
         SharedUtils.loadImagePicasso(holder.user, cxt, desc.getContent().getUser().getImageUrl());
+
+        if(desc.getContent().isClapped()){
+            holder.thumbButton.setColorFilter(cxt.getResources().getColor(R.color.colorPrimary));
+        }else{
+            holder.thumbButton.setColorFilter(cxt.getResources().getColor(android.R.color.darker_gray));
+        }
+        //set thumb up listener
+        holder.thumbButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onAnchoredContentClick(desc, position, AnchoredDescriptionCallbackType.THUMB);
+            }
+        });
 
         //set play listener
         holder.play.setOnClickListener(new View.OnClickListener() {
@@ -90,7 +104,7 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
         //set creation date
         holder.date.setText(desc.getContent().getUploadDate());
 
-        //TODO: set comments, update web service and data tables
+        //set comments
         holder.comments.setText(String.valueOf(desc.getContent().getComments()));
     }
 
@@ -104,9 +118,17 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
         return descriptions.size();
     }
 
+    public void clapResponse(int position, boolean clap){
+        AnchoredDescription desc = descriptions.get(position);
+        desc.getContent().setClapped(clap);
+        desc.getContent().setClaps(clap ? desc.getContent().getClaps() + 1 : desc.getContent().getClaps() - 1);
+        notifyItemChanged(position);
+
+    }
+
     static class AnchoredContentViewHolder extends RecyclerView.ViewHolder{
 
-        ImageView thumb, user, share, play, unanchor;
+        ImageView thumb, user, share, play, unanchor, thumbButton;
         TextView views, claps, comments, title, date;
 
         public AnchoredContentViewHolder(View itemView) {
@@ -121,6 +143,7 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
             title = (TextView)itemView.findViewById(R.id.dareResponseItemTitle);
             date = (TextView)itemView.findViewById(R.id.dareResponseItemDate);
             unanchor = (ImageView)itemView.findViewById(R.id.dareResponseItemUnanchore);
+            thumbButton = (ImageView)itemView.findViewById(R.id.dareResponseItemThumbButton);
         }
     }
 
@@ -129,6 +152,6 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
     }
 
     public enum AnchoredDescriptionCallbackType{
-        SHARE, PLAY, CONTACT, UNANCHOR
+        SHARE, PLAY, CONTACT, UNANCHOR, THUMB
     }
 }
