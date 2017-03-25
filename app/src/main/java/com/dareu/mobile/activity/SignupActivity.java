@@ -37,25 +37,53 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.Calendar;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnFocusChange;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SignupActivity extends AppCompatActivity implements ActivityListener {
+public class SignupActivity extends AppCompatActivity {
 
     private static final String TAG = "SignupActivity";
 
-    private EditText nameText, emailText, passwordText;
-    private TextView birthdayView;
-    private Button signupButton;
-    private ProgressDialog progressDialog;
-    private CoordinatorLayout coordinatorLayout;
-    private SignInButton signupGPlusButton;
-    private TextInputLayout nameLayout, emailLayout, passwordLayout;
+    @BindView(R.id.signupNameText)
+    EditText nameText;
 
+    @BindView(R.id.signupEmailText)
+    EditText emailText;
+
+    @BindView(R.id.signupPasswordText)
+    EditText passwordText;
+
+    @BindView(R.id.signupDateView)
+    TextView birthdayView;
+
+    @BindView(R.id.signupButton)
+    Button signupButton;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.signupGPlusButton)
+    SignInButton signupGPlusButton;
+
+    @BindView(R.id.signoutNameLayout)
+    TextInputLayout nameLayout;
+
+    @BindView(R.id.signupEmailLayout)
+    TextInputLayout emailLayout;
+
+    @BindView(R.id.signupPasswordLayout)
+    TextInputLayout passwordLayout;
+
+    private ProgressDialog progressDialog;
     private final GoogleSignupRequest currentGoogleRequest = new GoogleSignupRequest();
     private final SignupRequest currentRequest = new SignupRequest();
     private OpenClientService openService;
@@ -68,9 +96,10 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
         setContentView(R.layout.activity_signup);
         openService = RetroFactory.getInstance()
                 .create(OpenClientService.class);
-        getComponents();
+        ButterKnife.bind(this);
         initialize();
     }
+
 
     @Override
     public void onBackPressed() {
@@ -82,6 +111,7 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
+                        overridePendingTransition(R.anim.fade_in, R.anim.slide_up);
                     }
                 })
                 .setNegativeButton("No", null)
@@ -89,20 +119,6 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                 .show();
     }
 
-    @Override
-    public void getComponents() {
-        nameLayout = (TextInputLayout) findViewById(R.id.signoutNameLayout);
-        emailLayout = (TextInputLayout) findViewById(R.id.signupEmailLayout);
-        passwordLayout = (TextInputLayout) findViewById(R.id.signupPasswordLayout);
-        nameText = (EditText) findViewById(R.id.signupNameText);
-        emailText = (EditText) findViewById(R.id.signupEmailText);
-        passwordText = (EditText) findViewById(R.id.signupPasswordText);
-        signupButton = (Button) findViewById(R.id.signupButton);
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
-        birthdayView = (TextView) findViewById(R.id.signupDateView);
-        signupGPlusButton = (SignInButton) findViewById(R.id.signupGPlusButton);
-        setGooglePlusButtonText(signupGPlusButton, "Sign up");
-    }
 
     protected void setGooglePlusButtonText(SignInButton signInButton, String buttonText) {
         // Find the TextView that is inside of the SignInButton and set its text
@@ -117,143 +133,89 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
         }
     }
 
-    @Override
-    public void initialize() {
-        signupGPlusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = SharedUtils.getGoogleSigninIntent(SignupActivity.this);
-                startActivityForResult(intent, SharedUtils.GOOGLE_SIGNIN_REQUEST_CODE);
-            }
-        });
-        emailText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if(! b){
-                    openService.isEmailAvailable(emailText.getText().toString())
-                            .enqueue(new Callback<ResourceAvailableResponse>() {
-                                @Override
-                                public void onResponse(Call<ResourceAvailableResponse> call, Response<ResourceAvailableResponse> response) {
-                                    switch(response.code()){
-                                        case 200:
-                                            if(! response.body().isAvailable())
-                                                emailLayout.setError("This email is already registered");
-                                            else emailAvailable = true;
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
+    @OnClick(R.id.signupGPlusButton)
+    public void googleSignupButtonListener(){
+        Intent intent = SharedUtils.getGoogleSigninIntent(SignupActivity.this);
+        startActivityForResult(intent, SharedUtils.GOOGLE_SIGNIN_REQUEST_CODE);
+    }
 
-                                @Override
-                                public void onFailure(Call<ResourceAvailableResponse> call, Throwable t) {
+    @OnFocusChange(R.id.signupEmailText)
+    public void onEmailFocusChangedListener(boolean b){
+        if(! b){
+            openService.isEmailAvailable(emailText.getText().toString())
+                    .enqueue(new Callback<ResourceAvailableResponse>() {
+                        @Override
+                        public void onResponse(Call<ResourceAvailableResponse> call, Response<ResourceAvailableResponse> response) {
+                            switch(response.code()){
+                                case 200:
+                                    if(! response.body().isAvailable())
+                                        emailLayout.setError("This email is already registered");
+                                    else emailAvailable = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
 
-                                }
-                            });
-                }
-            }
-        });
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //get values
-                String name = nameText.getText().toString();
-                String email = emailText.getText().toString();
-                String password = passwordText.getText().toString();
-                String birthday;
+                        @Override
+                        public void onFailure(Call<ResourceAvailableResponse> call, Throwable t) {
 
-                TextInputLayout layout = null;
-                if(name.isEmpty()){
-                    nameLayout.setError("You must provide a name");
-                    return;
-                }else{
-                    nameLayout.setError("");
-                }
-                if(email.isEmpty()){
-                    emailLayout.setError("You must provide an email");
-                    return;
-                }else emailLayout.setError("");
+                        }
+                    });
+        }
+    }
 
-                if(! emailAvailable){
-                    Snackbar.make(coordinatorLayout, "Email has already been registered", Snackbar.LENGTH_LONG)
-                            .show();
-                    return;
-                }
-                String regId = SharedUtils
-                        .getStringPreference(SignupActivity.this, PrefName.GCM_TOKEN);
-                switch(SharedUtils.checkInternetConnection(SignupActivity.this)){
-                    case NOT_CONNECTED:
-                        SharedUtils.showNoInternetConnectionSnackbar(coordinatorLayout, SignupActivity.this);
-                        break;
-                    default:
-                        switch(signupType){
-                            case GOOGLE:
-                                birthday = currentGoogleRequest.getBirthdate();
-                                if(! SharedUtils.validateDate(birthday)){
-                                    Snackbar.make(coordinatorLayout, "You must provide a birth date", Snackbar.LENGTH_LONG)
-                                            .show();
-                                    return;
-                                }
-                                //connected
-                                progressDialog = new ProgressDialog(SignupActivity.this);
-                                progressDialog.setCancelable(false);
-                                progressDialog.setIndeterminate(true);
-                                progressDialog.setMessage("Signing up to DareÜ");
-                                progressDialog.show();
-                                //creates a new request
-                                currentGoogleRequest.setFcm(regId);
-                                openService.signupGoogle(currentGoogleRequest)
-                                        .enqueue(new Callback<AuthenticationResponse>() {
-                                            @Override
-                                            public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
-                                                if(response.body() == null){
+    public void signupButtonListener(){
+        //get values
+        String name = nameText.getText().toString();
+        String email = emailText.getText().toString();
+        String password = passwordText.getText().toString();
+        String birthday;
 
-                                                }else if(response.body().getToken() != null){
-                                                    SharedUtils.setStringPreference(SignupActivity.this, PrefName.SIGNIN_TOKEN, response.body().getToken());
-                                                    Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                    startActivity(intent);
-                                                }else{
-                                                    Snackbar.make(coordinatorLayout, response.body().getMessage(), Snackbar.LENGTH_LONG)
-                                                            .show();
-                                                }
-                                            }
+        TextInputLayout layout = null;
+        if(name.isEmpty()){
+            nameLayout.setError("You must provide a name");
+            return;
+        }else{
+            nameLayout.setError("");
+        }
+        if(email.isEmpty()){
+            emailLayout.setError("You must provide an email");
+            return;
+        }else emailLayout.setError("");
 
-                                            @Override
-                                            public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
-                                                Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG)
-                                                        .show();
-                                            }
-                                        });
-                                break;
-                            case LOCAL:
-                                //connected
-                                if(password.isEmpty()){
-                                    passwordLayout.setError("You must provide a password");
-                                    return;
-                                } else passwordLayout.setError("");
-                                birthday = currentRequest.getBirthday();
-                                if(! SharedUtils.validateDate(birthday)){
-                                    Snackbar.make(coordinatorLayout, "You must provide a birth date", Snackbar.LENGTH_LONG)
-                                            .show();
-                                    return;
-                                }
-                                progressDialog = new ProgressDialog(SignupActivity.this);
-                                progressDialog.setCancelable(false);
-                                progressDialog.setIndeterminate(true);
-                                progressDialog.setMessage("Signing up to DareÜ");
-                                progressDialog.show();
-
-                                //create a request
-                                currentRequest.setBirthday(birthday);
-                                currentRequest.setEmail(email);
-                                currentRequest.setName(name);
-                                currentRequest.setPassword(password);
-                                currentRequest.setFcm(regId);
-
-                                Call<AuthenticationResponse> call = openService
-                                        .signup(currentRequest);
-                                call.enqueue(new Callback<AuthenticationResponse>() {
+        if(! emailAvailable){
+            Snackbar.make(coordinatorLayout, "Email has already been registered", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+        String regId = SharedUtils
+                .getStringPreference(SignupActivity.this, PrefName.GCM_TOKEN);
+        if(regId == null || regId.isEmpty())
+            regId = FirebaseInstanceId.getInstance().getToken();
+        switch(SharedUtils.checkInternetConnection(SignupActivity.this)){
+            case NOT_CONNECTED:
+                SharedUtils.showNoInternetConnectionSnackbar(coordinatorLayout, SignupActivity.this);
+                break;
+            default:
+                switch(signupType){
+                    case GOOGLE:
+                        birthday = currentGoogleRequest.getBirthdate();
+                        if(! SharedUtils.validateDate(birthday)){
+                            Snackbar.make(coordinatorLayout, "You must provide a birth date", Snackbar.LENGTH_LONG)
+                                    .show();
+                            return;
+                        }
+                        //connected
+                        progressDialog = new ProgressDialog(SignupActivity.this);
+                        progressDialog.setCancelable(false);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Creating new account");
+                        progressDialog.show();
+                        //creates a new request
+                        currentGoogleRequest.setFcm(regId);
+                        openService.signupGoogle(currentGoogleRequest)
+                                .enqueue(new Callback<AuthenticationResponse>() {
                                     @Override
                                     public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
                                         if(response.body() == null){
@@ -263,6 +225,7 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                                             Intent intent = new Intent(SignupActivity.this, MainActivity.class);
                                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                             startActivity(intent);
+                                            overridePendingTransition(R.anim.slide_in_from_left, R.anim.fade_out);
                                         }else{
                                             Snackbar.make(coordinatorLayout, response.body().getMessage(), Snackbar.LENGTH_LONG)
                                                     .show();
@@ -275,42 +238,91 @@ public class SignupActivity extends AppCompatActivity implements ActivityListene
                                                 .show();
                                     }
                                 });
-                                break;
+                        break;
+                    case LOCAL:
+                        //connected
+                        if(password.isEmpty()){
+                            passwordLayout.setError("You must provide a password");
+                            return;
+                        } else passwordLayout.setError("");
+                        birthday = currentRequest.getBirthday();
+                        if(! SharedUtils.validateDate(birthday)){
+                            Snackbar.make(coordinatorLayout, "You must provide a birth date", Snackbar.LENGTH_LONG)
+                                    .show();
+                            return;
                         }
+                        progressDialog = new ProgressDialog(SignupActivity.this);
+                        progressDialog.setCancelable(false);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Signing up to DareÜ");
+                        progressDialog.show();
+
+                        //create a request
+                        currentRequest.setBirthday(birthday);
+                        currentRequest.setEmail(email);
+                        currentRequest.setName(name);
+                        currentRequest.setPassword(password);
+                        currentRequest.setFcm(regId);
+
+                        Call<AuthenticationResponse> call = openService
+                                .signup(currentRequest);
+                        call.enqueue(new Callback<AuthenticationResponse>() {
+                            @Override
+                            public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
+                                if(response.body() == null){
+
+                                }else if(response.body().getToken() != null){
+                                    SharedUtils.setStringPreference(SignupActivity.this, PrefName.SIGNIN_TOKEN, response.body().getToken());
+                                    Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                    overridePendingTransition(R.anim.slide_in_from_left, R.anim.fade_out);
+                                }else{
+                                    Snackbar.make(coordinatorLayout, response.body().getMessage(), Snackbar.LENGTH_LONG)
+                                            .show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
+                                Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG)
+                                        .show();
+                            }
+                        });
                         break;
                 }
+                break;
+        }
+    }
 
+    @OnClick(R.id.signupDateView)
+    public void birthDateListener(){
+        Calendar c = Calendar.getInstance();
+        int mYear = c.get(Calendar.YEAR) - 18;
+        int mMonth = c.get(Calendar.MONTH);
+        int mDay = c.get(Calendar.DAY_OF_MONTH);
+        System.out.println("the selected " + mDay);
+        DatePickerDialog dialog = new DatePickerDialog(SignupActivity.this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        String date = String.valueOf(monthOfYear + 1) + "/" + dayOfMonth + "/" + year;
+                        switch(signupType){
+                            case LOCAL:
+                                currentRequest.setBirthday(date);
+                                break;
+                            case GOOGLE:
+                                currentGoogleRequest.setBirthdate(date);
+                                break;
+                        }
+                        birthdayView.setText("Date of birth: " + date);
+                    }
+                }, mYear, mMonth, mDay);
+        dialog.show();
+    }
 
-            }
-        });
-        birthdayView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar c = Calendar.getInstance();
-                int mYear = c.get(Calendar.YEAR) - 18;
-                int mMonth = c.get(Calendar.MONTH);
-                int mDay = c.get(Calendar.DAY_OF_MONTH);
-                System.out.println("the selected " + mDay);
-                DatePickerDialog dialog = new DatePickerDialog(SignupActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                String date = String.valueOf(monthOfYear + 1) + "/" + dayOfMonth + "/" + year;
-                                switch(signupType){
-                                    case LOCAL:
-                                        currentRequest.setBirthday(date);
-                                        break;
-                                    case GOOGLE:
-                                        currentGoogleRequest.setBirthdate(date);
-                                        break;
-                                }
-                                birthdayView.setText("Date of birth: " + date);
-                            }
-                        }, mYear, mMonth, mDay);
-                dialog.show();
-            }
-        });
-
+    public void initialize() {
+        setGooglePlusButtonText(signupGPlusButton, "Sign up with Google");
     }
 
     @Override

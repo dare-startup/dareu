@@ -1,5 +1,7 @@
 package com.dareu.mobile.activity.user;
 
+import android.content.Context;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +14,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -23,6 +26,7 @@ import android.widget.VideoView;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
+import com.dareu.mobile.activity.shared.ProfileActivity;
 import com.dareu.mobile.adapter.ResponseCommentAdapter;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
@@ -36,12 +40,13 @@ import com.dareu.web.dto.response.entity.CommentDescription;
 import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.Page;
 
-import org.w3c.dom.Comment;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -53,21 +58,53 @@ public class DareResponseActivity extends AppCompatActivity {
     private static final String TAG = "ResponseActivity";
 
     //views
-    private CoordinatorLayout coordinatorLayout;
-    private VideoView videoView;
-    private ProgressBar videoProgressBar;
-    private TextView thumbs;
-    private TextView views;
-    private ImageView shareButton;
-    private ProgressBar commentsProgressBar;
-    private RecyclerView commentsRecyclerView;
-    private TextView comments;
-    private ImageView commentSelfImageView;
-    private EditText commentEditText;
-    private ImageButton commentButton;
-    private ImageButton dareResponseThumb;
-    private TextView commentsMessage;
-    private ImageView dareResponseAnchor;
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.dareResponseVideoView)
+    VideoView videoView;
+
+    @BindView(R.id.dareResponseVideoProgressBar)
+    ProgressBar videoProgressBar;
+
+    @BindView(R.id.dareResponseThumbs)
+    TextView thumbs;
+
+    @BindView(R.id.dareResponseViews)
+    TextView views;
+
+    @BindView(R.id.dareResponseShare)
+    ImageView shareButton;
+
+    @BindView(R.id.dareResponseCommentsProgressBar)
+    ProgressBar commentsProgressBar;
+
+    @BindView(R.id.dareResponseCommentsRecyclerView)
+    RecyclerView commentsRecyclerView;
+
+    @BindView(R.id.dareResponseComments)
+    TextView comments;
+
+    @BindView(R.id.dareResponseCommentImageView)
+    ImageView commentSelfImageView;
+
+    @BindView(R.id.dareResponseCommentEditText)
+    EditText commentEditText;
+
+    @BindView(R.id.dareResponseCommentButton)
+    ImageButton commentButton;
+
+    @BindView(R.id.dareResponseThumb)
+    ImageButton dareResponseThumb;
+
+    @BindView(R.id.dareResponseCommentsMessage)
+    TextView commentsMessage;
+
+    @BindView(R.id.dareResponseAnchor)
+    ImageView dareResponseAnchor;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     //utility classes
     private String dareResponseId;
@@ -83,11 +120,11 @@ public class DareResponseActivity extends AppCompatActivity {
         dareResponseId = getIntent().getStringExtra(DARE_RESPONSE_ID);
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
+        ButterKnife.bind(this);
         initialize();
     }
 
     private void initialize() {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setBackgroundColor(getResources().getColor(android.R.color.transparent));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -95,11 +132,9 @@ public class DareResponseActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                supportFinishAfterTransition();
             }
         });
-        commentsMessage = (TextView)findViewById(R.id.dareResponseCommentsMessage);
-        commentButton = (ImageButton)findViewById(R.id.dareResponseCommentButton);
         commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,8 +142,6 @@ public class DareResponseActivity extends AppCompatActivity {
                 createNewComment();
             }
         });
-        dareResponseThumb = (ImageButton)findViewById(R.id.dareResponseThumb);
-        commentEditText = (EditText) findViewById(R.id.dareResponseCommentEditText);
         commentEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
@@ -118,16 +151,6 @@ public class DareResponseActivity extends AppCompatActivity {
                 return false;
             }
         });
-        commentSelfImageView = (ImageView)findViewById(R.id.dareResponseCommentImageView);
-        shareButton = (ImageView)findViewById(R.id.dareResponseShare);
-        commentsProgressBar = (ProgressBar)findViewById(R.id.dareResponseCommentsProgressBar);
-        commentsRecyclerView = (RecyclerView)findViewById(R.id.dareResponseCommentsRecyclerView);
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-        videoProgressBar = (ProgressBar)findViewById(R.id.dareResponseVideoProgressBar);
-        thumbs = (TextView)findViewById(R.id.dareResponseThumbs);
-        comments = (TextView)findViewById(R.id.dareResponseComments);
-        views = (TextView)findViewById(R.id.dareResponseViews);
-        dareResponseAnchor = (ImageView)findViewById(R.id.dareResponseAnchor);
         dareService.findDareResponseDescription(dareResponseId, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
                 .enqueue(new Callback<DareResponseDescription>() {
                     @Override
@@ -136,7 +159,6 @@ public class DareResponseActivity extends AppCompatActivity {
                             case 200:
                                 currentResponseDescription = response.body();
                                 //load header
-                                videoView = (VideoView)findViewById(R.id.dareResponseVideoView);
                                 videoView.setVideoPath(response.body().getVideoUrl());
                                 //creates a media controller
                                 MediaController mediaController = new MediaController(DareResponseActivity.this);
@@ -326,7 +348,7 @@ public class DareResponseActivity extends AppCompatActivity {
                                     commentsMessage.setText("Be the first to comment this dare");
                                 }else{
                                     commentsAdapter =
-                                            new ResponseCommentAdapter(DareResponseActivity.this, response.body().getItems());
+                                            new ResponseCommentAdapter(DareResponseActivity.this, response.body().getItems(), commentsListener);
                                     commentsRecyclerView.addItemDecoration(new SpaceItemDecoration(15));
                                     commentsRecyclerView.setAdapter(commentsAdapter);
                                     commentsRecyclerView.setLayoutManager(new LinearLayoutManager(DareResponseActivity.this));
@@ -378,6 +400,11 @@ public class DareResponseActivity extends AppCompatActivity {
                             switch(response.code()){
                                 case 200:
                                     addComment(response.body().getId());
+                                    View view = getCurrentFocus();
+                                    if (view != null) {
+                                        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                                    }
                                     break;
                                 case 500:
                                     break;
@@ -406,7 +433,7 @@ public class DareResponseActivity extends AppCompatActivity {
                             case 200:
                                 if(commentsAdapter == null){
                                     List<CommentDescription> descs = new ArrayList<CommentDescription>();
-                                    commentsAdapter = new ResponseCommentAdapter(DareResponseActivity.this, descs);
+                                    commentsAdapter = new ResponseCommentAdapter(DareResponseActivity.this, descs, commentsListener);
                                     commentsRecyclerView.setAdapter(commentsAdapter);
                                 }
 
@@ -425,5 +452,54 @@ public class DareResponseActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private ResponseCommentAdapter.CommentButtonClickListener commentsListener = new ResponseCommentAdapter.CommentButtonClickListener() {
+        @Override
+        public void onCommentButtonClicked(final CommentDescription desc, final int position, ResponseCommentAdapter.CommentEventType type) {
+            switch(type){
+                case CLAP:
+                    dareService.clapResponseComment(desc.getId(), SharedUtils.getStringPreference(DareResponseActivity.this, PrefName.SIGNIN_TOKEN))
+                            .enqueue(new Callback<EntityRegistrationResponse>() {
+                                @Override
+                                public void onResponse(Call<EntityRegistrationResponse> call, Response<EntityRegistrationResponse> response) {
+                                    switch(response.code()){
+                                        case 200:
+                                            if(desc.isClapped())
+                                                commentsAdapter.clapComment(false, position);
+                                            else
+                                                commentsAdapter.clapComment(true, position);
+                                            break;
+                                        default:
+                                            try{
+                                                Log.e(TAG, response.errorBody().string());
+                                            }catch(IOException ex){
+                                                Log.e(TAG, ex.getMessage());
+                                            }
+                                            break;
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<EntityRegistrationResponse> call, Throwable t) {
+
+                                }
+                            });
+                    break;
+                case CONTACT:
+                    Intent intent = new Intent(DareResponseActivity.this, ProfileActivity.class);
+                    intent.putExtra(ProfileActivity.USER_PROFILE_PARAM, ProfileActivity.USER_PROFILE);
+                    intent.putExtra(ProfileActivity.USER_ID, desc.getUser().getId());
+                    intent.putExtra(ProfileActivity.USER_NAME, desc.getUser().getName());
+                    intent.putExtra(ProfileActivity.USER_IMAGE_URL, desc.getUser().getImageUrl());
+                    startActivity(intent);
+                    break;
+            }
+        }
+    };
+
+    @Override
+    public void onBackPressed(){
+        supportFinishAfterTransition();
     }
 }

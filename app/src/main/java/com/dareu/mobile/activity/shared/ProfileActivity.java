@@ -29,6 +29,8 @@ import com.dareu.web.dto.response.entity.UserAccount;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,6 +49,38 @@ public class ProfileActivity extends AppCompatActivity {
     private int currentProfileType;
     private String currentUserName;
 
+    @BindView(R.id.profileImage)
+    ImageView profileImage;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.profileDate)
+    TextView registrationDate;
+
+    @BindView(R.id.profileCoins)
+    TextView coins;
+
+    @BindView(R.id.profileScore)
+    TextView score;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.profileLayout)
+    LinearLayout layout;
+
+    @BindView(R.id.profileContacts)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.profileContactsMessage)
+    TextView contactsMessage;
+
+    @BindView(R.id.profileUploads)
+    RecyclerView uploads;
+
+    @BindView(R.id.profileUploadsMessage)
+    TextView uploadsMessage;
     private final AccountClientService clientService =
             RetroFactory.getInstance().create(AccountClientService.class);
 
@@ -54,6 +88,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        ButterKnife.bind(this);
         getParams();
         initialize();
     }
@@ -62,15 +97,13 @@ public class ProfileActivity extends AppCompatActivity {
      * initialize profile components
      */
     private void initialize() {
-        ImageView profileImage = (ImageView)findViewById(R.id.profileImage);
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(currentUserName);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                supportFinishAfterTransition();
             }
         });
         switch(currentProfileType){
@@ -123,18 +156,12 @@ public class ProfileActivity extends AppCompatActivity {
      * @param profile
      */
     private void loadUserProfile(AccountProfile profile) {
-        ImageView profileImage = (ImageView)findViewById(R.id.profileImage);
         //load current image
         SharedUtils.loadImagePicasso(profileImage, this, profile.getImageUrl());
-
         //date
-        TextView registrationDate = (TextView)findViewById(R.id.profileDate);
         registrationDate.setText("Registered since " + profile.getUserSinceDate());
-
-        TextView coins = (TextView)findViewById(R.id.profileCoins);
         coins.setText(String.valueOf(profile.getCoins()));
 
-        TextView score = (TextView)findViewById(R.id.profileScore);
         score.setText(String.valueOf(profile.getUscore()));
 
         //data section
@@ -146,21 +173,17 @@ public class ProfileActivity extends AppCompatActivity {
         //contacts section
         contactsSection(profile.getContacts());
 
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        LinearLayout layout = (LinearLayout)findViewById(R.id.profileLayout);
         progressBar.setVisibility(View.GONE);
         layout.setVisibility(View.VISIBLE);
 
     }
 
     private void contactsSection(Page<FriendSearchDescription> contacts) {
-        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.profileContacts);
-        TextView message = (TextView)findViewById(R.id.profileContactsMessage);
 
         if(contacts.getItems().isEmpty()){
             recyclerView.setVisibility(View.GONE);
-            message.setText("User do not have any contact yet");
-            message.setVisibility(View.VISIBLE);
+            contactsMessage.setText("User do not have any contact yet");
+            contactsMessage.setVisibility(View.VISIBLE);
         }else{
             UserSmallAdapter adapter = new UserSmallAdapter(contacts.getItems(), new UserSmallAdapter.UserSmallAdapterListener() {
                 @Override
@@ -173,7 +196,7 @@ public class ProfileActivity extends AppCompatActivity {
             recyclerView.addItemDecoration(new SpaceItemDecoration(15, true));
             recyclerView.setAdapter(adapter);
             recyclerView.setVisibility(View.VISIBLE);
-            message.setVisibility(View.GONE);
+            contactsMessage.setVisibility(View.GONE);
         }
     }
 
@@ -190,8 +213,6 @@ public class ProfileActivity extends AppCompatActivity {
      * @param descriptions
      */
     private void uploadsSection(Page<DareResponseDescription> descriptions){
-        RecyclerView uploads = (RecyclerView)findViewById(R.id.profileUploads);
-        TextView uploadsMessage = (TextView)findViewById(R.id.profileUploadsMessage);
 
         if(descriptions.getItems().isEmpty()){
             uploads.setVisibility(View.GONE);
@@ -241,5 +262,10 @@ public class ProfileActivity extends AppCompatActivity {
                 currentUserName = getIntent().getStringExtra(USER_NAME);
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed(){
+        supportFinishAfterTransition();
     }
 }

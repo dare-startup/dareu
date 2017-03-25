@@ -25,26 +25,61 @@ import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.UnacceptedDare;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UnacceptedDaresActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    private CoordinatorLayout coordinatorLayout;
-    private ProgressBar progressBar;
-    private CardView cardView;
-    private ProgressDialog progressDialog;
-    private LinearLayout unacceptedDareLayout;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+
+    @BindView(R.id.unacceptedDaresCardView)
+    CardView cardView;
+
+    @BindView(R.id.unacceptedDareLayout)
+    LinearLayout unacceptedDareLayout;
 
     //controls
-    private TextView dareName, dareDescription, dareCategory, dareTimer, dareCreationDate, message, challengerName;
-    private CircularImageView challengerImage;
-    private Button declineButton, acceptButton;
+    @BindView(R.id.unacceptedDareName)
+    TextView dareName;
+
+    @BindView(R.id.unacceptedDareDescription)
+    TextView dareDescription;
+
+    @BindView(R.id.unacceptedDareTimer)
+    TextView dareTimer;
+
+    @BindView(R.id.unacceptedDareCreationDate)
+    TextView dareCreationDate;
+
+    @BindView(R.id.unacceptedDareMessage)
+    TextView message;
+
+    @BindView(R.id.unacceptedDareChallengerName)
+    TextView challengerName;
+
+    @BindView(R.id.unacceptedDareChallengerImage)
+    CircularImageView challengerImage;
+
+    @BindView(R.id.unacceptedDareDeclineButton)
+    Button declineButton;
+
+    @BindView(R.id.unacceptedDareAcceptButton)
+    Button acceptButton;
 
     private UnacceptedDare currentDareDescription;
     private DareClientService dareService;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +87,11 @@ public class UnacceptedDaresActivity extends AppCompatActivity {
         setContentView(R.layout.activity_unaccepted_dares);
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
+        ButterKnife.bind(this);
         getComponents();
     }
 
     private void getComponents() {
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Unaccepted dares");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -66,21 +101,9 @@ public class UnacceptedDaresActivity extends AppCompatActivity {
                 finish();
             }
         });
-        unacceptedDareLayout = (LinearLayout)findViewById(R.id.unacceptedDareLayout);
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        dareName = (TextView)findViewById(R.id.unacceptedDareName);
-        dareDescription = (TextView)findViewById(R.id.unacceptedDareDescription);
-        //dareCategory = (TextView)findViewById(R.id.unacceptedDareCategory);
-        dareTimer = (TextView)findViewById(R.id.unacceptedDareTimer);
-        dareCreationDate = (TextView)findViewById(R.id.unacceptedDareCreationDate);
-        message = (TextView)findViewById(R.id.unacceptedDareMessage);
-        challengerName = (TextView)findViewById(R.id.unacceptedDareChallengerName);
-        challengerImage = (CircularImageView)findViewById(R.id.unacceptedDareChallengerImage);
         //progress dialog
         progressDialog = new ProgressDialog(UnacceptedDaresActivity.this);
         final DareConfirmationRequest request = new DareConfirmationRequest();
-        declineButton = (Button)findViewById(R.id.unacceptedDareDeclineButton);
         declineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -128,7 +151,6 @@ public class UnacceptedDaresActivity extends AppCompatActivity {
 
             }
         });
-        acceptButton = (Button)findViewById(R.id.unacceptedDareAcceptButton);
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,7 +197,6 @@ public class UnacceptedDaresActivity extends AppCompatActivity {
                         .show();
             }
         });
-        cardView = (CardView)findViewById(R.id.unacceptedDaresCardView);
         getUnacceptedDare();
     }
 

@@ -13,7 +13,7 @@
         <ImageView
             android:padding="8dp"
             android:scaleType="fitXY"
-
+            android:transitionName="dareResponseUserImage"
             android:id="@+id/receivedRequestItemImage"
             android:layout_width="50dp"
             android:layout_height="50dp" />

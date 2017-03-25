@@ -4,6 +4,7 @@ package com.dareu.mobile.activity.fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -33,6 +34,8 @@ import com.dareu.web.dto.response.entity.AnchoredDescription;
 import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.Page;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,10 +47,17 @@ import retrofit2.Response;
  */
 public class AnchoredFragment extends Fragment {
 
-    private ProgressBar progressBar;
-    private TextView message;
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.message)
+    TextView message;
+
+    @BindView(R.id.anchoredRecyclerView)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout refreshLayout;
 
     private View currentView;
     private int currentPageNumber = 1;
@@ -81,10 +91,8 @@ public class AnchoredFragment extends Fragment {
 
         // Inflate the layout for this fragment
         currentView = inflater.inflate(R.layout.fragment_anchored, container, false);
-        progressBar = (ProgressBar)currentView.findViewById(R.id.progressBar);
-        message = (TextView)currentView.findViewById(R.id.message);
-        recyclerView = (RecyclerView)currentView.findViewById(R.id.anchoredRecyclerView);
-        refreshLayout = (SwipeRefreshLayout)currentView.findViewById(R.id.swipeRefreshLayout);
+        ButterKnife.bind(this, currentView);
+
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -101,11 +109,12 @@ public class AnchoredFragment extends Fragment {
                 .enqueue(new Callback<Page<AnchoredDescription>>() {
                     @Override
                     public void onResponse(Call<Page<AnchoredDescription>> call, Response<Page<AnchoredDescription>> response) {
+                        ActivityOptionsCompat options;
                         switch(response.code()){
                             case 200:
                                 if(response.body().getItems().isEmpty()){
                                     progressBar.setVisibility(View.GONE);
-                                    message.setText("You do not have any anchored content yet");
+                                    message.setText("You do not have any starred content yet");
                                     message.setVisibility(View.VISIBLE);
                                 }else{
                                     adapter = new AnchoredContentAdapter(response.body().getItems(), getActivity(), new AnchoredContentAdapter.AnchoredButtonClickListener() {
@@ -115,8 +124,8 @@ public class AnchoredFragment extends Fragment {
                                                 case UNANCHOR:
                                                     //show a confirm dialog
                                                     new AlertDialog.Builder(getActivity())
-                                                            .setTitle("Un-anchor")
-                                                            .setMessage("Do you want to un-anchor this response?")
+                                                            .setTitle("Remove")
+                                                            .setMessage("Do you want to remove this response from starred content?")
                                                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                                                 @Override
                                                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -127,7 +136,7 @@ public class AnchoredFragment extends Fragment {
                                                                                 public void onResponse(Call<EntityRegistrationResponse> call, Response<EntityRegistrationResponse> response) {
                                                                                     switch(response.code()){
                                                                                         case 200:
-                                                                                            Toast.makeText(getActivity(), "Anchored content has been removed", Toast.LENGTH_LONG)
+                                                                                            Toast.makeText(getActivity(), "Starred content has been removed", Toast.LENGTH_LONG)
                                                                                                     .show();
                                                                                             adapter.remove(position);
                                                                                             if(adapter.getItemCount() == 0){
@@ -138,7 +147,7 @@ public class AnchoredFragment extends Fragment {
                                                                                             }
                                                                                             break;
                                                                                         default:
-                                                                                            Toast.makeText(getActivity(), "Could not remove anchored content", Toast.LENGTH_LONG)
+                                                                                            Toast.makeText(getActivity(), "Could not remove starred content", Toast.LENGTH_LONG)
                                                                                                     .show();
                                                                                             break;
                                                                                     }
@@ -166,7 +175,7 @@ public class AnchoredFragment extends Fragment {
                                                         intent.putExtra(ProfileActivity.USER_IMAGE_URL, desc.getContent().getUser().getImageUrl());
                                                         intent.putExtra(ProfileActivity.USER_NAME, desc.getContent().getUser().getName());
                                                     }
-
+                                                    //TODO: options = new ActivityOptionsCompat()
                                                     startActivity(intent);
                                                     break;
                                                 case PLAY:
@@ -227,7 +236,7 @@ public class AnchoredFragment extends Fragment {
                                     });
                                     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                                     recyclerView.setHasFixedSize(false);
-                                    recyclerView.addItemDecoration(new SpaceItemDecoration(5));
+                                    recyclerView.addItemDecoration(new SpaceItemDecoration(SpaceItemDecoration.EXTRA_LARGE_SPACE));
                                     recyclerView.setAdapter(adapter);
                                     progressBar.setVisibility(View.GONE);
                                     recyclerView.setVisibility(View.VISIBLE);

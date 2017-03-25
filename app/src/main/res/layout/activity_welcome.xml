@@ -7,14 +7,31 @@
     android:background="@drawable/welcome_background"
     tools:context="com.dareu.mobile.activity.WelcomeActivity">
 
-    <LinearLayout
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
+    <ImageView
         android:layout_centerInParent="true"
+        android:id="@+id/welcomeLogo"
+        android:scaleType="fitCenter"
+        android:tint="@android:color/white"
+        android:src="@drawable/dareu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"/>
+
+    <LinearLayout
+        android:animateLayoutChanges="true"
+        android:visibility="gone"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="250dp"
+        android:id="@+id/welcomeMessage"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:layout_alignParentTop="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center">
+
+
         <TextView
             android:textStyle="bold"
             android:textSize="26sp"
@@ -33,24 +50,27 @@
     </LinearLayout>
 
     <LinearLayout
+        android:animateLayoutChanges="true"
+        android:visibility="gone"
+        android:id="@+id/welcomeButtonsLayout"
+        android:layout_below="@id/welcomeMessage"
         android:paddingBottom="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginBottom="16dp"
-        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <Button
+            android:layout_gravity="center"
             android:id="@+id/welcomeSignupButton"
             style="@style/PrimaryButtonTheme"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             android:text="Sign up"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
+            android:textSize="18sp"
             style="@style/PrimaryWhiteTextView"
             android:id="@+id/welcomeSigninTextView"
             android:layout_gravity="center"

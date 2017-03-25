@@ -5,6 +5,7 @@
     android:id="@+id/activity_signup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context="com.dareu.mobile.activity.SignupActivity">
 
 
@@ -22,58 +23,72 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-                <android.support.v7.widget.CardView
-                    android:id="@+id/signupLayout"
+            <LinearLayout
+                android:padding="8dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/dareu"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    style="@style/WhiteTextAppearance"
+                    android:id="@+id/signoutNameLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <LinearLayout
-                        android:padding="8dp"
-                        android:orientation="vertical"
+                    android:layout_height="wrap_content"
+                    app:errorEnabled="true">
+                    <EditText
+                        android:textColor="@android:color/white"
+                        android:id="@+id/signupNameText"
+                        android:hint="Name"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <android.support.design.widget.TextInputLayout
-                            android:id="@+id/signoutNameLayout"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:errorEnabled="true">
-                            <EditText
-                                android:id="@+id/signupNameText"
-                                android:hint="Name"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="8dp"
-                                android:imeOptions="actionNext"
-                                android:inputType="textCapWords"/>
-                        </android.support.design.widget.TextInputLayout>
-                        <android.support.design.widget.TextInputLayout
-                            android:id="@+id/signupEmailLayout"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:errorEnabled="true">
-                            <EditText
-                                android:layout_marginBottom="8dp"
-                                android:id="@+id/signupEmailText"
-                                android:hint="Email"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:imeOptions="actionNext"
-                                android:inputType="textWebEmailAddress"/>
-                        </android.support.design.widget.TextInputLayout>
-                        <android.support.design.widget.TextInputLayout
-                            android:id="@+id/signupPasswordLayout"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:errorEnabled="true">
-                            <EditText
-                                android:layout_marginBottom="8dp"
-                                android:id="@+id/signupPasswordText"
-                                android:hint="Password"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:imeOptions="actionDone"
-                                android:inputType="textPassword"/>
-                        </android.support.design.widget.TextInputLayout>
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:imeOptions="actionNext"
+                        android:inputType="textCapWords"/>
+                </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/signupEmailLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/WhiteTextAppearance"
+                    app:errorEnabled="true">
+                    <EditText
+                        android:textColor="@android:color/white"
+                        android:layout_marginBottom="8dp"
+                        android:id="@+id/signupEmailText"
+                        android:hint="Email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionNext"
+                        android:inputType="textWebEmailAddress"/>
+                </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    app:hintAnimationEnabled="true"
+                    android:layout_marginBottom="8dp"
+                    android:id="@+id/signupPasswordLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/WhiteTextAppearance"
+                    app:passwordToggleEnabled="true"
+                    app:passwordToggleTint="@android:color/white"
+                    app:errorEnabled="true">
+                    <EditText
+                        android:textColor="@android:color/white"
+                        android:layout_marginBottom="8dp"
+                        android:id="@+id/signupPasswordText"
+                        android:hint="Password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:inputType="textPassword"/>
+                </android.support.design.widget.TextInputLayout>
 
 
 
@@ -81,46 +96,50 @@
 
 
 
-                        <TextView
-                            android:layout_marginTop="8dp"
-                            android:layout_marginLeft="4dp"
-                            android:layout_marginBottom="12dp"
-                            android:id="@+id/signupDateView"
-                            android:text="Touch to select your birthday"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                <TextView
+                    style="@style/PrimaryWhiteTextView"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginBottom="16dp"
+                    android:id="@+id/signupDateView"
+                    android:textSize="18sp"
+                    android:text="Touch to select your birthday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
 
-                        <Button
+                <Button
+                    android:background="@color/colorPrimary"
+                    android:elevation="0dp"
+                    android:layout_margin="8dp"
+                    android:id="@+id/signupButton"
+                    android:layout_alignParentBottom="true"
+                    android:text="Create account"
+                    style="@style/PrimaryDarkButtonTheme"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp" />
 
-                            android:textSize="14sp"
-                            android:elevation="4dp"
-                            android:drawableLeft="@drawable/ic_dare"
-                            android:layout_marginBottom="8dp"
-                            android:id="@+id/signupButton"
-                            android:layout_alignParentBottom="true"
-                            android:text="Sign up"
-                            style="@style/Widget.AppCompat.Button.Borderless"
-                            android:layout_width="match_parent"
-                            android:layout_height="45dp" />
+                <TextView
+                    style="@style/PrimaryWhiteTextView"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginBottom="12dp"
+                    android:textSize="18sp"
+                    android:text="Or"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-                        <TextView
-                            android:layout_gravity="center"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginLeft="4dp"
-                            android:layout_marginBottom="12dp"
-                            android:text="Or"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                        <com.google.android.gms.common.SignInButton
-                            android:layout_gravity="center"
-                            android:layout_marginBottom="8dp"
-                            android:id="@+id/signupGPlusButton"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
-                    </LinearLayout>
-                </android.support.v7.widget.CardView>
+                <com.google.android.gms.common.SignInButton
+                    android:layout_gravity="center"
+                    android:layout_margin="4dp"
+                    app:buttonSize="wide"
+                    android:elevation="0dp"
+                    android:id="@+id/signupGPlusButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
         </RelativeLayout>
 
     </android.support.design.widget.CoordinatorLayout>

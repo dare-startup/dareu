@@ -13,8 +13,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/NoActionBarAppTheme">
-        <activity android:name=".activity.SplashActivity">
-
+        <activity android:name=".activity.WelcomeActivity"
+            android:theme="@style/LauncherStyle.Launcher">
             <!-- set intent filter main here -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,7 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.WelcomeActivity" />
         <activity
             android:name=".activity.SignupActivity"
             android:windowSoftInputMode="adjustResize" />
@@ -43,7 +42,7 @@
         </activity>
         <activity
             android:name=".activity.shared.NewDareActivity"
-            android:label="Create Dare" />
+            android:label="Create Dare"/>
         <activity
             android:name=".activity.shared.FindFriendsActivity"
             android:label="Find friends">
@@ -96,8 +95,9 @@
             android:label="@string/title_activity_settings" />
         <activity android:name=".activity.user.UnacceptedDaresActivity" />
         <activity android:name=".activity.shared.FlagDareActivity" />
-        <activity android:name=".activity.shared.UploadDareResponseActivity"
-            android:windowSoftInputMode="adjustResize"></activity>
+        <activity
+            android:name=".activity.shared.UploadDareResponseActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activity.user.DareResponseActivity"
             android:windowSoftInputMode="adjustResize" />
@@ -113,7 +113,8 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".activity.shared.ProfileActivity"></activity>
+        <activity android:name=".activity.shared.ProfileActivity" />
+        <activity android:name=".activity.ForgotPasswordActivity"></activity>
     </application>
 
 </manifest>

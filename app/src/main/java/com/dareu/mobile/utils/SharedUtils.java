@@ -1,5 +1,7 @@
 package com.dareu.mobile.utils;
 
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,8 +17,11 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
@@ -282,7 +287,7 @@ public class SharedUtils {
                         .load(Uri.parse(uri))
                         .config(Bitmap.Config.ARGB_8888)
                         .error(R.drawable.ic_info_black_24dp)
-                        //.placeholder(R.drawable.progress_animation)
+                        .placeholder(R.drawable.dareu_orange)
                         .fit()
                         .into(imageView);
 
@@ -319,4 +324,38 @@ public class SharedUtils {
         Intent intent = Auth.GoogleSignInApi.getSignInIntent(client);
         return intent;
     }
+
+    public static String getFromDate(String stringDate){
+        try{
+            Date date = DETAILS_DATE_FORMAT.parse(stringDate);
+            Date now = new Date();
+
+            //get difference
+            long diffMs = now.getTime() - date.getTime();
+            long diffDays = diffMs / (24 * 60 * 60 * 1000);
+            long diffHours = diffMs / (60 * 60 * 1000) % 24;
+            long diffMinutes = diffMs / (60 * 1000) % 60;
+            long diffSeconds = diffMs / 1000 % 60;
+
+
+            if(diffDays > 0 && diffDays < 2)
+                return "A day ago";
+            else if(diffDays > 1)
+                return diffDays + " days ago";
+            else if(diffHours > 0 && diffHours < 2)
+                return diffHours + " hour ago";
+            else if(diffHours > 1)
+                return diffHours + " hours ago";
+            else if(diffMinutes > 0 && diffMinutes < 2)
+                return  "A minute ago";
+            else if(diffMinutes > 1)
+                return diffMinutes + " minutes ago";
+            else if(diffSeconds > 0)
+                return "Seconds ago";
+            else return "";
+        }catch(ParseException ex){
+            return "";
+        }
+    }
+
 }

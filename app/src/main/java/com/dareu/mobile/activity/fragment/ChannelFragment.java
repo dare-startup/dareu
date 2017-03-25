@@ -4,6 +4,7 @@ package com.dareu.mobile.activity.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +30,8 @@ import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.Page;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,16 +47,20 @@ public class ChannelFragment extends Fragment {
     private View currentView;
 
     //recycler view
-    private RecyclerView recyclerView;
+    @BindView(R.id.channelFragmentRecyclerView)
+    RecyclerView recyclerView;
 
     //refresh swipe layout
-    private SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.channelFragmentRefreshLayout)
+    SwipeRefreshLayout refreshLayout;
 
     //progress bar
-    private ProgressBar progressBar;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     //text info
-    private TextView textView;
+    @BindView(R.id.channelFragmentTextView)
+    TextView textView;
 
     private int currentPageNumber = 1;
     private DareClientService dareService;
@@ -84,8 +91,17 @@ public class ChannelFragment extends Fragment {
         if(currentView == null)
             currentView = getLayoutInflater(null).inflate(R.layout.fragment_channel, container, false);
 
-        getCurrentComponents();
-
+        ButterKnife.bind(this, currentView);
+        LinearLayoutManager mgr = new LinearLayoutManager(getActivity());
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getChannel();
+            }
+        });
+        recyclerView.setLayoutManager(mgr);
+        recyclerView.setHasFixedSize(false);
+        recyclerView.addItemDecoration(new SpaceItemDecoration(SpaceItemDecoration.EXTRA_LARGE_SPACE));
         switch(SharedUtils.checkInternetConnection(getActivity())){
             case NOT_CONNECTED:
                 progressBar.setVisibility(View.GONE);
@@ -121,8 +137,9 @@ public class ChannelFragment extends Fragment {
                             adapter =
                                     new ResponseDescriptionAdapter(getActivity(), response.body().getItems(), new ResponseDescriptionAdapter.ResponseDescriptionCallbacks() {
                                         @Override
-                                        public void onButtonClicked(DareResponseDescription description, final int position, ResponseDescriptionAdapter.ResponseDescriptionCallbackType type) {
+                                        public void onButtonClicked(DareResponseDescription description, final int position, ResponseDescriptionAdapter.ResponseDescriptionCallbackType type, View view) {
                                             Intent intent = null;
+                                            ActivityOptionsCompat options;
                                             switch(type){
                                                 case CONTACT:
                                                     intent = new Intent(getActivity(), ProfileActivity.class);
@@ -137,12 +154,17 @@ public class ChannelFragment extends Fragment {
                                                         intent.putExtra(ProfileActivity.USER_NAME, description.getUser().getName());
                                                     }
 
-                                                    startActivity(intent);
+                                                    options = ActivityOptionsCompat
+                                                            .makeSceneTransitionAnimation(getActivity(), view, "dareResponseUserImage");
+                                                    startActivity(intent, options.toBundle());
                                                     break;
+
                                                 case PLAY:
                                                     intent = new Intent(getActivity(), DareResponseActivity.class);
                                                     intent.putExtra(DareResponseActivity.DARE_RESPONSE_ID, description.getId());
-                                                    startActivity(intent);
+                                                    options = ActivityOptionsCompat
+                                                            .makeSceneTransitionAnimation(getActivity(), view, "responseThumbImage");
+                                                    startActivity(intent, options.toBundle());
                                                     break;
                                                 case SHARE:
                                                     //TODO: Start share intent from here
@@ -214,28 +236,5 @@ public class ChannelFragment extends Fragment {
                 });
     }
 
-    private void getCurrentComponents(){
-        if(refreshLayout == null)
-            refreshLayout = (SwipeRefreshLayout)currentView.findViewById(R.id.channelFragmentRefreshLayout);
-
-        if(recyclerView == null)
-            recyclerView = (RecyclerView)currentView.findViewById(R.id.channelFragmentRecyclerView);
-        LinearLayoutManager mgr = new LinearLayoutManager(getActivity());
-
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getChannel();
-            }
-        });
-        recyclerView.setLayoutManager(mgr);
-        recyclerView.setHasFixedSize(false);
-        recyclerView.addItemDecoration(new SpaceItemDecoration(5));
-        if(progressBar == null)
-            progressBar = (ProgressBar)currentView.findViewById(R.id.progressBar);
-
-        if(textView == null)
-            textView = (TextView)currentView.findViewById(R.id.channelFragmentTextView);
-    }
 
 }

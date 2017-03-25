@@ -20,6 +20,7 @@ public class ViewPagerFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstance){
+        super.onCreate(savedInstance);
         //get index
         this.resourceId = getArguments().getInt(RESOURCE_ID);
     }

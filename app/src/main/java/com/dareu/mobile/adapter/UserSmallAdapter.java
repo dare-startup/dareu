@@ -14,6 +14,9 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by jose.rubalcaba on 03/21/2017.
  */
@@ -58,13 +61,15 @@ public class UserSmallAdapter extends RecyclerView.Adapter<UserSmallAdapter.User
 
     class UserViewHolder extends RecyclerView.ViewHolder{
 
+        @BindView(R.id.userSmallImage)
         CircularImageView image;
+
+        @BindView(R.id.userSmallName)
         TextView name;
 
         public UserViewHolder(View itemView) {
             super(itemView);
-            image = (CircularImageView)itemView.findViewById(R.id.userSmallImage);
-            name = (TextView)itemView.findViewById(R.id.userSmallName);
+            ButterKnife.bind(this, itemView);
         }
     }
 

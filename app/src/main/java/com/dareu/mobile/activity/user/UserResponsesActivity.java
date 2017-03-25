@@ -21,18 +21,32 @@ import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.Page;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserResponsesActivity extends AppCompatActivity {
 
-    private SwipeRefreshLayout refreshLayout;
-    private CoordinatorLayout coordinatorLayout;
-    private TextView message;
-    private ProgressBar progressBar;
-    private RecyclerView recyclerView;
-    private Toolbar toolbar;
+
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout refreshLayout;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.message)
+    TextView message;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.recyclerView)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     private DareClientService clientService;
     private int currentPageNumber = 1;
@@ -41,7 +55,7 @@ public class UserResponsesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_responses);
-
+        ButterKnife.bind(this);
         getComponents();
     }
 
@@ -49,7 +63,6 @@ public class UserResponsesActivity extends AppCompatActivity {
         clientService = RetroFactory.getInstance()
                 .create(DareClientService.class);
         //get toolbar
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -59,10 +72,6 @@ public class UserResponsesActivity extends AppCompatActivity {
             }
         });
         setTitle("Uploaded responses");
-        message = (TextView)findViewById(R.id.message);
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
-        refreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -87,7 +96,7 @@ public class UserResponsesActivity extends AppCompatActivity {
                             ResponseDescriptionAdapter adapter = new ResponseDescriptionAdapter(UserResponsesActivity.this, response.body().getItems(),
                                     new ResponseDescriptionAdapter.ResponseDescriptionCallbacks() {
                                         @Override
-                                        public void onButtonClicked(DareResponseDescription description, int position, ResponseDescriptionAdapter.ResponseDescriptionCallbackType type) {
+                                        public void onButtonClicked(DareResponseDescription description, int position, ResponseDescriptionAdapter.ResponseDescriptionCallbackType type, View view) {
                                             switch (type){
                                                 case CONTACT:
 

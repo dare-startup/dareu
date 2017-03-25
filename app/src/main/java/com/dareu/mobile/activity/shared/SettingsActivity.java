@@ -33,6 +33,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -44,12 +46,21 @@ public class SettingsActivity extends AppCompatActivity {
     private static final int BROWSE_REQUEST_CODE = 543;
     private static final int CAPTURE_REQUEST_CODE = 123;
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 354;
-    private CircularImageView image;
-    private Uri imageUri;
 
-    private CoordinatorLayout coordinatorLayout;
-    private Toolbar toolbar;
+    @BindView(R.id.settingsImage)
+    CircularImageView image;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.settingsName)
+    TextView name;
+
     private File capture;
+    private Uri imageUri;
     private AccountClientService accountService;
 
     @Override
@@ -58,6 +69,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         accountService = RetroFactory.getInstance()
                 .create(AccountClientService.class);
+        ButterKnife.bind(this);
         getComponents();
     }
 
@@ -71,14 +83,12 @@ public class SettingsActivity extends AppCompatActivity {
         }catch(IOException ex){
 
         }
-        image = (CircularImageView)findViewById(R.id.settingsImage);
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
         //load current image
         AccountProfile accountProfile = SharedUtils.getCurrentProfile(this);
         if(accountProfile != null){
             //load it
             SharedUtils.loadImagePicasso(image, this, accountProfile.getImageUrl());
-            ((TextView)findViewById(R.id.settingsName)).setText(accountProfile.getName());
+            name.setText(accountProfile.getName());
         }
         setSupportActionBar(toolbar);
         setTitle("Settings");
@@ -130,9 +140,6 @@ public class SettingsActivity extends AppCompatActivity {
                         .show();
             }
         });
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-
-
     }
 
     @Override

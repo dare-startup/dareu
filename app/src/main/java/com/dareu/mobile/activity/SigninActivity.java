@@ -8,10 +8,10 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.dareu.mobile.R;
 import com.dareu.web.dto.client.OpenClientService;
@@ -24,22 +24,48 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.SignInButton;
+import com.google.firebase.iid.FirebaseInstanceId;
 
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SigninActivity extends AppCompatActivity implements ActivityListener{
+public class SigninActivity extends AppCompatActivity{
 
     private static final String TAG = "SigninActivity";
 
-    private CoordinatorLayout coordinatorLayout;
-    private ProgressDialog progressDialog;
-    private EditText usernameView;
-    private EditText passwordView;
-    private Button signinButton;
-    private SignInButton signinGoogleButton;
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
 
+    @BindView(R.id.signinUsernameText)
+    EditText usernameView;
+
+    @BindView(R.id.signinPasswordText)
+    EditText passwordView;
+
+    @BindView(R.id.signinButton)
+    Button signinButton;
+
+    @BindView(R.id.signinGoogleButton)
+    SignInButton signinGoogleButton;
+
+    @BindView(R.id.signinForgotPassword)
+    TextView forgotPassword;
+
+    @BindView(R.id.signinEmailLayout)
+    TextInputLayout emailLayout;
+
+    @BindView(R.id.signinPasswordLayout)
+    TextInputLayout passwordLayout;
+
+    @BindView(R.id.signinCreateAccountText)
+    TextView createAccountText;
+
+    private ProgressDialog progressDialog;
     private OpenClientService openService;
     private SigninType currentSigninType = SigninType.LOCAL;
 
@@ -49,113 +75,110 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
         setContentView(R.layout.activity_signin);
         openService = RetroFactory.getInstance()
                 .create(OpenClientService.class);
-        getComponents();
-        initialize();
+        ButterKnife.bind(this);
     }
 
-    @Override
-    public void getComponents() {
-        usernameView = (EditText)findViewById(R.id.signinUsernameText);
-        passwordView = (EditText)findViewById(R.id.signinPasswordText);
-        signinButton = (Button)findViewById(R.id.signinButton);
-        progressDialog = new ProgressDialog(SigninActivity.this);
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-        signinGoogleButton = (SignInButton)findViewById(R.id.signinGoogleButton);
-        signinGoogleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = SharedUtils.getGoogleSigninIntent(SigninActivity.this);
-                startActivityForResult(intent, SharedUtils.GOOGLE_SIGNIN_REQUEST_CODE);
-            }
-        });
+    @OnClick(R.id.signinCreateAccountText)
+    public void createAccountListener(){
+        Intent intent = new Intent(this, SignupActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(intent);
     }
 
-    @Override
-    public void initialize() {
-        signinButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //check values
-                String username = usernameView.getText().toString();
-                String password = passwordView.getText().toString();
-                TextInputLayout emailLayout = (TextInputLayout)findViewById(R.id.signinEmailLayout);
-                TextInputLayout passwordLayout = (TextInputLayout)findViewById(R.id.signinPasswordLayout);
-                if(username.isEmpty()){
-                    emailLayout.setError("Email should not be empty");
-                    //focus on username field
-                    if(usernameView.requestFocus())
-                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                    return;
-                }else
-                    emailLayout.setError("");
-                if(password.isEmpty()){
-                    passwordLayout.setError("Password should not be empty");
-                    //focus on username field
-                    if(passwordView.requestFocus())
-                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                    return;
-                } else
-                    emailLayout.setError("");
 
-                //hide keyboard
-                SharedUtils.hideKeyboard(getCurrentFocus(), SigninActivity.this);
+    @OnClick(R.id.signinGoogleButton)
+    public void googleSigninButtonListener(){
+        Intent intent = SharedUtils.getGoogleSigninIntent(SigninActivity.this);
+        startActivityForResult(intent, SharedUtils.GOOGLE_SIGNIN_REQUEST_CODE);
+    }
 
-                //check internet connection
-                switch(SharedUtils.checkInternetConnection(SigninActivity.this)){
-                    case NOT_CONNECTED:
-                        SharedUtils.showNoInternetConnectionSnackbar(coordinatorLayout, SigninActivity.this);
-                        break;
-                    default:
-                        SigninRequest request = new SigninRequest(username, password);
-                        String fcmToken = SharedUtils.getStringPreference(SigninActivity.this, PrefName.GCM_TOKEN);
-                        if(fcmToken == null || fcmToken.isEmpty())
-                            request.setFcmToken(fcmToken);
+    @OnClick(R.id.signinForgotPassword)
+    public void forgotPasswordListener(){
+        Intent intent = new Intent(SigninActivity.this, ForgotPasswordActivity.class);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_from_left, R.anim.fade_out);
+    }
 
-                        progressDialog.setTitle("Connecting");
-                        progressDialog.setIndeterminate(true);
-                        progressDialog.setCancelable(false);
-                        progressDialog.show();
-                        try{
-                            Call<AuthenticationResponse> call = openService
-                                    .signin(request);
-                            call.enqueue(new Callback<AuthenticationResponse>() {
-                                @Override
-                                public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
-                                    switch(response.code()){
-                                        case 200:
-                                            if(response.body().getToken() == null){
-                                                progressDialog.dismiss();
-                                                Snackbar.make(coordinatorLayout, "Bad credentials", Snackbar.LENGTH_LONG)
-                                                        .show();
-                                                return;
-                                            }
-                                            //save token
-                                            SharedUtils.setStringPreference(SigninActivity.this, PrefName.SIGNIN_TOKEN, response.body().getToken());
-                                            Intent intent = new Intent(SigninActivity.this, MainActivity.class);
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                            startActivity(intent);
-                                            break;
-                                        default:
-                                            break;
+
+    @OnClick(R.id.signinButton)
+    public void signInButtonListener(){
+        //check values
+        String username = usernameView.getText().toString();
+        String password = passwordView.getText().toString();
+        if(username.isEmpty()){
+            emailLayout.setError("Email should not be empty");
+            //focus on username field
+            if(usernameView.requestFocus())
+                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            return;
+        }else
+            emailLayout.setError("");
+        if(password.isEmpty()){
+            passwordLayout.setError("Password should not be empty");
+            //focus on username field
+            if(passwordView.requestFocus())
+                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            return;
+        } else
+            emailLayout.setError("");
+
+        //hide keyboard
+        SharedUtils.hideKeyboard(getCurrentFocus(), SigninActivity.this);
+
+        //check internet connection
+        switch(SharedUtils.checkInternetConnection(SigninActivity.this)){
+            case NOT_CONNECTED:
+                SharedUtils.showNoInternetConnectionSnackbar(coordinatorLayout, SigninActivity.this);
+                break;
+            default:
+                SigninRequest request = new SigninRequest(username, password);
+                String fcmToken = SharedUtils.getStringPreference(SigninActivity.this, PrefName.GCM_TOKEN);
+                if(fcmToken == null || fcmToken.isEmpty())
+                    request.setFcmToken(fcmToken);
+
+                progressDialog.setTitle("Connecting");
+                progressDialog.setIndeterminate(true);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+                try{
+                    Call<AuthenticationResponse> call = openService
+                            .signin(request);
+                    call.enqueue(new Callback<AuthenticationResponse>() {
+                        @Override
+                        public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
+                            switch(response.code()){
+                                case 200:
+                                    if(response.body().getToken() == null){
+                                        progressDialog.dismiss();
+                                        Snackbar.make(coordinatorLayout, "Bad credentials", Snackbar.LENGTH_LONG)
+                                                .show();
+                                        return;
                                     }
-                                }
-
-                                @Override
-                                public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
-                                    progressDialog.dismiss();
-                                    Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG)
-                                            .show();
-                                }
-                            });
-                        }catch(Exception ex){
-                            Log.e(TAG, ex.getMessage());
+                                    //save token
+                                    SharedUtils.setStringPreference(SigninActivity.this, PrefName.SIGNIN_TOKEN, response.body().getToken());
+                                    Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                    overridePendingTransition(R.anim.slide_in_from_left, R.anim.fade_out);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
-                        break;
+
+                        @Override
+                        public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
+                            progressDialog.dismiss();
+                            Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG)
+                                    .show();
+                        }
+                    });
+                }catch(Exception ex){
+                    Log.e(TAG, ex.getMessage());
                 }
-
-
-            }
-        });
+                break;
+        }
     }
 
     @Override
@@ -176,8 +199,11 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
         request.setCurrentSigninType(SigninRequest.SigninType.GOOGLE);
         request.setUser(account.getEmail());
         String fcmToken = SharedUtils.getStringPreference(this, PrefName.GCM_TOKEN);
+
         if(fcmToken == null || fcmToken.isEmpty())
-            request.setFcmToken(fcmToken);
+            fcmToken = FirebaseInstanceId.getInstance().getToken();
+
+        request.setFcmToken(fcmToken);
         //create progress dialog
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Connecting");
@@ -203,6 +229,7 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
                                 Intent intent = new Intent(SigninActivity.this, MainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(intent);
+                                overridePendingTransition(R.anim.slide_in_from_left, R.anim.fade_out);
                                 break;
                             default:
                                 progressDialog.dismiss();
@@ -218,6 +245,12 @@ public class SigninActivity extends AppCompatActivity implements ActivityListene
 
                     }
                 });
+    }
+
+    @Override
+    public void onBackPressed(){
+        finish();
+        overridePendingTransition(R.anim.fade_in, R.anim.slide_up);
     }
 
     private enum SigninType{

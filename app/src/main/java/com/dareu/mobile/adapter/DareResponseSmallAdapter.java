@@ -16,6 +16,9 @@ import com.dareu.web.dto.response.entity.DareResponseDescription;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by jose.rubalcaba on 03/21/2017.
  */
@@ -62,15 +65,18 @@ public class DareResponseSmallAdapter extends RecyclerView.Adapter<DareResponseS
 
     static class ViewHolder extends RecyclerView.ViewHolder{
 
+        @BindView(R.id.responseSmallItemImage)
         ImageView image;
+
+        @BindView(R.id.responseSmallItemName)
         TextView name;
+
+        @BindView(R.id.responseSmallItemView)
         ImageButton view;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            image = (ImageView)itemView.findViewById(R.id.responseSmallItemImage);
-            name = (TextView)itemView.findViewById(R.id.responseSmallItemName);
-            view = (ImageButton)itemView.findViewById(R.id.responseSmallItemView);
+            ButterKnife.bind(this, itemView);
         }
     }
 

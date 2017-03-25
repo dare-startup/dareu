@@ -7,6 +7,14 @@
     android:layout_height="match_parent"
     tools:openDrawer="start">
 
+    <FrameLayout
+        android:elevation="4dp"
+        android:background="@color/colorPrimary"
+        android:id="@+id/mainLayout"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinatorLayout"
         android:layout_width="match_parent"
@@ -59,6 +67,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"
+                    app:rippleColor="@color/darkBackground"
                     android:layout_margin="@dimen/fab_margin"
                     app:srcCompat="@drawable/ic_add_white" />
             </RelativeLayout>

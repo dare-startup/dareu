@@ -27,6 +27,8 @@ import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.DareDescription;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,16 +40,39 @@ public class NewDareDataActivity extends AppCompatActivity {
     public static final String DARE_ID = "dareId";
     public static final String ACCEPTED = "acceptedDare";
 
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.newDareDataChallengerImage)
+    CircularImageView challengerImage;
+
+    @BindView(R.id.newDareDataChallengerName)
+    TextView challengerName;
+
+    @BindView(R.id.newDareDataDareName)
+    TextView dareName;
+
+    @BindView(R.id.newDareDataDareDescription)
+    TextView dareDescription;
+
+    @BindView(R.id.newDareDataDareCategory)
+    TextView dareCategory;
+
+    @BindView(R.id.newDareDataDareTimer)
+    TextView dareTime;
+
+    @BindView(R.id.newDareDataLayout)
+    LinearLayout layout;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
     private ProgressDialog progressDialog;
     private DareDescription currentDareDescription;
-    private ProgressBar progressBar;
-    private CircularImageView challengerImage;
-    private TextView challengerName, dareName,
-            dareDescription, dareCategory, dareTime;
-    private LinearLayout layout;
-    private CoordinatorLayout coordinatorLayout;
-    private Toolbar toolbar;
-
     private String dareId;
     private DareClientService dareService;
 
@@ -59,12 +84,12 @@ public class NewDareDataActivity extends AppCompatActivity {
         dareId = getIntent().getStringExtra(DARE_ID);
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
+        ButterKnife.bind(this);
         if(dareId == null || dareId.isEmpty()){
             Toast.makeText(NewDareDataActivity.this, "No dare id was provided", Toast.LENGTH_LONG)
                     .show();
             finish();
         }else{
-            getComponents();
             getDare(dareId);
             setSupportActionBar(toolbar);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -172,12 +197,17 @@ public class NewDareDataActivity extends AppCompatActivity {
     }
 
     private void confirmDare(final boolean accepted){
-        progressBar.setVisibility(View.VISIBLE);
+        final String value = accepted ? "accepted" : "declined";
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(value + " dare");
+        progressDialog.setIndeterminate(true);
+        progressDialog.show();
+
         dareService.confirmDare(new DareConfirmationRequest(currentDareDescription.getId(), accepted), SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
                 .enqueue(new Callback<UpdatedEntityResponse>() {
                     @Override
                     public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
-                        String value = accepted ? "accepted" : "declined";
+                        progressDialog.dismiss();
                         Toast.makeText(NewDareDataActivity.this, "Dare has been " + value, Toast.LENGTH_LONG)
                                 .show();
                         Intent resultIntent = new Intent();
@@ -188,21 +218,9 @@ public class NewDareDataActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<UpdatedEntityResponse> call, Throwable t) {
-
+                        Toast.makeText(NewDareDataActivity.this, "", Toast.LENGTH_LONG)
+                                .show();
                     }
                 });
-    }
-
-    private void getComponents() {
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        challengerImage = (CircularImageView)findViewById(R.id.newDareDataChallengerImage);
-        challengerName = (TextView)findViewById(R.id.newDareDataChallengerName);
-        dareName = (TextView)findViewById(R.id.newDareDataDareName);
-        dareDescription = (TextView)findViewById(R.id.newDareDataDareDescription);
-        dareCategory = (TextView)findViewById(R.id.newDareDataDareCategory);
-        dareTime = (TextView)findViewById(R.id.newDareDataDareTimer);
-        layout = (LinearLayout)findViewById(R.id.newDareDataLayout);
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
     }
 }

@@ -13,6 +13,9 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by jose.rubalcaba on 01/30/2017.
  */
@@ -53,13 +56,15 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
     static class FriendSearchViewHolder extends RecyclerView.ViewHolder{
 
+        @BindView(R.id.friendItemImage)
         CircularImageView imageView;
+
+        @BindView(R.id.friendItemName)
         TextView nameView;
 
         FriendSearchViewHolder(View view){
             super(view);
-            this.imageView = (CircularImageView)view.findViewById(R.id.friendItemImage);
-            this.nameView = (TextView)view.findViewById(R.id.friendItemName);
+            ButterKnife.bind(this, view);
         }
     }
 }

@@ -21,7 +21,6 @@
             android:layout_height="wrap_content" />
 
         <LinearLayout
-            android:visibility="gone"
             android:id="@+id/unacceptedDareLayout"
             android:layout_below="@id/toolbar"
             android:orientation="vertical"
@@ -29,8 +28,9 @@
             android:layout_height="wrap_content">
 
             <TextView
+                android:layout_marginBottom="8dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="8dp"
                 style="@style/CardTitleTextViewTheme"
                 android:text="Challenger"
                 android:layout_width="wrap_content"
@@ -52,14 +52,14 @@
                     <com.mikhaellopez.circularimageview.CircularImageView
                         android:src="@drawable/ic_account_circle_black_24dp"
                         android:id="@+id/unacceptedDareChallengerImage"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp" />
+                        android:layout_width="70dp"
+                        android:layout_height="70dp" />
 
                     <LinearLayout
                         android:gravity="center"
                         android:padding="8dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:orientation="vertical">
                         <TextView
                             android:id="@+id/unacceptedDareChallengerName"
@@ -74,8 +74,9 @@
 
 
             <TextView
+                android:layout_marginBottom="8dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="8dp"
                 style="@style/CardTitleTextViewTheme"
                 android:text="Dare"
                 android:layout_width="wrap_content"
@@ -95,12 +96,12 @@
                     android:orientation="vertical">
 
                     <LinearLayout
+                        android:padding="8dp"
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
                         <LinearLayout
-                            android:gravity=""
                             android:orientation="vertical"
                             android:layout_weight=".5"
                             android:layout_width="0dp"
@@ -140,30 +141,34 @@
 
 
                     <TextView
+                        android:layout_marginLeft="8dp"
                         style="@style/TitleTextViewTheme"
                         android:text="Dare description"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"/>
+                        android:layout_marginBottom="8dp"/>
                     <TextView
+                        android:layout_marginLeft="8dp"
                         android:id="@+id/unacceptedDareDescription"
                         android:text="Some dare description"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
+                        android:layout_marginBottom="16dp"/>
 
                     <TextView
+                        android:layout_marginLeft="8dp"
                         style="@style/TitleTextViewTheme"
                         android:text="Dare time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"/>
+                        android:layout_marginBottom="8dp"/>
                     <TextView
+                        android:layout_marginLeft="8dp"
                         android:id="@+id/unacceptedDareTimer"
                         android:text="666 hrs"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"/>
+                        android:layout_marginBottom="16dp"/>
 
 
 
@@ -172,10 +177,11 @@
                         android:text="Do you want to accept this challenge?"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="16dp"
+                        android:layout_marginLeft="8dp"
                         android:layout_marginBottom="4dp"/>
 
                     <LinearLayout
+                        android:padding="8dp"
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"
                         android:gravity="center"
@@ -187,14 +193,14 @@
                             android:layout_weight=".5"
                             style="@style/PrimaryButtonTheme"
                             android:text="Decline"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content" />
                         <Button
                             android:id="@+id/unacceptedDareAcceptButton"
                             android:layout_weight=".5"
                             style="@style/PrimaryWhiteButtonTheme"
                             android:text="Accept"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
                 </LinearLayout>

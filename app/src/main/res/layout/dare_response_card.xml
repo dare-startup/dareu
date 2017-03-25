@@ -22,6 +22,8 @@
                 android:padding="4dp">
 
                 <ImageView
+                    android:transitionName="dareResponseUserImage"
+                    android:paddingTop="4dp"
                     android:id="@+id/dareResponseItemUser"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -30,7 +32,7 @@
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight=".6"
                     android:orientation="vertical">
 
@@ -39,7 +41,6 @@
                         style="@style/TitleTextViewTheme"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
                         android:text="Dare title" />
 
                     <TextView
@@ -52,6 +53,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:layout_marginRight="8dp"
                     android:id="@+id/dareResponseItemShare"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
@@ -72,9 +74,10 @@
                 android:layout_height="wrap_content">
 
                 <ImageView
+                    android:transitionName="responseThumbImage"
                     android:id="@+id/dareResponseItemThumb"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="380dp"
                     android:scaleType="fitXY"
                     android:src="@drawable/welcome_background" />
 

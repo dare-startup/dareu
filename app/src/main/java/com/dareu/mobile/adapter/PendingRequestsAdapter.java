@@ -18,6 +18,9 @@ import com.dareu.web.dto.response.entity.Page;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by jose.rubalcaba on 03/10/2017.
  */
@@ -26,14 +29,13 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private static final int SENT_VIEW_TYPE = 0;
     private static final int RECEIVED_VIEW_TYPE = 1;
-    private static final int FOOTER_VIEW_TYPE = 2;
 
     private boolean sent;
-    private Page<ConnectionRequest> requests;
+    private List<ConnectionRequest> requests;
     private ViewClickListener listener;
     private Context cxt;
 
-    public PendingRequestsAdapter(Context cxt, Page<ConnectionRequest> requests, ViewClickListener listener, boolean sent) {
+    public PendingRequestsAdapter(Context cxt, List<ConnectionRequest> requests, ViewClickListener listener, boolean sent) {
         this.cxt  =cxt;
         this.listener = listener;
         this.requests = requests;
@@ -45,39 +47,24 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         if(viewType == SENT_VIEW_TYPE)
             return new SentRequestViewHolder(LayoutInflater.from(cxt)
                                     .inflate(R.layout.sent_request_item, parent, false));
-        else if(viewType == RECEIVED_VIEW_TYPE)
+        else
             return new ReceivedRequestViewHolder(LayoutInflater.from(cxt)
                                     .inflate(R.layout.received_request_item, parent, false));
-        else return new FooterViewHolder(LayoutInflater.from(cxt)
-                                    .inflate(R.layout.footer_item, parent, false));
+
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         //check if is footer view
-        if(position == requests.getItems().size()){
-            FooterViewHolder footerViewHolder = (FooterViewHolder)holder;
-            if(requests.getPageNumber() < requests.getPagesAvailable()){
-                footerViewHolder.text.setText("Load more");
-                footerViewHolder.text.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        //TODO: load more here
-                    }
-                });
-            }else{
-                footerViewHolder.text.setText("There are no more items");
-            }
-        }else{
-            final ConnectionRequest request = requests.getItems().get(position);
+            final ConnectionRequest request = requests.get(position);
             if(sent){
                 //sent requests adapter
                 SentRequestViewHolder sentViewHolder = (SentRequestViewHolder)holder;
                 sentViewHolder.cancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        listener.onViewClick(requests.getItems().get(position), ButtonType.CANCEL);
-                        requests.getItems().remove(position);
+                        listener.onViewClick(requests.get(position), position, ButtonType.CANCEL, view);
+                        requests.remove(position);
                         notifyItemRemoved(position);
                     }
                 });
@@ -86,7 +73,7 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 sentViewHolder.image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        listener.onViewClick(requests.getItems().get(position), ButtonType.IMAGE);
+                        listener.onViewClick(requests.get(position), position, ButtonType.IMAGE, view);
                     }
                 });
             }else{
@@ -95,14 +82,14 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 receivedViewHolder.image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        listener.onViewClick(requests.getItems().get(position), ButtonType.IMAGE);
+                        listener.onViewClick(requests.get(position), position, ButtonType.IMAGE, view);
                     }
                 });
                 receivedViewHolder.decline.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        listener.onViewClick(requests.getItems().get(position), ButtonType.DECLINE);
-                        requests.getItems().remove(position);
+                        listener.onViewClick(requests.get(position), position, ButtonType.DECLINE, view);
+                        requests.remove(position);
                         notifyItemRemoved(position);
                     }
                 });
@@ -110,68 +97,71 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 receivedViewHolder.accept.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        listener.onViewClick(requests.getItems().get(position), ButtonType.ACCEPT);
-                        requests.getItems().remove(position);
+                        listener.onViewClick(requests.get(position), position, ButtonType.ACCEPT, view);
+                        requests.remove(position);
                         notifyItemRemoved(position);
                     }
                 });
             }
-        }
-
     }
 
     @Override
     public int getItemViewType(int position) {
-        if(position == requests.getItems().size())
-            return FOOTER_VIEW_TYPE;
-        else if(sent)
+        if(sent)
             return SENT_VIEW_TYPE;
         else
             return RECEIVED_VIEW_TYPE;
     }
 
+    public void remove(int position){
+        requests.remove(position);
+        notifyItemRemoved(position);
+    }
+
     @Override
     public int getItemCount() {
-        return requests.getItems().size() + 1; //+1 for footer view
+        return requests.size(); //+1 for footer view
     }
 
     static class ReceivedRequestViewHolder extends RecyclerView.ViewHolder{
 
+        @BindView(R.id.receivedRequestItemImage)
         ImageView image;
+
+        @BindView(R.id.receivedRequestItemName)
         TextView name;
-        Button decline, accept;
+
+        @BindView(R.id.receivedRequestItemDeclineButton)
+        Button decline;
+
+        @BindView(R.id.receivedRequestItemAcceptButton)
+        Button accept;
 
         public ReceivedRequestViewHolder(View view) {
             super(view);
-            image = (ImageView)view.findViewById(R.id.receivedRequestItemImage);
-            name = (TextView)view.findViewById(R.id.receivedRequestItemName);
-            decline = (Button)view.findViewById(R.id.receivedRequestItemDeclineButton);
-            accept = (Button)view.findViewById(R.id.receivedRequestItemAcceptButton);
+            ButterKnife.bind(this, view);
         }
     }
 
     static class SentRequestViewHolder extends RecyclerView.ViewHolder{
+
+        @BindView(R.id.sentRequestItemImage)
         ImageView image;
+
+        @BindView(R.id.sentRequestItemName)
         TextView name;
+
+        @BindView(R.id.sentRequestItemCancelButton)
         Button cancelButton;
+
         public SentRequestViewHolder(View view) {
             super(view);
-            image = (ImageView)view.findViewById(R.id.sentRequestItemImage);
-            name = (TextView)view.findViewById(R.id.sentRequestItemName);
-            cancelButton = (Button)view.findViewById(R.id.sentRequestItemCancelButton);
-        }
-    }
-
-    static class FooterViewHolder extends RecyclerView.ViewHolder{
-        TextView text;
-        public FooterViewHolder(View view) {
-            super(view);
-            text = (TextView)view.findViewById(R.id.message);
+            ButterKnife.bind(this, view);
         }
     }
 
     public static interface ViewClickListener{
-        public void onViewClick(ConnectionRequest request, ButtonType type);
+        public void onViewClick(ConnectionRequest request, int position, ButtonType type, View view);
     }
 
     public static enum ButtonType{

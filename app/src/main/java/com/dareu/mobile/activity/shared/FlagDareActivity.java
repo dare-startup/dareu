@@ -25,6 +25,8 @@ import com.dareu.web.dto.request.FlagDareRequest;
 import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.entity.DareDescription;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,31 +35,44 @@ public class FlagDareActivity extends AppCompatActivity {
 
     public static final String DARE_ID = "dareId";
 
-    private TextView dareName, dareDescription;
-    private EditText flagComment;
-    private Toolbar toolbar;
+    @BindView(R.id.flagDareName)
+    TextView dareName;
+
+    @BindView(R.id.flagDareDescription)
+    TextView dareDescription;
+
+    @BindView(R.id.flagDareComment)
+    EditText flagComment;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.flagDareLayout)
+    LinearLayout layout;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
     private ProgressDialog progressDialog;
-    private ProgressBar progressBar;
-    private LinearLayout layout;
-    private CoordinatorLayout coordinatorLayout;
-
     private String dareId;
-
     private DareClientService dareService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flag_dare);
-        getComponents();
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
+        ButterKnife.bind(this);
+        getComponents();
     }
 
     private void getComponents(){
         //get dare id
         dareId = getIntent().getStringExtra(DARE_ID);
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Flag dare");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -78,13 +93,6 @@ public class FlagDareActivity extends AppCompatActivity {
                         .show();
             }
         });
-        //todo: check internet connections on every activity
-        dareName = (TextView)findViewById(R.id.flagDareName);
-        dareDescription = (TextView)findViewById(R.id.flagDareDescription);
-        flagComment = (EditText)findViewById(R.id.flagDareComment);
-        layout = (LinearLayout)findViewById(R.id.flagDareLayout);
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         dareService.dareDescription(dareId, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
             .enqueue(new Callback<DareDescription>() {
                 @Override

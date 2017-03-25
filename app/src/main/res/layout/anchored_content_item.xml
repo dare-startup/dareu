@@ -16,22 +16,24 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:padding="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:padding="4dp">
+                >
 
                 <ImageView
+                    android:paddingTop="4dp"
                     android:id="@+id/dareResponseItemUser"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginRight="4dp"
                     android:src="@mipmap/ic_launcher" />
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight=".6"
                     android:orientation="vertical">
 
@@ -40,7 +42,6 @@
                         style="@style/TitleTextViewTheme"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
                         android:text="Dare title" />
 
                     <TextView
@@ -61,10 +62,11 @@
 
                 <ImageView
                     android:id="@+id/dareResponseItemUnanchore"
-                    android:tint="@color/colorPrimary"
-                    android:src="@drawable/ic_star_border_white_24dp"
                     android:layout_width="30dp"
-                    android:layout_height="30dp" />
+                    android:layout_height="30dp"
+                    android:layout_marginRight="8dp"
+                    android:src="@drawable/ic_star_border_white_24dp"
+                    android:tint="@color/colorPrimary" />
 
             </LinearLayout>
 
@@ -75,7 +77,7 @@
                 <ImageView
                     android:id="@+id/dareResponseItemThumb"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="380dp"
                     android:scaleType="fitXY"
                     android:src="@drawable/welcome_background" />
 

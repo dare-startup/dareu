@@ -4,16 +4,35 @@
     <style name="NoActionBarAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="android:progressBackgroundTint">@color/colorPrimary</item>
+        <item name="android:indeterminateProgressStyle">@style/IndeterminateProgress</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:colorBackground">@color/mainBackground</item>
         <item name="android:textViewStyle">@style/PrimaryTextViewTheme</item>
         <!--<item name="colorControlNormal">#c5c5c5</item>-->
-        <item name="colorControlActivated">@color/colorPrimary</item>
-        <item name="colorControlHighlight">@color/colorPrimary</item>
+        <item name="colorControlActivated">@android:color/white</item>
+        <item name="colorControlHighlight">@android:color/white</item>
         <item name="android:editTextStyle">@style/PrimaryEditTextTheme</item>
         <item name="colorControlNormal">@android:color/white</item>
+
         <item name="android:checkboxStyle">@style/CheckBoxTheme</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+    <style name="NoAnimationTheme" parent="NoActionBarAppTheme">
+        <item name="android:windowAnimationStyle">@null</item>
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+        <!--<item name="android:colorBackgroundCacheHint">@null</item>-->
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+    </style>
+
+    <style name="IndeterminateProgress" parent="@android:style/Widget.ProgressBar">
+        <item name="android:indeterminateTint">@color/colorPrimary</item>
+    </style>
+    <!-- LAUNCHER -->
+    <style name="LauncherStyle.Launcher" parent="NoActionBarAppTheme">
+        <item name="android:windowBackground">@drawable/icon_launcher</item>
     </style>
 
     <!-- Checbox -->
@@ -22,6 +41,7 @@
     </style>
 
     <!-- Buttons -->
+
     <style name="PrimaryWhiteButtonTheme" parent="android:Widget.Holo.Light.Button">
         <item name="android:background">@android:color/white</item>
         <item name="android:textColor">@color/colorPrimary</item>
@@ -46,8 +66,7 @@
 
     <style name="PrimaryDarkButtonTheme" parent="android:Widget.Holo.Light.Button">
         <item name="android:background">@color/colorPrimaryDark</item>
-        <item name="android:textColor">@color/colorAccent</item>
-        <item name="android:layout_margin">8dp</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <!-- TextView's -->
@@ -102,4 +121,16 @@
     <style name="NoActionBarAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="NoActionBarAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="WhiteTextAppearance" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColorHint">@android:color/white</item>
+        <!-- Hint color and label color in FALSE state
+        <item name="android:textColorHint">@android:color/white</item>
+        <item name="android:textSize">20sp</item>
+        Label color in TRUE state and bar color FALSE and TRUE State
+        <item name="colorAccent">@android:color/white</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlActivated">@android:color/white</item>-->
+    </style>
 </resources>

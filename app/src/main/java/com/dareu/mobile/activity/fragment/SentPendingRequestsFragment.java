@@ -1,7 +1,9 @@
 package com.dareu.mobile.activity.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,6 +17,7 @@ import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
+import com.dareu.mobile.activity.shared.ProfileActivity;
 import com.dareu.mobile.adapter.PendingRequestsAdapter;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.mobile.utils.SharedUtils;
@@ -24,6 +27,8 @@ import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.ConnectionRequest;
 import com.dareu.web.dto.response.entity.Page;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -35,12 +40,20 @@ public class SentPendingRequestsFragment extends Fragment {
 
 
     private View currentView;
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private PendingRequestsAdapter adapter;
-    private ProgressBar progressBar;
-    private TextView message;
 
+    @BindView(R.id.sentPendingRequestsRecyclerView)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.message)
+    TextView message;
+
+    private PendingRequestsAdapter adapter;
     private AccountClientService clientService;
     private int currentPageNumber = 1;
 
@@ -60,10 +73,8 @@ public class SentPendingRequestsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         currentView = inflater.inflate(R.layout.fragment_sent_pending_requests, container, false);
-        recyclerView = (RecyclerView)currentView.findViewById(R.id.sentPendingRequestsRecyclerView);
-        swipeRefreshLayout = (SwipeRefreshLayout)currentView.findViewById(R.id.swipeRefreshLayout);
-        progressBar = (ProgressBar)currentView.findViewById(R.id.progressBar);
-        message = (TextView)currentView.findViewById(R.id.message);
+        ButterKnife.bind(this, currentView);
+
 
         switch(SharedUtils.checkInternetConnection(getActivity())){
             case NOT_CONNECTED:
@@ -79,9 +90,11 @@ public class SentPendingRequestsFragment extends Fragment {
                                 switch(response.code()){
                                     case 200:
                                         //get items
-                                        adapter = new PendingRequestsAdapter(getActivity().getApplicationContext(), response.body(), new PendingRequestsAdapter.ViewClickListener() {
+                                        adapter = new PendingRequestsAdapter(getActivity().getApplicationContext(), response.body().getItems(), new PendingRequestsAdapter.ViewClickListener() {
                                             @Override
-                                            public void onViewClick(ConnectionRequest request, PendingRequestsAdapter.ButtonType type) {
+                                            public void onViewClick(ConnectionRequest request, final int position, PendingRequestsAdapter.ButtonType type, View view) {
+                                                Intent intent;
+                                                ActivityOptionsCompat options;
                                                 switch (type){
                                                     case CANCEL:
                                                         clientService.cancelFriendshipRequest(request.getConnectionId(), SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
@@ -90,8 +103,9 @@ public class SentPendingRequestsFragment extends Fragment {
                                                                     public void onResponse(Call<UpdatedEntityResponse> call, Response<UpdatedEntityResponse> response) {
                                                                         switch (response.code()){
                                                                             case 200:
-                                                                                Toast.makeText(getActivity(), "The request has been canceled", Toast.LENGTH_LONG)
+                                                                                Toast.makeText(getActivity(), "Request has been canceled", Toast.LENGTH_LONG)
                                                                                         .show();
+                                                                                adapter.remove(position);
                                                                                 break;
                                                                             default:
                                                                                 break;
@@ -105,7 +119,14 @@ public class SentPendingRequestsFragment extends Fragment {
                                                                 });
                                                         break;
                                                     case IMAGE:
-                                                        //TODO: start activity
+                                                        intent = new Intent(getActivity(), ProfileActivity.class);
+                                                        intent.putExtra(ProfileActivity.USER_IMAGE_URL, request.getUser().getImageUrl());
+                                                        intent.putExtra(ProfileActivity.USER_ID, request.getUser().getId());
+                                                        intent.putExtra(ProfileActivity.USER_NAME, request.getUser().getName());
+                                                        intent.putExtra(ProfileActivity.USER_PROFILE_PARAM, ProfileActivity.USER_PROFILE);
+                                                        options = ActivityOptionsCompat
+                                                                .makeSceneTransitionAnimation(getActivity(), view, "dareResponseUserImage");
+                                                        startActivity(intent, options.toBundle());
                                                         break;
                                                     case NAME:
                                                         //TODO: start activity

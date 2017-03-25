@@ -19,11 +19,11 @@ import java.util.List;
 public class MainContentPagerAdapter extends FragmentStatePagerAdapter {
 
     private static List<Fragment> fragments;
-    private static final String[] titles = new String[]{ "Discover", "Channel", "Hot", "Anchored" };
+    private static final String[] titles = new String[]{ "Channel", "Discover", "Hot", "Anchored" };
     static{
         fragments = new ArrayList<>();
-        fragments.add(DiscoverFragment.newInstance());
         fragments.add(ChannelFragment.newInstance());
+        fragments.add(DiscoverFragment.newInstance());
         fragments.add(HotFragment.newInstance());
         fragments.add(AnchoredFragment.newInstance());
     }

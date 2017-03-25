@@ -15,6 +15,9 @@ import com.dareu.web.dto.response.entity.DareResponseDescription;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by jose.rubalcaba on 03/20/2017.
  */
@@ -102,7 +105,7 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
         holder.claps.setText(String.valueOf(desc.getContent().getClaps()));
 
         //set creation date
-        holder.date.setText(desc.getContent().getUploadDate());
+        holder.date.setText(SharedUtils.getFromDate(desc.getContent().getUploadDate()));
 
         //set comments
         holder.comments.setText(String.valueOf(desc.getContent().getComments()));
@@ -128,22 +131,43 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
 
     static class AnchoredContentViewHolder extends RecyclerView.ViewHolder{
 
-        ImageView thumb, user, share, play, unanchor, thumbButton;
-        TextView views, claps, comments, title, date;
+
+        @BindView(R.id.dareResponseItemThumb)
+        ImageView thumb;
+
+        @BindView(R.id.dareResponseItemUser)
+        ImageView user;
+
+        @BindView(R.id.dareResponseItemShare)
+        ImageView share;
+
+        @BindView(R.id.dareResponseItemPlay)
+        ImageView play;
+
+        @BindView(R.id.dareResponseItemUnanchore)
+        ImageView unanchor;
+
+        @BindView(R.id.dareResponseItemThumbButton)
+        ImageView thumbButton;
+
+        @BindView(R.id.dareResponseItemViews)
+        TextView views;
+
+        @BindView(R.id.dareResponseItemClaps)
+        TextView claps;
+
+        @BindView(R.id.dareResponseItemComments)
+        TextView comments;
+
+        @BindView(R.id.dareResponseItemTitle)
+        TextView title;
+
+        @BindView(R.id.dareResponseItemDate)
+        TextView date;
 
         public AnchoredContentViewHolder(View itemView) {
             super(itemView);
-            thumb = (ImageView)itemView.findViewById(R.id.dareResponseItemThumb);
-            user = (ImageView)itemView.findViewById(R.id.dareResponseItemUser);
-            share = (ImageView)itemView.findViewById(R.id.dareResponseItemShare);
-            play = (ImageView)itemView.findViewById(R.id.dareResponseItemPlay);
-            views = (TextView)itemView.findViewById(R.id.dareResponseItemViews);
-            claps = (TextView)itemView.findViewById(R.id.dareResponseItemClaps);
-            comments = (TextView)itemView.findViewById(R.id.dareResponseItemComments);
-            title = (TextView)itemView.findViewById(R.id.dareResponseItemTitle);
-            date = (TextView)itemView.findViewById(R.id.dareResponseItemDate);
-            unanchor = (ImageView)itemView.findViewById(R.id.dareResponseItemUnanchore);
-            thumbButton = (ImageView)itemView.findViewById(R.id.dareResponseItemThumbButton);
+            ButterKnife.bind(this, itemView);
         }
     }
 

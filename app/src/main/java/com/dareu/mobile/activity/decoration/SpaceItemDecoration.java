@@ -10,32 +10,39 @@ import android.view.View;
 
 public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
 
-    private int space = 30;
+    public static final int EXTRA_LARGE_SPACE = 45;
+    public static final int LARGE_SPACE = 30;
+    public static final int MEDIUM_SPACE = 15;
+    public static final int SMALL_SPACE = 5;
+    public static final int NO_SPACE = 0;
+
+    private int currentSpaceType = MEDIUM_SPACE;
+
     private boolean horizontal = false;
 
     public SpaceItemDecoration(){
     }
 
-    public SpaceItemDecoration(int space, boolean horizontal) {
+    public SpaceItemDecoration(int spaceType, boolean horizontal) {
         this.horizontal = horizontal;
-        this.space = space;
+        this.currentSpaceType = spaceType;
     }
 
     public SpaceItemDecoration(boolean horizontal) {
         this.horizontal = horizontal;
     }
 
-    public SpaceItemDecoration(int space){
-        this.space = space;
+    public SpaceItemDecoration(int spaceType){
+        this.currentSpaceType = spaceType;
     }
 
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         if(parent.getChildAdapterPosition(view) != parent.getAdapter().getItemCount() - 1){
             if(horizontal){
-                outRect.right = space;
+                outRect.right = currentSpaceType;
             }else{
-                outRect.bottom = space;
+                outRect.bottom = currentSpaceType;
             }
         }
 

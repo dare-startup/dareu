@@ -11,15 +11,26 @@ import android.view.View;
 import com.dareu.mobile.R;
 import com.dareu.mobile.adapter.PendingRequestsPagerAdapter;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class PendingRequestsActivity extends AppCompatActivity {
 
     public static final String FRIENDSHIP_ID = "friendshipId";
 
     //views
-    private CoordinatorLayout coordinatorLayout;
-    private Toolbar toolbar;
-    private ViewPager viewPager;
-    private TabLayout tabLayout;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.viewPager)
+    ViewPager viewPager;
+
+    @BindView(R.id.tabLayout)
+    TabLayout tabLayout;
 
 
     //variables
@@ -28,12 +39,12 @@ public class PendingRequestsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pending_requests);
-        getComponents();
+        ButterKnife.bind(this);
+        initialize();
 
     }
 
-    private void getComponents() {
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
+    private void initialize() {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -44,12 +55,9 @@ public class PendingRequestsActivity extends AppCompatActivity {
                 finish();
             }
         });
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-        viewPager = (ViewPager)findViewById(R.id.viewPager);
         PendingRequestsPagerAdapter adapter = new PendingRequestsPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);
         //creates a tab layout
-        tabLayout = (TabLayout)findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
     }
 }

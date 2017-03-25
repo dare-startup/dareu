@@ -35,6 +35,8 @@ import com.dareu.web.dto.response.entity.Page;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -46,11 +48,22 @@ public class FindFriendsActivity extends AppCompatActivity {
     public static final String SELECTED_USER_ID = "selectedUserIdArray";
     private int pageNumber = 1;
 
-    private RecyclerView recyclerView;
-    private ProgressBar progressBar;
-    private CoordinatorLayout coordinatorLayout;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.findFriendsList)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.message)
+    TextView message;
+
     private AccountClientService accountService;
-    private TextView message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +71,7 @@ public class FindFriendsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_find_friends);
         accountService = RetroFactory.getInstance()
                 .create(AccountClientService.class);
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,15 +93,11 @@ public class FindFriendsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         //load all friends
-        this.recyclerView = (RecyclerView)findViewById(R.id.findFriendsList);
         LinearLayoutManager manager = new LinearLayoutManager(FindFriendsActivity.this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setHasFixedSize(false);
         recyclerView.addItemDecoration(new SpaceItemDecoration());
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-        message = (TextView)findViewById(R.id.message);
     }
 
     @Override
@@ -122,7 +131,6 @@ public class FindFriendsActivity extends AppCompatActivity {
                     FriendSearchAdapter adapter = new FriendSearchAdapter(new ArrayList<FriendSearchDescription>(), null);
                     recyclerView.setAdapter(adapter);
                     //show message
-                    TextView message = (TextView)findViewById(R.id.message);
                     message.setText("Empty result");
                     message.setVisibility(View.VISIBLE);
                     return false;
@@ -184,7 +192,6 @@ public class FindFriendsActivity extends AppCompatActivity {
                                            progressBar.setVisibility(View.GONE);
                                            recyclerView.setAdapter(adapter);
                                            recyclerView.setVisibility(View.VISIBLE);
-                                           TextView message = (TextView)findViewById(R.id.message);
                                            message.setVisibility(View.GONE);
                                        }
                                        break;

@@ -14,6 +14,9 @@ import com.dareu.web.dto.response.entity.CommentDescription;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by jose.rubalcaba on 03/09/2017.
  */
@@ -22,10 +25,12 @@ public class ResponseCommentAdapter  extends RecyclerView.Adapter<ResponseCommen
 
     private Context cxt;
     private List<CommentDescription> list;
+    private CommentButtonClickListener listener;
 
-    public ResponseCommentAdapter(Context cxt, List<CommentDescription> list){
+    public ResponseCommentAdapter(Context cxt, List<CommentDescription> list, CommentButtonClickListener listener){
         this.cxt = cxt;
         this.list = list;
+        this.listener = listener;
     }
 
 
@@ -33,7 +38,7 @@ public class ResponseCommentAdapter  extends RecyclerView.Adapter<ResponseCommen
     public CommentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         //create view
         View view = LayoutInflater.from(cxt)
-                .inflate(R.layout.response_comment_tem, parent, false);
+                .inflate(R.layout.response_comment_item, parent, false);
 
         return new CommentViewHolder(view);
     }
@@ -44,14 +49,14 @@ public class ResponseCommentAdapter  extends RecyclerView.Adapter<ResponseCommen
     }
 
     @Override
-    public void onBindViewHolder(final CommentViewHolder holder, int position) {
-        CommentDescription description = list.get(position);
+    public void onBindViewHolder(final CommentViewHolder holder, final int position) {
+        final CommentDescription description = list.get(position);
         //load image
         SharedUtils.loadImagePicasso(holder.image, cxt, description.getResponse().getUser().getImageUrl());
         holder.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: GO TO PROFILE ACTIVITY HERE
+                listener.onCommentButtonClicked(description, position, CommentEventType.CONTACT);
             }
         });
         //load text views
@@ -59,19 +64,35 @@ public class ResponseCommentAdapter  extends RecyclerView.Adapter<ResponseCommen
         holder.name.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: GO TO PROFILE ACTIVITY
+                listener.onCommentButtonClicked(description, position, CommentEventType.CONTACT);
             }
         });
 
         holder.comment.setText(description.getComment());
-        holder.date.setText(description.getCommentDate());
+        holder.date.setText(SharedUtils.getFromDate(description.getCommentDate()));
         holder.clap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: CLAP A COMMENT HERE
-                holder.image.setImageDrawable(cxt.getResources().getDrawable(R.drawable.ic_thumb_orange));
+                listener.onCommentButtonClicked(description, position, CommentEventType.CLAP);
             }
         });
+
+        if(description.isClapped()){
+            holder.clap.setText("Remove clap");
+        }else{
+            holder.clap.setText("Clap comment");
+        }
+    }
+
+    public void clapComment(boolean clapped, int position){
+        CommentDescription desc = list.get(position);
+        desc.setClapped(clapped);
+        if(clapped){
+            desc.setClaps(desc.getClaps() + 1);
+        }else{
+            desc.setClaps(desc.getClaps() - 1);
+        }
+        notifyItemChanged(position);
     }
 
     @Override
@@ -81,16 +102,32 @@ public class ResponseCommentAdapter  extends RecyclerView.Adapter<ResponseCommen
 
     static class CommentViewHolder extends RecyclerView.ViewHolder{
 
+        @BindView(R.id.responseCommentItemImage)
         ImageView image;
-        TextView name, comment, date, clap;
+
+        @BindView(R.id.responseCommentItemName)
+        TextView name;
+
+        @BindView(R.id.responseCommentItemComment)
+        TextView comment;
+
+        @BindView(R.id.responseCommentItemDate)
+        TextView date;
+
+        @BindView(R.id.responseCommentItemClap)
+        TextView clap;
 
         public CommentViewHolder(View view) {
             super(view);
-            image = (ImageView)view.findViewById(R.id.responseCommentItemImage);
-            name = (TextView)view.findViewById(R.id.responseCommentItemName);
-            comment = (TextView)view.findViewById(R.id.responseCommentItemComment);
-            date = (TextView)view.findViewById(R.id.responseCommentItemDate);
-            clap = (TextView)view.findViewById(R.id.responseCommentItemClap);
+            ButterKnife.bind(this, view);
         }
+    }
+
+    public interface CommentButtonClickListener {
+        public void onCommentButtonClicked(CommentDescription desc, int position, CommentEventType type);
+    }
+
+    public enum CommentEventType{
+        CONTACT, CLAP
     }
 }

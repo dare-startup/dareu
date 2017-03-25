@@ -30,7 +30,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.shared.NewDareActivity;
@@ -56,6 +55,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -79,6 +81,29 @@ public class MainActivity extends AppCompatActivity
 
     private AccountClientService accountService;
     private DareClientService dareService;
+    private BroadcastReceiver broadcastReceiver;
+
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.newDareButton)
+    FloatingActionButton newDareButton;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.viewPager)
+    ViewPager viewPager;
+
+    @BindView(R.id.tabLayout)
+    TabLayout tabLayout;
+
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,35 +113,50 @@ public class MainActivity extends AppCompatActivity
                 .create(AccountClientService.class);
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         //setup drawer
-        setupDrawer(toolbar);
+        setupDrawer();
         //setup view pager
         setupViewPager();
-        //setup first visit dialog
-        //setupFirstVisitDialog();
-        FloatingActionButton newDareButton = (FloatingActionButton)findViewById(R.id.newDareButton);
-        newDareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //start a new dare activity
-                Intent intent = new Intent(MainActivity.this, NewDareActivity.class);
-                startActivityForResult(intent, NEW_DARE_REQUEST_CODE);
-            }
-        });
         //check registration id availability
         SharedUtils.checkFirebaseRegistrationId(MainActivity.this);
         //check if there is an active dare
         checkActiveDare();
         //register receiver
-        registerReceiver(new BroadcastReceiver() {
+        broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 addNotificationLayout(context, intent, NEW_DARE_NOTIFICATION);
             }
-        }, new IntentFilter(MainActivity.ACTION_NEW_DARE));
+        };
+        registerReceiver(broadcastReceiver, new IntentFilter(MainActivity.ACTION_NEW_DARE));
 
+    }
+
+    @OnClick(R.id.newDareButton)
+    public void newDareButtonListener(){
+        Intent intent = new Intent(MainActivity.this, NewDareActivity.class);
+        startActivityForResult(intent, NEW_DARE_REQUEST_CODE);
+        overridePendingTransition(R.anim.slide_in_from_right, R.anim.fade_out);
+    }
+
+    @Override
+    public void onPause(){
+        unregisterReceiver(broadcastReceiver);
+        super.onPause();
+    }
+
+    @Override
+    public void onResume(){
+        registerReceiver(broadcastReceiver, new IntentFilter(MainActivity.ACTION_NEW_DARE));
+        super.onResume();
+    }
+
+    @Override
+    public void onDestroy(){
+        //unregisterReceiver(broadcastReceiver);
+        super.onDestroy();
     }
 
     private void checkActiveDare() {
@@ -154,7 +194,6 @@ public class MainActivity extends AppCompatActivity
 
     private void createActiveDareCountdown(final ActiveDare dare){
         //create snackbar
-        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         final Snackbar snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_INDEFINITE);
 
         //create two dates
@@ -254,8 +293,6 @@ public class MainActivity extends AppCompatActivity
         //get dare id
         String dareId = intent.getStringExtra(NEW_DARE_ID);
 
-        final CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
-
         //load dare
         dareService.dareDescription(dareId, SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
                 .enqueue(new Callback<DareDescription>() {
@@ -268,7 +305,7 @@ public class MainActivity extends AppCompatActivity
                         else
                             text = Html.fromHtml(String.format("<font color=#F05B19>%s</font> <font color=#FFFFFF> just dared you, want to take a look?</font>",
                                     response.body().getChallenger().getName()));
-                        Snackbar snackbar = Snackbar.make(layout, text, Snackbar.LENGTH_INDEFINITE)
+                        Snackbar snackbar = Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_INDEFINITE)
                                 .setAction("Details", new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -291,14 +328,11 @@ public class MainActivity extends AppCompatActivity
 
 
     private void setupViewPager() {
-        final ViewPager viewPager = (ViewPager)findViewById(R.id.viewPager);
         viewPager.setAdapter(new MainContentPagerAdapter(getSupportFragmentManager()));
-        TabLayout layout = (TabLayout)findViewById(R.id.tabLayout);
-        layout.setupWithViewPager(viewPager);
-        final Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        tabLayout.setupWithViewPager(viewPager);
         //first tab
 
-        layout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
@@ -314,19 +348,21 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-        for(int i = 0; i < layout.getTabCount(); i ++){
+        for(int i = 0; i < tabLayout.getTabCount(); i ++){
             switch(i){
                 case 0:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_explore_white_24dp);
+                    tabLayout.getTabAt(i).setIcon(R.drawable.ic_ondemand_video_white_24dp);
                     break;
+
                 case 1:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_ondemand_video_white_24dp);
+                    tabLayout.getTabAt(i).setIcon(R.drawable.ic_explore_white_24dp);
                     break;
+
                 case 2:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_whatshot_white_24dp);
+                    tabLayout.getTabAt(i).setIcon(R.drawable.ic_whatshot_white_24dp);
                     break;
                 case 3:
-                    layout.getTabAt(i).setIcon(R.drawable.ic_star_white_24dp);
+                    tabLayout.getTabAt(i).setIcon(R.drawable.ic_star_white_24dp);
                     break;
             }
         }
@@ -334,11 +370,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             finish();
+            unregisterReceiver(broadcastReceiver);
         }
     }
 
@@ -429,19 +466,16 @@ public class MainActivity extends AppCompatActivity
                 break;**/
 
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void setupDrawer(Toolbar toolbar){
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+    private void setupDrawer(){
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         View headerView = navigationView.getHeaderView(0);
@@ -504,6 +538,12 @@ public class MainActivity extends AppCompatActivity
                 checkPendingDare();
         }else if(requestCode == UPLOAD_DARE_RESPONSE_REQUEST_CODE && resultCode == RESULT_OK){
             checkPendingDare();
+        }else if(requestCode == NewDareDataActivity.PENDING_DARE_REQUEST_CODE && resultCode != RESULT_OK){
+            //dare hasn't been accepted
+            checkPendingDare();
         }
     }
+
+
+
 }

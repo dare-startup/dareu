@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:gravity="center"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     android:padding="8dp">
 
     <TextView
+        android:textColor="@android:color/black"
         android:id="@+id/categoryItemNameView"
-        android:text="Category name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <TextView
+        android:textSize="12sp"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/darker_gray"
         android:id="@+id/categoryItemDescView"
-        style="@style/PrimaryTextViewTheme"
-        android:text="Category description here"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </LinearLayout>

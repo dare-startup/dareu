@@ -40,6 +40,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -50,13 +52,29 @@ public class UploadDareResponseActivity extends AppCompatActivity {
     public static final String DARE_ID = "dareId";
     public static final String UPLOADING = "uplaodingDareResponse";
 
-    private Toolbar toolbar;
-    private ProgressBar progressBar;
-    private TextView dareName, dareDescription;
-    private ImageView thumbImage;
-    private EditText comment;
-    private LinearLayout layout;
-    private CoordinatorLayout coordinatorLayout;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.uploadDareResponseDareName)
+    TextView dareName;
+
+    @BindView(R.id.uploadDareResponseDareDescription)
+    TextView dareDescription;
+
+    @BindView(R.id.uploadDareResponseThumb)
+    ImageView thumbImage;
+
+    @BindView(R.id.uploadDareResponseComment)
+    EditText comment;
+
+    @BindView(R.id.uploadDareResponseLayout)
+    LinearLayout layout;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
 
     private static final int CAPTURE_REQUEST_CODE = 1231;
     private static final int GALLERY_REQUEST_CODE = 1234;
@@ -76,6 +94,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_upload_dare_response);
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
+        ButterKnife.bind(this);
         getComponents();
     }
 
@@ -85,15 +104,6 @@ public class UploadDareResponseActivity extends AppCompatActivity {
         SharedUtils.VIDEO_DIRECTORY.mkdir();
         newFileName = new File(SharedUtils.VIDEO_DIRECTORY, System.currentTimeMillis() + ".mp4");
         thumbFile = new File(SharedUtils.IMAGE_DIRECTORY, System.currentTimeMillis() + ".jpg");
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
-        dareName= (TextView)findViewById(R.id.uploadDareResponseDareName);
-        dareDescription = (TextView)findViewById(R.id.uploadDareResponseDareDescription);
-        thumbImage = (ImageView)findViewById(R.id.uploadDareResponseThumb);
-        comment = (EditText)findViewById(R.id.uploadDareResponseComment);
-        layout = (LinearLayout)findViewById(R.id.uploadDareResponseLayout);
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
-
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle("Upload dare response");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -257,7 +267,7 @@ public class UploadDareResponseActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-        Uri uri = null;
+
         if(requestCode == CAPTURE_REQUEST_CODE && resultCode == RESULT_OK){
             //video has been captured
             processDareVideo(data.getData());

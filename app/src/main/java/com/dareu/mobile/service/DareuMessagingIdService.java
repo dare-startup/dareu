@@ -29,7 +29,7 @@ public class DareuMessagingIdService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
         if(accountService == null)
-            RetroFactory
+            accountService = RetroFactory
                     .getInstance()
                     .create(AccountClientService.class);
         String regId = FirebaseInstanceId.getInstance().getToken();

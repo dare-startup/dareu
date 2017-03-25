@@ -21,7 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.activity.ActivityListener;
 import com.dareu.mobile.adapter.CategoriesAdapter;
 import com.dareu.mobile.utils.PrefName;
 import com.dareu.web.dto.client.DareClientService;
@@ -32,15 +31,40 @@ import com.dareu.web.dto.response.EntityRegistrationResponse;
 import com.dareu.web.dto.response.entity.CategoryDescription;
 import com.dareu.web.dto.response.entity.Page;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewDareActivity extends AppCompatActivity implements ActivityListener{
+public class NewDareActivity extends AppCompatActivity {
 
     private CreateDareRequest dareRequest;
     private ProgressDialog progressDialog;
-    private TextView selectedUserView;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.newDareSelectedUser)
+    TextView selectedUserView;
+
+    @BindView(R.id.newDareFindFriendsButton)
+    Button findFriendsButton;
+
+    @BindView(R.id.newDareCategorySpinner)
+    Spinner categoriesSpinner;
+
+    @BindView(R.id.newDareTimerSpinner)
+    Spinner timerSpinner;
+
+    @BindView(R.id.newDareNameView)
+    EditText nameView;
+
+    @BindView(R.id.newDareDescriptionView)
+    EditText descView;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     public static final String DARE_CREATION_STATUS = "dareCreationStatus";
 
@@ -52,34 +76,9 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
         setContentView(R.layout.activity_new_dare);
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
-        getComponents();
+        ButterKnife.bind(this);
         initialize();
 
-    }
-
-    @Override
-    public void getComponents() {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new AlertDialog.Builder(NewDareActivity.this)
-                        .setTitle("Exit")
-                        .setMessage("Do you want to cancel new dare creation?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                finish();
-                            }
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-            }
-        });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        selectedUserView = (TextView)findViewById(R.id.newDareSelectedUser);
     }
 
     @Override
@@ -90,18 +89,34 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        finish();
+                        supportFinishAfterTransition();
                     }
                 })
                 .setNegativeButton("No", null)
                 .show();
     }
 
-    @Override
     public void initialize() {
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new AlertDialog.Builder(NewDareActivity.this)
+                        .setTitle("Exit")
+                        .setMessage("Do you want to cancel new dare creation?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                supportFinishAfterTransition();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+            }
+        });
         dareRequest = new CreateDareRequest();
         //set find friends listener
-        Button findFriendsButton = (Button)findViewById(R.id.newDareFindFriendsButton);
         findFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,7 +132,6 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                         //create spinner adapter
                         CategoriesAdapter adapter = new CategoriesAdapter(NewDareActivity.this, response.body().getItems());
                         //set to spinner
-                        Spinner categoriesSpinner = (Spinner)findViewById(R.id.newDareCategorySpinner);
                         categoriesSpinner.setAdapter(adapter);
                         categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
@@ -139,7 +153,6 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                     }
                 });
         //set timer spinner
-        Spinner timerSpinner = (Spinner)findViewById(R.id.newDareTimerSpinner);
         timerSpinner.setAdapter(new ArrayAdapter<String>(NewDareActivity.this,
                 R.layout.support_simple_spinner_dropdown_item, SharedUtils.TIMERS));
         timerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -154,6 +167,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                 dareRequest.setTimer(0);
             }
         });
+
     }
 
     @Override
@@ -174,15 +188,8 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
     }
 
     private void saveDare() {
-
-        //get name
-        EditText nameView = (EditText)findViewById(R.id.newDareNameView);
-        EditText descView = (EditText)findViewById(R.id.newDareDescriptionView);
-
         dareRequest.setName(nameView.getText().toString());
         dareRequest.setDescription(descView.getText().toString());
-
-        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorLayout);
         //validate request
         if(dareRequest.getFriendId() == null){
             Snackbar.make(coordinatorLayout, "You must select a friend", Snackbar.LENGTH_LONG)
@@ -220,7 +227,7 @@ public class NewDareActivity extends AppCompatActivity implements ActivityListen
                         intent.putExtra(DARE_CREATION_STATUS, Boolean.TRUE.toString());
                         setResult(RESULT_OK, intent);
                         progressDialog.dismiss();
-                        finish();
+                        supportFinishAfterTransition();
                     }
 
                     @Override

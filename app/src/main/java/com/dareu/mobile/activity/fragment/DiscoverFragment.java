@@ -4,6 +4,7 @@ package com.dareu.mobile.activity.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +31,8 @@ import com.dareu.web.dto.response.entity.Page;
 
 import java.io.IOException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,13 +45,23 @@ import retrofit2.Response;
 public class DiscoverFragment extends Fragment {
 
     private static final String TAG = "DiscoverFragment";
-    private RecyclerView recyclerView;
-    private DiscoverUsersAdapter adapter;
-    private ProgressBar progressBar;
-    private SwipeRefreshLayout refreshLayout;
-    private int pageNumber = 1;
-    private TextView centeredMessage;
 
+    @BindView(R.id.fragmentDiscoverRecyclerView)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout refreshLayout;
+
+    @BindView(R.id.fragmentCenteredMessage)
+    TextView centeredMessage;
+
+    private View currentView;
+
+    private int pageNumber = 1;
+    private DiscoverUsersAdapter adapter;
     private AccountClientService accountService;
 
     public DiscoverFragment() {
@@ -77,12 +90,10 @@ public class DiscoverFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_discover, container, false);
-        recyclerView = (RecyclerView)view.findViewById(R.id.fragmentDiscoverRecyclerView);
+        currentView = inflater.inflate(R.layout.fragment_discover, container, false);
+        ButterKnife.bind(this, currentView);
         recyclerView.addItemDecoration(new SpaceItemDecoration(5));
-        progressBar = (ProgressBar)view.findViewById(R.id.progressBar);
         progressBar.setVisibility(View.VISIBLE);
-        refreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swipeRefreshLayout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -91,7 +102,6 @@ public class DiscoverFragment extends Fragment {
                 discoverCall.enqueue(call);
             }
         });
-        centeredMessage = (TextView)view.findViewById(R.id.fragmentCenteredMessage);
 
         switch(SharedUtils.checkInternetConnection(getActivity())){
             case NOT_CONNECTED:
@@ -105,7 +115,7 @@ public class DiscoverFragment extends Fragment {
                 discoverCall.enqueue(call);
                 break;
         }
-        return view;
+        return currentView;
     }
 
     private Callback<Page<DiscoverUserAccount>> call = new Callback<Page<DiscoverUserAccount>>() {
@@ -122,7 +132,8 @@ public class DiscoverFragment extends Fragment {
                     }else{
                         adapter = new DiscoverUsersAdapter(getActivity(), response.body().getItems(), new DiscoverUsersAdapter.OnButtonClicked() {
                             @Override
-                            public void onButtonClicked(DiscoverUserAccount account, DiscoverUsersAdapter.ButtonType type, final int position) {
+                            public void onButtonClicked(DiscoverUserAccount account, DiscoverUsersAdapter.ButtonType type, final int position, View view) {
+                                ActivityOptionsCompat options;
                                 switch (type){
                                     case ADD:
                                         accountService.requestConnection(account.getId(),
@@ -133,6 +144,12 @@ public class DiscoverFragment extends Fragment {
                                                         Toast.makeText(getActivity(), "You request has been sent", Toast.LENGTH_LONG)
                                                                 .show();
                                                         adapter.remove(position);
+                                                        if(adapter.getItemCount() == 0){
+                                                            //hide recycler view and show message
+                                                            recyclerView.setVisibility(View.GONE);
+                                                            centeredMessage.setVisibility(View.VISIBLE);
+                                                            centeredMessage.setText("There is no available content right now");
+                                                        }
                                                     }
 
                                                     @Override
@@ -148,7 +165,10 @@ public class DiscoverFragment extends Fragment {
                                         intent.putExtra(ProfileActivity.USER_IMAGE_URL, account.getImageUrl());
                                         intent.putExtra(ProfileActivity.USER_ID, account.getId());
                                         intent.putExtra(ProfileActivity.USER_NAME, account.getName());
-                                        startActivity(intent);
+
+                                        options = ActivityOptionsCompat
+                                                .makeSceneTransitionAnimation(getActivity(), view, "dareResponseUserImage");
+                                        startActivity(intent, options.toBundle());
                                         break;
                                 }
                             }
@@ -171,8 +191,7 @@ public class DiscoverFragment extends Fragment {
 
         @Override
         public void onFailure(Call<Page<DiscoverUserAccount>> call, Throwable t) {
-            Snackbar.make(getActivity().findViewById(R.id.coordinatorLayout), t.getMessage(), Snackbar.LENGTH_LONG)
-                    .show();
+            Toast.makeText(getActivity(), t.getMessage(), Toast.LENGTH_LONG).show();
             progressBar.setVisibility(View.GONE);
             centeredMessage.setVisibility(View.GONE);
         }

@@ -17,6 +17,9 @@ import com.dareu.web.dto.response.entity.DiscoverUserAccount;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by jose.rubalcaba on 01/29/2017.
  */
@@ -45,7 +48,7 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         final DiscoverUsersViewHolder sent;
         //user ready to be added
         sent = (DiscoverUsersViewHolder)holder;
@@ -56,20 +59,20 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
             @Override
             public void onClick(View v) {
                 DiscoverUserAccount acc = list.get(position);
-                listener.onButtonClicked(acc, ButtonType.ADD, position);
+                listener.onButtonClicked(acc, ButtonType.ADD, position, sent.addButton);
             }
         });
         sent.nameView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onButtonClicked(list.get(position), ButtonType.CONTACT, position);
+                listener.onButtonClicked(list.get(position), ButtonType.CONTACT, position, sent.nameView);
             }
         });
 
         sent.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onButtonClicked(list.get(position), ButtonType.CONTACT, position);
+                listener.onButtonClicked(list.get(position), ButtonType.CONTACT, position, sent.imageView);
             }
         });
         SharedUtils.loadImagePicasso(sent.imageView, cxt, list.get(position).getImageUrl());
@@ -88,23 +91,29 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     static class DiscoverUsersViewHolder extends RecyclerView.ViewHolder{
 
+        @BindView(R.id.discoverUserItemImage)
         ImageView imageView;
+
+        @BindView(R.id.discoverUserItemName)
         TextView nameView;
+
+        @BindView(R.id.discoverUserItemConnect)
         Button addButton;
-        TextView uploads, dares;
+
+        @BindView(R.id.discoverUserItemUploads)
+        TextView uploads;
+
+        @BindView(R.id.discoverUserItemDares)
+        TextView dares;
 
         DiscoverUsersViewHolder(View view){
             super(view);
-            this.imageView = (ImageView)view.findViewById(R.id.discoverUserItemImage);
-            this.nameView = (TextView)view.findViewById(R.id.discoverUserItemName);
-            this.addButton = (Button)view.findViewById(R.id.discoverUserItemConnect);
-            this.uploads = (TextView)view.findViewById(R.id.discoverUserItemUploads);
-            this.dares = (TextView)view.findViewById(R.id.discoverUserItemDares);
+            ButterKnife.bind(this, view);
         }
     }
 
     public interface OnButtonClicked{
-        public void onButtonClicked(DiscoverUserAccount account, ButtonType type, int position);
+        public void onButtonClicked(DiscoverUserAccount account, ButtonType type, int position, View view);
     }
 
     public enum ButtonType{
