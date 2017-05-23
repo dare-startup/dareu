@@ -97,10 +97,16 @@ public class FlagDareActivity extends AppCompatActivity {
             .enqueue(new Callback<DareDescription>() {
                 @Override
                 public void onResponse(Call<DareDescription> call, Response<DareDescription> response) {
-                    dareName.setText(response.body().getName());
-                    dareDescription.setText(response.body().getDescription());
-                    layout.setVisibility(View.VISIBLE);
-                    progressBar.setVisibility(View.GONE);
+                    switch(response.code()){
+                        case 200:
+                            dareName.setText(response.body().getName());
+                            dareDescription.setText(response.body().getDescription());
+                            layout.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.GONE);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
                 @Override
@@ -135,7 +141,7 @@ public class FlagDareActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        progressDialog = new ProgressDialog(FlagDareActivity.this);
+                        progressDialog = new ProgressDialog(FlagDareActivity.this, R.style.AppAlertDialog);
                         progressDialog.setMessage("Flagging dare");
                         progressDialog.setCancelable(false);
                         progressDialog.show();

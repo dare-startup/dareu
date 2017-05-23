@@ -9,15 +9,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
+import com.dareu.mobile.activity.listener.RecyclerPagerScrollListener;
 import com.dareu.mobile.activity.shared.ProfileActivity;
 import com.dareu.mobile.activity.user.DareResponseActivity;
 import com.dareu.mobile.adapter.ResponseDescriptionAdapter;
@@ -43,6 +46,8 @@ import retrofit2.Response;
  */
 public class ChannelFragment extends Fragment {
 
+    private static final String TAG = "ChannelFragment";
+
     //current view
     private View currentView;
 
@@ -62,9 +67,14 @@ public class ChannelFragment extends Fragment {
     @BindView(R.id.channelFragmentTextView)
     TextView textView;
 
+    //next page progress bar
+    @BindView(R.id.nextPageProgressBar)
+    LinearLayout nextPageProgressBar;
+
     private int currentPageNumber = 1;
     private DareClientService dareService;
     private ResponseDescriptionAdapter adapter;
+    private RecyclerPagerScrollListener listener;
 
     public ChannelFragment() {
 
@@ -117,6 +127,7 @@ public class ChannelFragment extends Fragment {
     }
 
     private void getChannel(){
+        currentPageNumber = 1;
         dareService.channel(currentPageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
                 .enqueue(new Callback<Page<DareResponseDescription>>() {
                     @Override
@@ -133,6 +144,14 @@ public class ChannelFragment extends Fragment {
                             progressBar.setVisibility(View.GONE);
                             textView.setVisibility(View.GONE);
                             recyclerView.setVisibility(View.VISIBLE);
+                            listener = new RecyclerPagerScrollListener(new RecyclerPagerScrollListener.RecyclerViewPagerScrollListener() {
+                                @Override
+                                public void onScrolledToBottom() {
+                                    //load more items here
+                                    loadNextPage();
+                                }
+                            }, response.body().getPageSize(), response.body().getPagesAvailable());
+                            recyclerView.addOnScrollListener(listener);
                             //creates an adapter
                             adapter =
                                     new ResponseDescriptionAdapter(getActivity(), response.body().getItems(), new ResponseDescriptionAdapter.ResponseDescriptionCallbacks() {
@@ -236,5 +255,34 @@ public class ChannelFragment extends Fragment {
                 });
     }
 
+    private void loadNextPage() {
+        nextPageProgressBar.setVisibility(View.VISIBLE);
+        currentPageNumber ++;
+        listener.setLoading(true);
+        listener.setPageNumber(currentPageNumber);
+        dareService.channel(currentPageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<Page<DareResponseDescription>>() {
+                    @Override
+                    public void onResponse(Call<Page<DareResponseDescription>> call, Response<Page<DareResponseDescription>> response) {
+                        switch(response.code()){
+                            case 200:
+                                if(! response.body().getItems().isEmpty()){
+                                    //add all items to adapter
+                                    adapter.addAll(response.body().getItems());
+                                    listener.setLoading(false);
+                                    nextPageProgressBar.setVisibility(View.GONE);
+                                }
+                                break;
+                            default:
+                                nextPageProgressBar.setVisibility(View.GONE);
+                                break;
+                        }
+                    }
 
+                    @Override
+                    public void onFailure(Call<Page<DareResponseDescription>> call, Throwable t) {
+
+                    }
+                });
+    }
 }

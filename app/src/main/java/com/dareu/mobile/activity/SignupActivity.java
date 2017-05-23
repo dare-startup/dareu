@@ -207,7 +207,7 @@ public class SignupActivity extends AppCompatActivity {
                             return;
                         }
                         //connected
-                        progressDialog = new ProgressDialog(SignupActivity.this);
+                        progressDialog = new ProgressDialog(SignupActivity.this, R.style.AppAlertDialog);
                         progressDialog.setCancelable(false);
                         progressDialog.setIndeterminate(true);
                         progressDialog.setMessage("Creating new account");

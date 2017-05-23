@@ -13,12 +13,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
+import com.dareu.mobile.activity.listener.RecyclerPagerScrollListener;
 import com.dareu.mobile.activity.shared.ProfileActivity;
 import com.dareu.mobile.adapter.DiscoverUsersAdapter;
 import com.dareu.mobile.utils.PrefName;
@@ -26,6 +28,7 @@ import com.dareu.mobile.utils.SharedUtils;
 import com.dareu.web.dto.client.AccountClientService;
 import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.response.EntityRegistrationResponse;
+import com.dareu.web.dto.response.entity.DareResponseDescription;
 import com.dareu.web.dto.response.entity.DiscoverUserAccount;
 import com.dareu.web.dto.response.entity.Page;
 
@@ -58,11 +61,15 @@ public class DiscoverFragment extends Fragment {
     @BindView(R.id.fragmentCenteredMessage)
     TextView centeredMessage;
 
+    @BindView(R.id.nextPageProgressBar)
+    LinearLayout nextPageProgressBar;
+
     private View currentView;
 
     private int pageNumber = 1;
     private DiscoverUsersAdapter adapter;
     private AccountClientService accountService;
+    private RecyclerPagerScrollListener listener;
 
     public DiscoverFragment() {
         // Required empty public constructor
@@ -97,11 +104,10 @@ public class DiscoverFragment extends Fragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Call<Page<DiscoverUserAccount>> discoverCall =
-                        accountService.discoverUsers(pageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN));
-                discoverCall.enqueue(call);
+                getDiscover();
             }
         });
+
 
         switch(SharedUtils.checkInternetConnection(getActivity())){
             case NOT_CONNECTED:
@@ -110,12 +116,47 @@ public class DiscoverFragment extends Fragment {
                 centeredMessage.setText(getResources().getString(R.string.no_internet_connection));
                 break;
             default:
-                Call<Page<DiscoverUserAccount>> discoverCall =
-                        accountService.discoverUsers(pageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN));
-                discoverCall.enqueue(call);
+                getDiscover();
                 break;
         }
         return currentView;
+    }
+
+    private void getDiscover(){
+        Call<Page<DiscoverUserAccount>> discoverCall =
+                accountService.discoverUsers(pageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN));
+        discoverCall.enqueue(call);
+    }
+
+    private void getNextPage(){
+        nextPageProgressBar.setVisibility(View.VISIBLE);
+        pageNumber ++;
+        listener.setLoading(true);
+        listener.setPageNumber(pageNumber);
+        accountService.discoverUsers(pageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<Page<DiscoverUserAccount>>() {
+                    @Override
+                    public void onResponse(Call<Page<DiscoverUserAccount>> call, Response<Page<DiscoverUserAccount>> response) {
+                        switch(response.code()){
+                            case 200:
+                                if(! response.body().getItems().isEmpty()){
+                                    //add all items to adapter
+                                    adapter.addAll(response.body().getItems());
+                                    listener.setLoading(false);
+                                    nextPageProgressBar.setVisibility(View.GONE);
+                                }
+                                break;
+                            default:
+                                nextPageProgressBar.setVisibility(View.GONE);
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Page<DiscoverUserAccount>> call, Throwable t) {
+
+                    }
+                });
     }
 
     private Callback<Page<DiscoverUserAccount>> call = new Callback<Page<DiscoverUserAccount>>() {
@@ -130,6 +171,12 @@ public class DiscoverFragment extends Fragment {
                         centeredMessage.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);
                     }else{
+                        listener = new RecyclerPagerScrollListener(new RecyclerPagerScrollListener.RecyclerViewPagerScrollListener() {
+                            @Override
+                            public void onScrolledToBottom() {
+                                getNextPage();
+                            }
+                        }, response.body().getPageSize(), response.body().getPagesAvailable());
                         adapter = new DiscoverUsersAdapter(getActivity(), response.body().getItems(), new DiscoverUsersAdapter.OnButtonClicked() {
                             @Override
                             public void onButtonClicked(DiscoverUserAccount account, DiscoverUsersAdapter.ButtonType type, final int position, View view) {

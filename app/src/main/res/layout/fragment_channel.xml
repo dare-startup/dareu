@@ -5,6 +5,7 @@
     tools:context="com.dareu.mobile.activity.fragment.ChannelFragment">
 
     <ProgressBar
+        android:indeterminateTint="@color/colorPrimary"
         android:id="@+id/progressBar"
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
@@ -26,11 +27,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/channelFragmentRecyclerView"
-            android:visibility="gone"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.RecyclerView
+                android:visibility="gone"
+                android:id="@+id/channelFragmentRecyclerView"
+                android:layout_weight=".95"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"/>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/nextPageProgressBar"
+                android:layout_weight=".05"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <ProgressBar
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/colorPrimary"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp" />
+            </LinearLayout>
+        </LinearLayout>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

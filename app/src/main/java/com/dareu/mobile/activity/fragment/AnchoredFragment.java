@@ -13,12 +13,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dareu.mobile.R;
 import com.dareu.mobile.activity.decoration.SpaceItemDecoration;
+import com.dareu.mobile.activity.listener.RecyclerPagerScrollListener;
 import com.dareu.mobile.activity.shared.ProfileActivity;
 import com.dareu.mobile.activity.user.DareResponseActivity;
 import com.dareu.mobile.adapter.AnchoredContentAdapter;
@@ -59,9 +61,13 @@ public class AnchoredFragment extends Fragment {
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout refreshLayout;
 
+    @BindView(R.id.nextPageProgressBar)
+    LinearLayout nextPageProgressBar;
+
     private View currentView;
     private int currentPageNumber = 1;
     private AnchoredContentAdapter adapter;
+    private RecyclerPagerScrollListener listener;
 
     private DareClientService clientService;
 
@@ -96,15 +102,16 @@ public class AnchoredFragment extends Fragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                currentPageNumber = 1;
                 getAnchoredContent();
             }
         });
+
         getAnchoredContent();
         return currentView;
     }
 
     private void getAnchoredContent(){
+        currentPageNumber = 1;
         clientService.getAnchoredContent(currentPageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
                 .enqueue(new Callback<Page<AnchoredDescription>>() {
                     @Override
@@ -117,6 +124,12 @@ public class AnchoredFragment extends Fragment {
                                     message.setText("You do not have any starred content yet");
                                     message.setVisibility(View.VISIBLE);
                                 }else{
+                                    listener = new RecyclerPagerScrollListener(new RecyclerPagerScrollListener.RecyclerViewPagerScrollListener() {
+                                        @Override
+                                        public void onScrolledToBottom() {
+                                            loadNextPage();
+                                        }
+                                    }, response.body().getPageSize(), response.body().getPagesAvailable());
                                     adapter = new AnchoredContentAdapter(response.body().getItems(), getActivity(), new AnchoredContentAdapter.AnchoredButtonClickListener() {
                                         @Override
                                         public void onAnchoredContentClick(final AnchoredDescription desc, final int position, AnchoredContentAdapter.AnchoredDescriptionCallbackType type) {
@@ -240,12 +253,43 @@ public class AnchoredFragment extends Fragment {
                                     recyclerView.setAdapter(adapter);
                                     progressBar.setVisibility(View.GONE);
                                     recyclerView.setVisibility(View.VISIBLE);
+                                    recyclerView.addOnScrollListener(listener);
                                     //hide refreshing if refreshing
                                     if(refreshLayout.isRefreshing())
                                         refreshLayout.setRefreshing(false);
                                 }
                                 break;
                             default:
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Page<AnchoredDescription>> call, Throwable t) {
+
+                    }
+                });
+    }
+    private void loadNextPage() {
+        nextPageProgressBar.setVisibility(View.VISIBLE);
+        currentPageNumber ++;
+        listener.setLoading(true);
+        listener.setPageNumber(currentPageNumber);
+        clientService.getAnchoredContent(currentPageNumber, SharedUtils.getStringPreference(getActivity(), PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<Page<AnchoredDescription>>() {
+                    @Override
+                    public void onResponse(Call<Page<AnchoredDescription>> call, Response<Page<AnchoredDescription>> response) {
+                        switch(response.code()){
+                            case 200:
+                                if(! response.body().getItems().isEmpty()){
+                                    //add all items to adapter
+                                    adapter.addAll(response.body().getItems());
+                                    listener.setLoading(false);
+                                    nextPageProgressBar.setVisibility(View.GONE);
+                                }
+                                break;
+                            default:
+                                nextPageProgressBar.setVisibility(View.GONE);
                                 break;
                         }
                     }

@@ -1,4 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Account"
+        android:layout="@layout/preference_custom_category">
 
+        <android.support.v7.preference.EditTextPreference
+            android:key="changeEmailPreference"
+            android:title="Change account email"
+            android:summary="Change the main email address linked to a DareÜ account"
+            android:dialogMessage="Type your new email address"
+            android:defaultValue=""
+            android:dialogLayout="@layout/pref_dialog_edittext_fix"/>
+
+        <android.support.v7.preference.EditTextPreference
+            android:key="changePasswordPreference"
+            android:title="Change account password"
+            android:summary="Change password linked to a DareÜ account"
+            android:dialogMessage="Type your new email address"
+            android:defaultValue=""
+            android:dialogLayout="@layout/pref_dialog_edittext_fix"/>
+
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Notifications"
+        android:layout="@layout/preference_custom_category">
+
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="daredNotificationPreference"
+            android:title="After being dared"
+            android:summary="Send a notification after a user dare this account"
+            android:defaultValue="true" />
+
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="contactNotificationPreference"
+            android:title="After being contacted"
+            android:summary="Send a notification after a user contact this account"
+            android:defaultValue="true" />
+
+        <android.support.v7.preference.SwitchPreferenceCompat
+            android:key="updateNotificationPreference"
+            android:title="Own content updates"
+            android:summary="Send notifications after a response content has been updated (commented, clapped, starred)"
+            android:defaultValue="true" />
+
+
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Do not enter"
+        android:layout="@layout/preference_custom_category">
+
+        <android.support.v7.preference.Preference
+            android:key="deleteAccountPreference"
+            android:title="Delete this account"
+            android:summary="Unlink this account to DareÜ servers, uploads, comments, contacts will be deleted (use this option with care and love)">
+
+        </android.support.v7.preference.Preference>
+    </android.support.v7.preference.PreferenceCategory>
 </PreferenceScreen>

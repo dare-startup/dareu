@@ -3,15 +3,18 @@ package com.dareu.mobile.activity.shared;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,6 +28,7 @@ import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.request.DareConfirmationRequest;
 import com.dareu.web.dto.response.UpdatedEntityResponse;
 import com.dareu.web.dto.response.entity.DareDescription;
+import com.dareu.web.dto.response.entity.UnacceptedDare;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import butterknife.BindView;
@@ -45,10 +49,7 @@ public class NewDareDataActivity extends AppCompatActivity {
     ProgressBar progressBar;
 
     @BindView(R.id.newDareDataChallengerImage)
-    CircularImageView challengerImage;
-
-    @BindView(R.id.newDareDataChallengerName)
-    TextView challengerName;
+    ImageView challengerImage;
 
     @BindView(R.id.newDareDataDareName)
     TextView dareName;
@@ -56,8 +57,8 @@ public class NewDareDataActivity extends AppCompatActivity {
     @BindView(R.id.newDareDataDareDescription)
     TextView dareDescription;
 
-    @BindView(R.id.newDareDataDareCategory)
-    TextView dareCategory;
+    //@BindView(R.id.newDareDataDareCategory)
+    //TextView dareCategory;
 
     @BindView(R.id.newDareDataDareTimer)
     TextView dareTime;
@@ -70,6 +71,9 @@ public class NewDareDataActivity extends AppCompatActivity {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    @BindView(R.id.collapsing_toolbar)
+    CollapsingToolbarLayout toolbarLayout;
 
     private ProgressDialog progressDialog;
     private DareDescription currentDareDescription;
@@ -85,22 +89,54 @@ public class NewDareDataActivity extends AppCompatActivity {
         dareService = RetroFactory.getInstance()
                 .create(DareClientService.class);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        toolbar.setTitleTextColor(getResources().getColor(android.R.color.white));
+        toolbarLayout.setCollapsedTitleTextColor(getResources().getColor(android.R.color.white));
+        toolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.white));
         if(dareId == null || dareId.isEmpty()){
-            Toast.makeText(NewDareDataActivity.this, "No dare id was provided", Toast.LENGTH_LONG)
-                    .show();
-            finish();
+            //just get a pending dare from here
+            getPendingDare();
         }else{
             getDare(dareId);
-            setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
-                }
-            });
         }
 
+    }
+
+    private void getPendingDare(){
+        dareService.unacceptedDare(SharedUtils.getStringPreference(this, PrefName.SIGNIN_TOKEN))
+                .enqueue(new Callback<UnacceptedDare>() {
+                    @Override
+                    public void onResponse(Call<UnacceptedDare> call, Response<UnacceptedDare> response) {
+                        switch(response.code()){
+                            case 200:
+                                createDareDescription(response.body());
+                                updateDareValues();
+                                break;
+                            case 204:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<UnacceptedDare> call, Throwable t) {
+
+                    }
+                });
+    }
+
+    private void createDareDescription(UnacceptedDare dare){
+        currentDareDescription = new DareDescription(dare.getId(), dare.getName(), dare.getDescription(),
+                "", String.valueOf(dare.getTimer()), dare.getCreationDate());
+        currentDareDescription.setChallenger(dare.getChallenger());
     }
 
     private void getDare(String dareId) {
@@ -108,29 +144,36 @@ public class NewDareDataActivity extends AppCompatActivity {
                 .enqueue(new Callback<DareDescription>() {
                     @Override
                     public void onResponse(Call<DareDescription> call, Response<DareDescription> response) {
-                        if(response != null){
-                            currentDareDescription = response.body();
-                            setTitle(response.body().getName());
-                            challengerName.setText(response.body().getChallenger().getName());
-                            dareName.setText(response.body().getName());
-                            dareDescription.setText(response.body().getDescription());
-                            dareCategory.setText(response.body().getCategory());
-                            dareTime.setText(response.body().getEstimatedDareTime());
-                            progressBar.setVisibility(View.GONE);
-                            layout.setVisibility(View.VISIBLE);
-                            //load image
-                            SharedUtils.loadImagePicasso(challengerImage, NewDareDataActivity.this,
-                                    response.body().getChallenger().getImageUrl());
-
+                        switch(response.code()){
+                            case 200:
+                                currentDareDescription = response.body();
+                                updateDareValues();
+                                break;
                         }
                     }
 
                     @Override
                     public void onFailure(Call<DareDescription> call, Throwable t) {
-                        Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(coordinatorLayout, t.getMessage(), Snackbar.LENGTH_LONG)
+                        .show();
+
+                        //
                         progressBar.setVisibility(View.GONE);
                     }
                 });
+    }
+
+    private void updateDareValues(){
+        setTitle(currentDareDescription.getChallenger().getName());
+        dareName.setText(currentDareDescription.getName());
+        dareDescription.setText(currentDareDescription.getDescription());
+        //dareCategory.setText(Html.fromHtml(response.body().getCategory()));
+        dareTime.setText(currentDareDescription.getEstimatedDareTime() + " to complete this dare");
+        progressBar.setVisibility(View.GONE);
+        layout.setVisibility(View.VISIBLE);
+        //load image
+        SharedUtils.loadImagePicasso(challengerImage, NewDareDataActivity.this,
+                currentDareDescription.getChallenger().getImageUrl());
     }
 
     @Override
@@ -150,7 +193,7 @@ public class NewDareDataActivity extends AppCompatActivity {
                 new AlertDialog.Builder(NewDareDataActivity.this)
                         .setTitle("Decline dare")
                         .setMessage("Are you sure to decline this dare?")
-                        .setPositiveButton("Yes, decline", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
@@ -165,7 +208,7 @@ public class NewDareDataActivity extends AppCompatActivity {
                 new AlertDialog.Builder(NewDareDataActivity.this)
                         .setTitle("Accept dare")
                         .setMessage("Are you sure to accept this dare?")
-                        .setPositiveButton("Yes, accept", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 confirmDare(true);
@@ -179,7 +222,7 @@ public class NewDareDataActivity extends AppCompatActivity {
                 new AlertDialog.Builder(NewDareDataActivity.this)
                         .setTitle("Flag dare")
                         .setMessage("Want to flag this dare?")
-                        .setPositiveButton("Yes, flag", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
@@ -189,6 +232,7 @@ public class NewDareDataActivity extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         })
+                        .setNegativeButton("No", null)
                         .show();
                 break;
         }
@@ -223,4 +267,6 @@ public class NewDareDataActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
 }

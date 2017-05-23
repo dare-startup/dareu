@@ -213,7 +213,7 @@ public class NewDareActivity extends AppCompatActivity {
             return;
         }
 
-        progressDialog = new ProgressDialog(NewDareActivity.this);
+        progressDialog = new ProgressDialog(NewDareActivity.this, R.style.AppAlertDialog);
         progressDialog.setMessage("Creating new dare...");
         progressDialog.setIndeterminate(true);
         progressDialog.show();

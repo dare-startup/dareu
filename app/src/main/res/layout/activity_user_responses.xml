@@ -24,6 +24,7 @@
                 android:layout_height="match_parent">
 
                 <ProgressBar
+                    android:indeterminateTint="@color/colorPrimary"
                     android:layout_centerInParent="true"
                     android:id="@+id/progressBar"
                     android:layout_width="wrap_content"

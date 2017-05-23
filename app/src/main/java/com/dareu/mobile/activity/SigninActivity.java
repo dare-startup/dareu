@@ -205,7 +205,7 @@ public class SigninActivity extends AppCompatActivity{
 
         request.setFcmToken(fcmToken);
         //create progress dialog
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this, R.style.AppAlertDialog);
         progressDialog.setTitle("Connecting");
         progressDialog.setMessage("Signing in");
         progressDialog.setIndeterminate(true);

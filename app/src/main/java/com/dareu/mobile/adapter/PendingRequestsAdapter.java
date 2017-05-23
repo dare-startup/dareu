@@ -36,7 +36,7 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private Context cxt;
 
     public PendingRequestsAdapter(Context cxt, List<ConnectionRequest> requests, ViewClickListener listener, boolean sent) {
-        this.cxt  =cxt;
+        this.cxt  = cxt;
         this.listener = listener;
         this.requests = requests;
         this.sent = sent;
@@ -120,7 +120,7 @@ public class PendingRequestsAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemCount() {
-        return requests.size(); //+1 for footer view
+        return requests.size();
     }
 
     static class ReceivedRequestViewHolder extends RecyclerView.ViewHolder{

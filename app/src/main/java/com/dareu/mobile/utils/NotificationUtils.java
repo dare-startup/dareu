@@ -31,7 +31,7 @@ public class NotificationUtils {
 
     public static void dispatchNotification(Context cxt, Map<String, String> data){
         String messageType = data.get(AbstractMessage.MESSAGE_TYPE);
-        Log.i(TAG, "Received PUSH notification " + messageType);
+
         if(messageType.equalsIgnoreCase(MessageType.NEW_DARE.toString())){
             //new dare notification
             newDareNotification(cxt, data);

@@ -1,5 +1,7 @@
 package com.dareu.mobile.adapter;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -63,7 +65,18 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
         holder.thumbButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onAnchoredContentClick(desc, position, AnchoredDescriptionCallbackType.THUMB);
+                view.animate()
+                        .scaleX(1.3f)
+                        .scaleY(1.3f)
+                        .setDuration(300)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                listener.onAnchoredContentClick(desc, position, AnchoredDescriptionCallbackType.THUMB);
+                            }
+                        })
+                        .start();
+
             }
         });
 
@@ -80,7 +93,18 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
         holder.share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onAnchoredContentClick(desc, position, AnchoredDescriptionCallbackType.SHARE);
+                v.animate()
+                        .scaleX(1.3f)
+                        .scaleY(1.3f)
+                        .setDuration(300)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                listener.onAnchoredContentClick(desc, position, AnchoredDescriptionCallbackType.SHARE);
+                            }
+                        })
+                        .start();
+
             }
         });
 
@@ -95,7 +119,18 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
         holder.unanchor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onAnchoredContentClick(desc, position, AnchoredDescriptionCallbackType.UNANCHOR);
+                view.animate()
+                        .scaleX(1.3f)
+                        .scaleY(1.3f)
+                        .setDuration(300)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                listener.onAnchoredContentClick(desc, position, AnchoredDescriptionCallbackType.UNANCHOR);
+                            }
+                        })
+                        .start();
+
             }
         });
         //set views
@@ -127,6 +162,13 @@ public class AnchoredContentAdapter extends RecyclerView.Adapter<AnchoredContent
         desc.getContent().setClaps(clap ? desc.getContent().getClaps() + 1 : desc.getContent().getClaps() - 1);
         notifyItemChanged(position);
 
+    }
+
+    public void addAll(List<AnchoredDescription> descs){
+        for(AnchoredDescription d : descs){
+            descriptions.add(d);
+            notifyItemInserted(descriptions.indexOf(d));
+        }
     }
 
     static class AnchoredContentViewHolder extends RecyclerView.ViewHolder{

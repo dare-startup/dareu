@@ -57,9 +57,6 @@ public class DareResponseActivity extends AppCompatActivity {
     public static final String DARE_RESPONSE_ID = "dareResponseId";
     private static final String TAG = "ResponseActivity";
 
-    //views
-    @BindView(R.id.coordinatorLayout)
-    CoordinatorLayout coordinatorLayout;
 
     @BindView(R.id.dareResponseVideoView)
     VideoView videoView;
@@ -112,6 +109,7 @@ public class DareResponseActivity extends AppCompatActivity {
     private int currentPageNumber = 1;
     private ResponseCommentAdapter commentsAdapter;
     private DareResponseDescription currentResponseDescription;
+    private final SpaceItemDecoration itemDecoration = new SpaceItemDecoration(0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +169,8 @@ public class DareResponseActivity extends AppCompatActivity {
                                         videoView.requestFocus();
                                         videoProgressBar.setVisibility(View.GONE);
                                         videoView.start();
+                                        //TODO:set a new notification about being watching this dare response
+
                                     }
                                 });
                                 videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -349,7 +349,7 @@ public class DareResponseActivity extends AppCompatActivity {
                                 }else{
                                     commentsAdapter =
                                             new ResponseCommentAdapter(DareResponseActivity.this, response.body().getItems(), commentsListener);
-                                    commentsRecyclerView.addItemDecoration(new SpaceItemDecoration(15));
+                                    commentsRecyclerView.addItemDecoration(itemDecoration);
                                     commentsRecyclerView.setAdapter(commentsAdapter);
                                     commentsRecyclerView.setLayoutManager(new LinearLayoutManager(DareResponseActivity.this));
                                     commentsRecyclerView.setHasFixedSize(false);
@@ -439,6 +439,11 @@ public class DareResponseActivity extends AppCompatActivity {
 
                                 commentsAdapter.add(response.body());
                                 commentEditText.setText("");
+                                //remove item decoration
+                                commentsRecyclerView.removeItemDecoration(itemDecoration);
+
+                                //re-add it to decorate newly added item
+                                commentsRecyclerView.addItemDecoration(itemDecoration);
                                 break;
                             case 500:
                                 break;

@@ -1,5 +1,7 @@
 package com.dareu.mobile.adapter;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.PopupMenu;
@@ -8,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -60,6 +63,7 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         SharedUtils.loadImagePicasso(holder.user, cxt, desc.getUser().getImageUrl());
 
 
+
         holder.thumb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,7 +92,18 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         holder.share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callback.onButtonClicked(desc, position, ResponseDescriptionCallbackType.SHARE, holder.share);
+                v.animate()
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                callback.onButtonClicked(desc, position, ResponseDescriptionCallbackType.SHARE, holder.share);
+                            }
+                        })
+                        .setDuration(300)
+                        .start();
+
             }
         });
 
@@ -103,7 +118,18 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         holder.thumbUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                callback.onButtonClicked(desc, position, ResponseDescriptionCallbackType.THUMB, holder.thumbUp);
+                view.animate()
+                        .scaleX(1.3f)
+                        .scaleY(1.3f)
+                        .setDuration(300)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                callback.onButtonClicked(desc, position, ResponseDescriptionCallbackType.THUMB, holder.thumbUp);
+                            }
+                        })
+                        .start();
+
             }
         });
 
@@ -121,6 +147,7 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         //set creation date
         holder.date.setText(SharedUtils.getFromDate(desc.getUploadDate()));
 
+        //set comments count
         holder.comments.setText(String.valueOf(desc.getComments()));
     }
 
@@ -172,6 +199,13 @@ public class ResponseDescriptionAdapter extends RecyclerView.Adapter<ResponseDes
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+    }
+
+    public void addAll(List<DareResponseDescription> list){
+        for(DareResponseDescription d : list){
+            descriptions.add(d);
+            notifyItemInserted(descriptions.indexOf(d));
         }
     }
 

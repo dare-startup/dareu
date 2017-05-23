@@ -78,6 +78,13 @@ public class DiscoverUsersAdapter extends RecyclerView.Adapter<RecyclerView.View
         SharedUtils.loadImagePicasso(sent.imageView, cxt, list.get(position).getImageUrl());
     }
 
+    public void addAll(List<DiscoverUserAccount> l){
+        for(DiscoverUserAccount acc : l){
+            list.add(acc);
+            notifyItemInserted(list.indexOf(acc));
+        }
+    }
+
     public void remove(int position){
         list.remove(position);
         notifyItemRemoved(position);

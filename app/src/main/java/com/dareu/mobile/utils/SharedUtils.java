@@ -62,6 +62,10 @@ import retrofit2.Response;
 
 public class SharedUtils {
 
+    public static final int BROWSE_REQUEST_CODE = 543;
+    public  static final int CAPTURE_REQUEST_CODE = 123;
+    public  static final int CAMERA_PERMISSION_REQUEST_CODE = 354;
+
     private static final String TAG = "SharedUtils";
     public static final String SERVICE_PACKAGE = "com.dareu.mobile.service";
     public static final int GOOGLE_SIGNIN_REQUEST_CODE = 289;
@@ -355,6 +359,19 @@ public class SharedUtils {
             else return "";
         }catch(ParseException ex){
             return "";
+        }
+    }
+
+    public static File createNewFile(){
+        File capture;
+        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/DareU/");
+        directory.mkdir();
+        capture = new File(directory, System.currentTimeMillis() + ".jpg");
+        try{
+            capture.createNewFile();
+            return capture;
+        }catch(IOException ex){
+            return null;
         }
     }
 

@@ -5,6 +5,7 @@
     tools:context="com.dareu.mobile.activity.fragment.DiscoverFragment">
 
     <ProgressBar
+        android:indeterminateTint="@color/colorPrimary"
         android:id="@+id/progressBar"
         android:visibility="gone"
         android:layout_gravity="center"
@@ -26,13 +27,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/fragmentDiscoverRecyclerView"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-
-
+            android:layout_height="wrap_content">
+            <android.support.v7.widget.RecyclerView
+                android:layout_weight=".95"
+                android:id="@+id/fragmentDiscoverRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"/>
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/nextPageProgressBar"
+                android:layout_weight=".05"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <ProgressBar
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/colorPrimary"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp" />
+            </LinearLayout>
+        </LinearLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </FrameLayout>
