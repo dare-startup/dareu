@@ -136,7 +136,7 @@ public class SigninActivity extends AppCompatActivity{
                 String fcmToken = SharedUtils.getStringPreference(SigninActivity.this, PrefName.GCM_TOKEN);
                 if(fcmToken == null || fcmToken.isEmpty())
                     request.setFcmToken(fcmToken);
-
+                progressDialog = new ProgressDialog(SigninActivity.this);
                 progressDialog.setTitle("Connecting");
                 progressDialog.setIndeterminate(true);
                 progressDialog.setCancelable(false);

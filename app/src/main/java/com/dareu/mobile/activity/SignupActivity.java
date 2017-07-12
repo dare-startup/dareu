@@ -2,12 +2,8 @@ package com.dareu.mobile.activity;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
@@ -21,7 +17,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.dareu.mobile.R;
-import com.dareu.mobile.service.DareuMessagingIdService;
 import com.dareu.web.dto.client.OpenClientService;
 import com.dareu.web.dto.client.factory.RetroFactory;
 import com.dareu.web.dto.request.GoogleSignupRequest;
@@ -32,11 +27,8 @@ import com.dareu.web.dto.response.AuthenticationResponse;
 import com.dareu.web.dto.response.ResourceAvailableResponse;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.Calendar;
@@ -50,8 +42,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SignupActivity extends AppCompatActivity {
-
-    private static final String TAG = "SignupActivity";
 
     @BindView(R.id.signupNameText)
     EditText nameText;
@@ -165,6 +155,7 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
+    @OnClick(R.id.signupButton)
     public void signupButtonListener(){
         //get values
         String name = nameText.getText().toString();
